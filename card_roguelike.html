@@ -396,21 +396,21 @@ body {
 /* Utility */
 .hidden { display: none !important; }
 .battle-log-toggle {
-  position: absolute; bottom: 8px; left: 10px; z-index: 60;
-  padding: 5px 12px; font-size: 13px; cursor: pointer; user-select: none;
-  background: rgba(0,0,0,0.8); border: 1px solid var(--border); border-radius: 6px;
-  color: #ffd700; white-space: nowrap; display: flex; align-items: center; gap: 6px;
-  transition: all 0.15s;
+  position: absolute; top: 6px; right: 10px; z-index: 60;
+  padding: 3px 8px; font-size: 11px; cursor: pointer; user-select: none;
+  background: rgba(0,0,0,0.75); border: 1px solid var(--border); border-radius: 6px;
+  color: #ffd700; white-space: nowrap; display: flex; align-items: center; gap: 4px;
+  transition: all 0.15s; max-height: 24px;
 }
 .battle-log-toggle:hover { background: rgba(25,25,55,0.95); border-color: var(--gold); }
 .battle-log-toggle .log-badge {
-  background: #c0303a; color: #fff; border-radius: 10px; padding: 1px 7px;
-  font-size: 11px; min-width: 16px; text-align: center;
+  background: #c0303a; color: #fff; border-radius: 10px; padding: 0 6px;
+  font-size: 10px; min-width: 14px; text-align: center;
 }
 .battle-log-toggle .log-badge.hidden { display: none; }
 .battle-log {
-  position: absolute; bottom: 42px; left: 10px; width: 270px; max-height: 130px;
-  overflow-y: auto; font-size: 13px; color: #ccc; padding: 8px;
+  position: absolute; top: 36px; right: 10px; width: 240px; max-height: 120px;
+  overflow-y: auto; font-size: 12px; color: #ccc; padding: 6px;
   background: rgba(0,0,0,0.85); border-radius: 6px; border: 1px solid var(--border);
   z-index: 59;
 }
@@ -578,16 +578,16 @@ body {
   .deck-pile { padding: 3px 6px; min-height: 32px; }
   .deck-pile-icon { font-size: 16px; }
 
-  /* Battle log */
+  /* Battle log - moved to top-right */
   .battle-log {
-    bottom: 120px; left: 5px; width: 180px; max-height: 90px;
-    font-size: 11px; padding: 5px;
+    width: 170px; max-height: 80px; font-size: 10px; padding: 4px; top: 32px; right: 5px;
   }
-  .battle-log-toggle { bottom: 112px; left: 5px; font-size: 11px; padding: 4px 8px; }
+  .battle-log-toggle { font-size: 10px; padding: 2px 6px; top: 5px; right: 5px; max-height: 20px; }
+  .battle-log-toggle .log-badge { font-size: 9px; padding: 0 5px; }
 
-  /* Turn info */
-  #battle-turn-info { font-size: 11px; }
-  #enemy-intent { font-size: 10px; }
+  /* Turn info - move down to avoid log toggle overlap */
+  #battle-turn-info { font-size: 11px; padding-right: 70px; }
+  #enemy-intent { font-size: 10px; padding-right: 70px; }
 
   /* Overlays */
   .overlay { padding: 10px; overflow-y: auto; -webkit-overflow-scrolling: touch; touch-action: pan-y; justify-content: flex-start; align-items: center; padding-top: 20px; padding-bottom: 20px; }
@@ -649,7 +649,8 @@ body {
   .card-name { font-size: 8px; }
   .card-stats { font-size: 9px; }
   .end-turn-btn { padding: 8px 14px; font-size: 12px; min-height: 36px; }
-  .battle-log { width: 150px; max-height: 80px; font-size: 10px; }
+  .battle-log { width: 140px; max-height: 70px; font-size: 9px; padding: 3px; top: 28px; right: 4px; }
+  .battle-log-toggle { font-size: 9px; padding: 2px 5px; top: 4px; right: 4px; max-height: 18px; }
   .overlay-title { font-size: 18px; }
   .reward-cards { gap: 8px; }
 }
