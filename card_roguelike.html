@@ -453,6 +453,70 @@ body {
   margin-top: clamp(12px, 3vw, 20px);
   margin-bottom: clamp(10px, 2vw, 16px);
 }
+.difficulty-select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 10px 0 16px;
+  flex-wrap: wrap;
+}
+.difficulty-btn {
+  padding: 6px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  background: rgba(0,0,0,0.3);
+  color: #888;
+  transition: all 0.2s;
+  user-select: none;
+  touch-action: manipulation;
+}
+.difficulty-btn:hover { border-color: var(--gold); color: var(--gold); }
+.difficulty-btn.active {
+  background: rgba(212,175,55,0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 8px rgba(212,175,55,0.3);
+}
+
+/* Settings overlay */
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  width: 100%;
+  max-width: 400px;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-label { font-size: 14px; color: #ddd; }
+.settings-desc { font-size: 11px; color: #666; margin-top: 2px; }
+.settings-toggle {
+  width: 46px;
+  height: 24px;
+  background: #333;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  touch-action: manipulation;
+}
+.settings-toggle.on { background: var(--gold); }
+.settings-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 20px; height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.settings-toggle.on::after { transform: translateX(22px); }
+
 .class-cards {
   display: flex;
   gap: clamp(8px, 2vw, 20px);
@@ -665,6 +729,7 @@ body {
     <div id="menu-continue-btn" class="menu-btn" style="display:none;" onclick="continueRun()">继续冒险</div>
     <div class="menu-btn" onclick="startNewRun()">开始新冒险</div>
     <div class="menu-btn secondary" onclick="showMetaShop()">💎 裂境圣所</div>
+    <div class="menu-btn secondary" onclick="showSettings()">⚙️ 设置</div>
     <div class="menu-btn secondary" onclick="showRules()">游戏规则</div>
     <div class="menu-info">
       深入暗影裂境，挑战三幕冒险。<br>
@@ -679,6 +744,12 @@ body {
   <div id="screen-class-select" class="screen">
     <div class="menu-title class-select-title">选择你的英雄</div>
     <div class="menu-subtitle class-select-subtitle">每个职业拥有专属卡组、技能和卡牌池</div>
+    <div class="difficulty-select">
+      <span style="color:#888;font-size:13px;margin-right:8px;">难度:</span>
+      <div class="difficulty-btn" data-diff="easy" onclick="selectDifficulty('easy')">😊 简单</div>
+      <div class="difficulty-btn active" data-diff="normal" onclick="selectDifficulty('normal')">⚔️ 普通</div>
+      <div class="difficulty-btn" data-diff="hard" onclick="selectDifficulty('hard')">💀 困难</div>
+    </div>
     <div class="class-select-hint">点击职业卡片开始冒险 →</div>
     <div class="class-cards" id="class-cards-container"></div>
     <div class="menu-btn secondary class-select-back" onclick="showScreen('menu')">返回</div>
@@ -883,6 +954,49 @@ body {
     <button class="overlay-btn" onclick="closeRules()">返回</button>
   </div>
 
+  <!-- OVERLAY: SETTINGS -->
+  <div id="overlay-settings" class="overlay">
+    <div class="overlay-title">设置</div>
+    <div style="display:flex;flex-direction:column;align-items:center;min-width:300px;">
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">🎵 背景音乐</div>
+          <div class="settings-desc">开启或关闭背景音乐</div>
+        </div>
+        <div class="settings-toggle" id="setting-music" onclick="toggleSetting('music')"></div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">🔊 音效</div>
+          <div class="settings-desc">按钮和战斗音效</div>
+        </div>
+        <div class="settings-toggle" id="setting-sfx" onclick="toggleSetting('sfx')"></div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">✨ 战斗动画</div>
+          <div class="settings-desc">显示攻击和法术动画</div>
+        </div>
+        <div class="settings-toggle on" id="setting-animations" onclick="toggleSetting('animations')"></div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">💬 自动战斗日志</div>
+          <div class="settings-desc">战斗时自动展开日志</div>
+        </div>
+        <div class="settings-toggle" id="setting-autolog" onclick="toggleSetting('autolog')"></div>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-label">🔄 重置进度</div>
+          <div class="settings-desc">清除所有局外进度和碎晶</div>
+        </div>
+        <button class="overlay-btn" style="padding:4px 12px;font-size:12px;min-height:28px;background:#c0303a;border-color:#c0303a;" onclick="resetMetaProgress()">重置</button>
+      </div>
+    </div>
+    <button class="overlay-btn" onclick="closeSettings()">返回</button>
+  </div>
+
   <div id="card-tooltip" class="card-tooltip"></div>
 
   <!-- OVERLAY: INITIAL REWARD (开局奖励) -->
@@ -916,10 +1030,10 @@ const CARD_POOL = [
   { id: 'guardsman', name: '侍从卫兵', cost: 1, type: 'minion', attack: 1, hp: 2, rarity: 'common', art: '🛡️', text: '嘲讽', taunt: true },
   { id: 'stone_golem', name: '石像鬼', cost: 2, type: 'minion', attack: 1, hp: 4, rarity: 'common', art: '🗿', text: '嘲讽', taunt: true },
   { id: 'blood_imp', name: '血色小鬼', cost: 1, type: 'minion', attack: 2, hp: 1, rarity: 'common', art: '😈', text: '亡语：对敌方英雄造成1点伤害', deathrattle: 'deal_face_1' },
-  { id: 'murloc', name: '鱼人战士', cost: 2, type: 'minion', attack: 2, hp: 1, rarity: 'common', art: '🐟', text: '' },
+  { id: 'murloc', name: '鱼人战士', cost: 2, type: 'minion', attack: 2, hp: 1, rarity: 'common', art: '🐟', text: '', race: 'beast' },
   { id: 'archer', name: '精灵弓手', cost: 2, type: 'minion', attack: 2, hp: 2, rarity: 'common', art: '🏹', text: '战吼：造成1点伤害', battlecry: 'deal_1' },
   { id: 'healer', name: '圣光侍僧', cost: 2, type: 'minion', attack: 1, hp: 3, rarity: 'common', art: '✝️', text: '战吼：恢复3点生命', battlecry: 'heal_3' },
-  { id: 'wolf', name: '森林狼', cost: 2, type: 'minion', attack: 3, hp: 2, rarity: 'common', art: '🐺', text: '' },
+  { id: 'wolf', name: '森林狼', cost: 2, type: 'minion', attack: 3, hp: 2, rarity: 'common', art: '🐺', text: '', race: 'beast' },
   { id: 'shield_bearer', name: '持盾者', cost: 3, type: 'minion', attack: 0, hp: 5, rarity: 'common', art: '🛡️', text: '嘲讽', taunt: true },
   { id: 'orc_grunt', name: '兽人步兵', cost: 3, type: 'minion', attack: 3, hp: 3, rarity: 'common', art: '👹', text: '' },
   { id: 'card_drawer', name: '秘法师', cost: 3, type: 'minion', attack: 2, hp: 2, rarity: 'common', art: '📜', text: '战吼：抽一张牌', battlecry: 'draw_1' },
@@ -1136,8 +1250,8 @@ const EVENTS = [
     text: '一股清澈的魔法泉水从地下涌出。饮用它可以恢复生命，但你也可以将其收集起来留待后用。',
     choices: [
       { text: '饮用泉水（恢复15点生命）', cond: g => true, action: g => { const heal = Math.min(15, g.player.maxHp - g.player.hp); g.player.hp += heal; log(`你恢复了${heal}点生命`); } },
-      { text: '收集泉水（获得2枚幸运币到牌组）', cond: g => true, action: g => { g.player.deck.push({ ...getCardData('coin_start'), uid: uid() }); g.player.deck.push({ ...getCardData('coin_start'), uid: uid() }); log('你收集了泉水，获得2张幸运币'); } },
-      { text: '两者都要（失去10金币）', cond: g => g.gold >= 10, action: g => { g.gold -= 10; const heal = Math.min(10, g.player.maxHp - g.player.hp); g.player.hp += heal; g.player.deck.push({ ...getCardData('coin_start'), uid: uid() }); log(`你恢复了${heal}点生命并获得1张幸运币`); } },
+      { text: '收集泉水（获得2枚幸运币到牌组）', cond: g => true, action: g => { g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); log('你收集了泉水，获得2张幸运币'); } },
+      { text: '两者都要（失去10金币）', cond: g => g.gold >= 10, action: g => { g.gold -= 10; const heal = Math.min(10, g.player.maxHp - g.player.hp); g.player.hp += heal; g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); log(`你恢复了${heal}点生命并获得1张幸运币`); } },
     ]
   },
   {
@@ -1479,6 +1593,9 @@ function initGame(classId) {
   if (upgrades.first_mana) G.relics.push({ id: 'meta_first_mana', name: '法力涌动', icon: '🔷', effect: 'extra_mana_start', description: '第一回合+1法力' });
   if (upgrades.hero_power_discount) G.player.heroPower.cost = Math.max(0, G.player.heroPower.cost - 1);
   if (upgrades.start_relic) grantRelic(G);
+
+  // Apply difficulty
+  applyDifficulty();
 }
 
 function startNewRun() {
@@ -1622,7 +1739,8 @@ function hideOverlay(id) { document.getElementById(id).classList.remove('active'
 
 // ===================== MAP RENDERING =====================
 function renderMap() {
-  document.getElementById('map-act-title').textContent = ACT_NAMES[G.act];
+  const diffName = G.difficulty ? DIFFICULTY_SETTINGS[G.difficulty]?.name || '' : '';
+  document.getElementById('map-act-title').textContent = ACT_NAMES[G.act] + (diffName ? ` · ${diffName}` : '');
   document.getElementById('map-hp').textContent = `${G.player.hp}/${G.player.maxHp}`;
   document.getElementById('map-gold').textContent = G.gold;
   document.getElementById('map-deck').textContent = G.player.deck.length;
@@ -1688,6 +1806,7 @@ function completeNode() {
       saveMetaProgress('victory');
       const meta = getMetaProgress();
       document.getElementById('victory-info').innerHTML = `你征服了暗影裂境！<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 8} 裂境碎晶</span>`;
+      playSfx('victory');
       showOverlay('overlay-victory');
     } else {
       generateMap(G.act);
@@ -1723,6 +1842,15 @@ function startBattle(type) {
     spellPower: 0,
     intent: null,
   };
+  
+  // Apply difficulty to enemy stats
+  if (G.difficulty) {
+    const d = DIFFICULTY_SETTINGS[G.difficulty];
+    if (d) {
+      G.enemy.maxHp = Math.floor(G.enemy.maxHp * d.enemyHpMult);
+      G.enemy.hp = G.enemy.maxHp;
+    }
+  }
   
   // Build enemy deck
   enemyData.deck.forEach(id => {
@@ -2136,6 +2264,7 @@ function playCard(card, index) {
   const effCost = getCardCost(card);
   G.player.mana -= effCost;
   G.player.hand.splice(index, 1);
+  playSfx('play');
 
   if (card.type === 'minion') {
     if (G.player.minions.length >= 7) { G.player.hand.push(card); G.player.mana += effCost; return; }
@@ -2175,6 +2304,8 @@ function createMinion(card, isPlayer) {
   let hp = card.hp || 0;
   // Relic: strength (+1/+1)
   if (isPlayer && hasRelic('strength')) { attack += 1; hp += 1; }
+  // Relic: beast master (+1/+1 for beasts)
+  if (isPlayer && hasRelic('beast_master') && card.race === 'beast') { attack += 1; hp += 1; }
   // Relic: divine protection (divine shield on summon)
   const hasDivine = (isPlayer && hasRelic('divine_protection')) || card.divineShield || false;
 
@@ -3252,6 +3383,7 @@ function attackTarget(target) {
     return;
   }
 
+  playSfx('attack');
   if (G.battle.isHeroAttacker) {
     heroAttack(target);
   } else {
@@ -3389,6 +3521,11 @@ function onBattleWon() {
   else goldReward = 15;
 
   if (hasRelic('double_gold')) goldReward *= 2;
+  // Apply difficulty gold multiplier
+  if (G.difficulty) {
+    const d = DIFFICULTY_SETTINGS[G.difficulty];
+    if (d) goldReward = Math.floor(goldReward * d.goldMult);
+  }
   G.gold += goldReward;
   addBattleLog(`获得${goldReward}金币`, 'system');
 
@@ -3555,6 +3692,7 @@ function onBattleLost() {
   setTimeout(() => {
     const meta = getMetaProgress();
     document.getElementById('gameover-info').innerHTML = `你在第${G.act + 1}幕的战斗中倒下，坚持了${Math.ceil(G.battle.turn / 2)}个回合。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 2} 裂境碎晶</span>`;
+    playSfx('defeat');
     showOverlay('overlay-gameover');
   }, 800);
 }
@@ -4129,6 +4267,160 @@ function viewDiscardPile() {
 // ===================== MISC =====================
 function showRules() { showOverlay('overlay-rules'); }
 function closeRules() { hideOverlay('overlay-rules'); }
+
+// ===================== DIFFICULTY SYSTEM =====================
+let currentDifficulty = 'normal';
+
+const DIFFICULTY_SETTINGS = {
+  easy:   { name: '简单', enemyHpMult: 0.8, enemyAtkMult: 0.8, goldMult: 1.2, startGold: 30, hpMult: 1.1, shardMult: 0.7 },
+  normal: { name: '普通', enemyHpMult: 1.0, enemyAtkMult: 1.0, goldMult: 1.0, startGold: 0,  hpMult: 1.0, shardMult: 1.0 },
+  hard:   { name: '困难', enemyHpMult: 1.2, enemyAtkMult: 1.15, goldMult: 0.8, startGold: -15, hpMult: 0.9, shardMult: 1.5 },
+};
+
+function selectDifficulty(diff) {
+  currentDifficulty = diff;
+  document.querySelectorAll('.difficulty-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.diff === diff);
+  });
+  playSfx('click');
+}
+
+function applyDifficulty() {
+  const d = DIFFICULTY_SETTINGS[currentDifficulty];
+  if (!d) return;
+  G.difficulty = currentDifficulty;
+  G.player.maxHp = Math.floor(G.player.maxHp * d.hpMult);
+  G.player.hp = G.player.maxHp;
+  G.gold = Math.max(0, G.gold + d.startGold);
+}
+
+// ===================== SETTINGS SYSTEM =====================
+let SETTINGS = {
+  music: false,
+  sfx: true,
+  animations: true,
+  autolog: false,
+};
+
+const SETTINGS_KEY = 'shadow_rift_settings';
+
+function loadSettings() {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) SETTINGS = { ...SETTINGS, ...JSON.parse(raw) };
+  } catch(e) {}
+}
+
+function saveSettings() {
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(SETTINGS)); } catch(e) {}
+}
+
+function showSettings() {
+  loadSettings();
+  document.getElementById('setting-music').classList.toggle('on', SETTINGS.music);
+  document.getElementById('setting-sfx').classList.toggle('on', SETTINGS.sfx);
+  document.getElementById('setting-animations').classList.toggle('on', SETTINGS.animations);
+  document.getElementById('setting-autolog').classList.toggle('on', SETTINGS.autolog);
+  showOverlay('overlay-settings');
+}
+
+function closeSettings() { hideOverlay('overlay-settings'); }
+
+function toggleSetting(key) {
+  SETTINGS[key] = !SETTINGS[key];
+  saveSettings();
+  const el = document.getElementById('setting-' + key);
+  if (el) el.classList.toggle('on', SETTINGS[key]);
+  if (key === 'music') {
+    if (SETTINGS.music) playMusic(); else stopMusic();
+  }
+  playSfx('click');
+}
+
+function resetMetaProgress() {
+  if (!confirm('确定要重置所有局外进度吗？所有裂境碎晶和永久升级将被清除！')) return;
+  try { localStorage.removeItem(META_KEY); } catch(e) {}
+  updateMainMenu();
+  closeSettings();
+  alert('进度已重置');
+}
+
+// ===================== SOUND EFFECTS =====================
+function playSfx(type) {
+  if (!SETTINGS.sfx) return;
+  initAudio();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  
+  switch(type) {
+    case 'click':
+      osc.frequency.value = 600; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.08);
+      osc.start(now); osc.stop(now + 0.08);
+      break;
+    case 'play':
+      osc.frequency.value = 440; osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.15);
+      osc.start(now); osc.stop(now + 0.15);
+      break;
+    case 'attack':
+      osc.frequency.setValueAtTime(150, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+      osc.type = 'sawtooth';
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.1);
+      osc.start(now); osc.stop(now + 0.1);
+      break;
+    case 'heal':
+      osc.frequency.setValueAtTime(523, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.15);
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.15);
+      osc.start(now); osc.stop(now + 0.15);
+      break;
+    case 'death':
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.exponentialRampToValueAtTime(60, now + 0.3);
+      osc.type = 'sawtooth';
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.3);
+      osc.start(now); osc.stop(now + 0.3);
+      break;
+    case 'victory':
+      const notes = [523, 659, 784, 1047];
+      notes.forEach((f, i) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type = 'triangle'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, now + i * 0.1);
+        g.gain.linearRampToValueAtTime(0.08, now + i * 0.1 + 0.02);
+        g.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.15);
+        o.start(now + i * 0.1); o.stop(now + i * 0.1 + 0.15);
+      });
+      break;
+    case 'defeat':
+      const dnotes = [400, 350, 300, 200];
+      dnotes.forEach((f, i) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type = 'sawtooth'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, now + i * 0.15);
+        g.gain.linearRampToValueAtTime(0.06, now + i * 0.15 + 0.02);
+        g.gain.linearRampToValueAtTime(0, now + i * 0.15 + 0.2);
+        o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.2);
+      });
+      break;
+  }
+}
+
 function returnToMenu() {
   hideOverlay('overlay-gameover');
   hideOverlay('overlay-victory');
@@ -4227,6 +4519,11 @@ function saveMetaProgress(result) {
       }
     } else {
       shards = 2 + Math.floor(G.act * 1.5);
+    }
+    // Apply difficulty shard multiplier
+    if (G && G.difficulty) {
+      const d = DIFFICULTY_SETTINGS[G.difficulty];
+      if (d) shards = Math.floor(shards * d.shardMult);
     }
     meta.shards = (meta.shards || 0) + shards;
     meta.lastShards = shards;
@@ -4374,8 +4671,17 @@ function updateMainMenu() {
 }
 
 // Initialize
+loadSettings();
 updateMainMenu();
 showScreen('menu');
+
+// Auto-play music if enabled
+if (SETTINGS.music) {
+  document.addEventListener('click', function autoPlay() {
+    if (SETTINGS.music && !musicPlaying) playMusic();
+    document.removeEventListener('click', autoPlay);
+  }, { once: true });
+}
 </script>
 </body>
 </html>
