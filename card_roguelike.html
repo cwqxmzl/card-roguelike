@@ -664,11 +664,13 @@ body {
     <div class="menu-subtitle">卡牌肉鸽冒险</div>
     <div id="menu-continue-btn" class="menu-btn" style="display:none;" onclick="continueRun()">继续冒险</div>
     <div class="menu-btn" onclick="startNewRun()">开始新冒险</div>
+    <div class="menu-btn secondary" onclick="showMetaShop()">💎 裂境圣所</div>
     <div class="menu-btn secondary" onclick="showRules()">游戏规则</div>
     <div class="menu-info">
       深入暗影裂境，挑战三幕冒险。<br>
       收集卡牌、获取遗物、击败首领，构建你的专属牌组。<br>
-      每次冒险地图随机生成，死亡即重新开始。
+      每次冒险地图随机生成，死亡即重新开始。<br>
+      通关或失败可获得裂境碎晶，用于永久强化。
     </div>
     <div id="menu-stats" style="font-size:11px;color:#555;margin-top:12px;"></div>
   </div>
@@ -848,7 +850,7 @@ body {
   <!-- OVERLAY: VICTORY -->
   <div id="overlay-victory" class="overlay">
     <div class="overlay-title" style="color:var(--gold);">胜利！</div>
-    <div style="font-size:16px;color:#aaa;margin-bottom:20px;">你征服了暗影裂境！</div>
+    <div id="victory-info" style="font-size:16px;color:#aaa;margin-bottom:20px;">你征服了暗影裂境！</div>
     <button class="overlay-btn green" onclick="returnToMenu()">返回主菜单</button>
   </div>
 
@@ -869,13 +871,41 @@ body {
       三幕冒险，每幕有随机分支路径。节点类型：普通战斗、精英战、商店、事件、休息、宝箱、首领。<br>
       击败敌人获得卡牌奖励和金币。商店购买卡牌和遗物。遗物提供被动加成。<br>
       生命值不会在战斗间完全恢复，合理规划路线！<br><br>
-      <b style="color:var(--gold);">英雄技能</b><br>
-      每回合可使用一次（2费）。法师：造成1点伤害。牧师：恢复2点生命。
+      <b style="color:var(--gold);">开局祝福</b><br>
+      选择职业后，从3个随机祝福中选1个（金币、生命、遗物、卡牌等）。<br><br>
+      <b style="color:var(--gold);">裂境圣所（局外肉鸽）</b><br>
+      每次冒险结束（胜利或失败）都会获得裂境碎晶。<br>
+      在主菜单进入裂境圣所，用碎晶购买永久升级：生命强化、初始金币、初始护甲、先手抽牌、初始遗物、法力涌动、英雄觉醒等。<br>
+      升级在每次新冒险中自动生效！<br><br>
+      <b style="color:var(--gold);">背景音乐</b><br>
+      点击左上角🎵按钮开关背景音乐。
     </div>
     <button class="overlay-btn" onclick="closeRules()">返回</button>
   </div>
 
   <div id="card-tooltip" class="card-tooltip"></div>
+
+  <!-- OVERLAY: INITIAL REWARD (开局奖励) -->
+  <div id="overlay-initial-reward" class="overlay">
+    <div class="overlay-title">开局祝福</div>
+    <div style="font-size:14px;color:#aaa;margin-bottom:16px;">冒险开始前，选择一份祝福</div>
+    <div id="initial-reward-choices" style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;max-width:800px;"></div>
+  </div>
+
+  <!-- OVERLAY: META SHOP (局外肉鸽) -->
+  <div id="overlay-meta-shop" class="overlay">
+    <div class="overlay-title">裂境圣所</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+      <span style="font-size:18px;">💎</span>
+      <span style="color:var(--gold);font-size:18px;font-weight:bold;" id="meta-shards">0</span>
+      <span style="color:#888;font-size:13px;">裂境碎晶</span>
+    </div>
+    <div id="meta-upgrades" style="display:flex;flex-direction:column;gap:10px;max-width:600px;max-height:55vh;overflow-y:auto;padding:10px;"></div>
+    <button class="overlay-btn" onclick="closeMetaShop()">返回</button>
+  </div>
+
+  <!-- Music toggle button -->
+  <div id="music-toggle" onclick="toggleMusic()" style="position:fixed;top:6px;left:10px;z-index:200;cursor:pointer;background:rgba(0,0,0,0.6);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:14px;color:#ffd700;touch-action:manipulation;">🎵</div>
 </div>
 
 <script>
@@ -1036,6 +1066,29 @@ const RELICS = [
   { id: 'spell_power', name: '奥术之眼', icon: '👁️', desc: '法术伤害+1', effect: 'spell_power' },
   { id: 'double_gold', name: '贪婪之戒', icon: '💍', desc: '金币获取翻倍', effect: 'double_gold' },
   { id: 'fire_aura', name: '灼热光环', icon: '🔥', desc: '每回合结束时对敌方英雄造成1点伤害', effect: 'fire_aura' },
+];};
+
+// ===================== META PROGRESSION (局外肉鸽) =====================
+const META_UPGRADES = [
+  { id: 'max_hp', name: '生命强化', icon: '❤️', desc: '初始最大生命值+5', maxLevel: 5, costs: [3,6,9,12,15] },
+  { id: 'start_gold', name: '初始金币', icon: '💰', desc: '初始金币+15', maxLevel: 3, costs: [4,8,12] },
+  { id: 'start_armor', name: '初始护甲', icon: '🛡️', desc: '每场战斗开始+2护甲', maxLevel: 3, costs: [5,10,15] },
+  { id: 'first_draw', name: '先手抽牌', icon: '🃏', desc: '第一回合多抽1张牌', maxLevel: 1, costs: [10] },
+  { id: 'start_relic', name: '初始遗物', icon: '🎁', desc: '冒险开始获得1件随机遗物', maxLevel: 1, costs: [12] },
+  { id: 'first_mana', name: '法力涌动', icon: '🔷', desc: '第一回合+1法力', maxLevel: 1, costs: [15] },
+  { id: 'hero_power_discount', name: '英雄觉醒', icon: '⚡', desc: '英雄技能费用-1', maxLevel: 1, costs: [18] },
+  { id: 'rare_luck', name: '幸运之触', icon: '🍀', desc: '稀有奖励概率+10%', maxLevel: 3, costs: [5,10,15] },
+];
+
+const STARTING_BONUSES = [
+  { id: 'gold', name: '赏金令', icon: '💰', desc: '开始时获得30金币' },
+  { id: 'hp', name: '生命精华', icon: '❤️', desc: '最大生命值+8' },
+  { id: 'relic', name: '神秘遗物', icon: '🎁', desc: '获得1件随机遗物' },
+  { id: 'rare_card', name: '稀有卡牌', icon: '🃏', desc: '牌组加入1张稀有卡' },
+  { id: 'upgrade', name: '强化锤', icon: '⚒️', desc: '随机升级1张起始牌' },
+  { id: 'armor', name: '护甲卷轴', icon: '🛡️', desc: '每场战斗开始+3护甲' },
+  { id: 'draw', name: '洞察之眼', icon: '👁️', desc: '每场战斗第一回合多抽1张' },
+  { id: 'mana', name: '法力核心', icon: '🔷', desc: '第一回合+1法力' },
 ];
 
 const ACT_NAMES = ['第一幕 · 黑暗森林', '第二幕 · 暗影深渊', '第三幕 · 虚空裂境'];
@@ -1219,6 +1272,143 @@ const EVENTS = [
       { text: '绕道而行', cond: g => true, action: g => { log('你避开了裂隙'); } },
     ]
   },
+  {
+    title: '遗忘的卷轴',
+    text: '一卷落满灰尘的卷轴半埋在泥土中。上面的文字已模糊，但能感受到残留的魔法能量。',
+    choices: [
+      { text: '阅读卷轴（随机获得1张史诗牌，但失去5生命）', cond: g => g.player.hp > 5, action: g => {
+        g.player.hp -= 5;
+        const epics = CARD_POOL.filter(c => c.rarity === 'epic' || c.rarity === 'legendary');
+        const card = epics[Math.floor(Math.random() * epics.length)];
+        g.player.deck.push({ ...card, uid: uid() });
+        log(`卷轴化为 ${card.name}！`);
+      } },
+      { text: '抄录卷轴（花费20金币，获得1张稀有牌）', cond: g => g.gold >= 20, action: g => {
+        g.gold -= 20;
+        const rares = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
+        const card = rares[Math.floor(Math.random() * rares.length)];
+        g.player.deck.push({ ...card, uid: uid() });
+        log(`你抄录了 ${card.name}`);
+      } },
+      { text: '卖掉卷轴（获得25金币）', cond: g => true, action: g => {
+        g.gold += 25;
+        log('你把卷轴卖给了路过的商人');
+      } },
+    ]
+  },
+  {
+    title: '角斗场',
+    text: '一座废弃的角斗场中回荡着远古的战吼。中央的火盆邀请你接受挑战。',
+    choices: [
+      { text: '接受挑战（战斗：1/1随从，胜则获2张牌+30金）', cond: g => g.player.hp > 8, action: g => {
+        g.player.hp -= 4;
+        for (let i = 0; i < 2; i++) {
+          const card = CARD_POOL[Math.floor(Math.random() * CARD_POOL.length)];
+          g.player.deck.push({ ...card, uid: uid() });
+        }
+        g.gold += 30;
+        log('你在角斗场中获胜！获得2张牌和30金币');
+      } },
+      { text: '只是搜刮（获得15金币）', cond: g => true, action: g => {
+        g.gold += 15;
+        log('你在角落找到了15金币');
+      } },
+      { text: '离开', cond: g => true, action: g => { log('你离开了角斗场'); } },
+    ]
+  },
+  {
+    title: '炼金术士的帐篷',
+    text: '一位炼金术士正在帐篷里忙碌。桌上摆满了五颜六色的药剂。"想要力量？那就帮我试一瓶吧！"',
+    choices: [
+      { text: '喝蓝色药剂（可能恢复或受伤）', cond: g => true, action: g => {
+        if (Math.random() < 0.6) {
+          const heal = Math.min(20, g.player.maxHp - g.player.hp);
+          g.player.hp += heal;
+          log(`药剂生效！恢复${heal}点生命`);
+        } else {
+          const dmg = Math.floor(Math.random() * 6) + 4;
+          g.player.hp -= dmg;
+          log(`药剂变质！受到${dmg}点伤害`);
+        }
+      } },
+      { text: '喝红色药剂（随机升级1张牌或失去8生命）', cond: g => g.player.hp > 8, action: g => {
+        if (Math.random() < 0.5) {
+          const upgradable = g.player.deck.filter(c => !c.upgraded);
+          if (upgradable.length > 0) {
+            const card = upgradable[Math.floor(Math.random() * upgradable.length)];
+            upgradeCard(card);
+            log(`${card.name} 被强化了！`);
+          } else { log('没有可升级的牌'); }
+        } else {
+          g.player.hp -= 8;
+          log('药剂灼烧了你的身体！失去8点生命');
+        }
+      } },
+      { text: '买下所有药剂（花费40金币，获得2张牌+升级1张）', cond: g => g.gold >= 40, action: g => {
+        g.gold -= 40;
+        for (let i = 0; i < 2; i++) {
+          const card = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic')[Math.floor(Math.random() * 3)];
+          if (card) g.player.deck.push({ ...card, uid: uid() });
+        }
+        const upgradable = g.player.deck.filter(c => !c.upgraded);
+        if (upgradable.length > 0) {
+          const c = upgradable[Math.floor(Math.random() * upgradable.length)];
+          upgradeCard(c);
+          log(`炼金术士帮你强化了 ${c.name}！`);
+        }
+        log('你买下了全部药剂');
+      } },
+    ]
+  },
+  {
+    title: '命运十字',
+    text: '小径在此分岔为三条路。一块古老的石碑刻着："选择命运，承担后果。"',
+    choices: [
+      { text: '财富之路（+50金币但-6生命）', cond: g => g.player.hp > 6, action: g => {
+        g.player.hp -= 6; g.gold += 50;
+        log('你踩过陷阱拿到了50金币');
+      } },
+      { text: '力量之路（升级1张牌+获得1张稀有牌）', cond: g => true, action: g => {
+        const upgradable = g.player.deck.filter(c => !c.upgraded);
+        if (upgradable.length > 0) {
+          const c = upgradable[Math.floor(Math.random() * upgradable.length)];
+          upgradeCard(c);
+          log(`${c.name} 被强化了`);
+        }
+        const pool = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
+        const card = pool[Math.floor(Math.random() * pool.length)];
+        g.player.deck.push({ ...card, uid: uid() });
+        log(`你获得了 ${card.name}`);
+      } },
+      { text: '命运之路（随机大奖励或大惩罚）', cond: g => g.player.hp > 10, action: g => {
+        const roll = Math.random();
+        if (roll < 0.3) { g.player.maxHp += 5; g.player.hp += 5; log('命运眷顾你！最大生命值+5'); }
+        else if (roll < 0.55) { grantRelic(g); log('命运赐予你一件遗物！'); }
+        else { g.player.hp -= 12; log('命运重击！失去12点生命'); }
+      } },
+    ]
+  },
+  {
+    title: '精灵泉源',
+    text: '一座精灵泉水隐藏在密林深处。泉水散发着柔和的光芒，据说拥有净化与增幅的双重力量。',
+    choices: [
+      { text: '净化（删除1张牌，恢复15生命）', cond: g => g.player.deck.length > 1, action: g => {
+        g.player.deck.splice(Math.floor(Math.random() * g.player.deck.length), 1);
+        const heal = Math.min(15, g.player.maxHp - g.player.hp);
+        g.player.hp += heal;
+        log(`泉水净化了你的牌组，恢复${heal}点生命`);
+      } },
+      { text: '增幅（花费20金币，所有随从获得+1/+1永久）', cond: g => g.gold >= 20, action: g => {
+        g.gold -= 20;
+        G.player.deck.forEach(c => { if (c.type === 'minion') { c.attack = (c.attack||0)+1; c.hp = (c.hp||0)+1; } });
+        log('泉水增幅了你的随从牌！');
+      } },
+      { text: '取水（获得2张幸运币）', cond: g => true, action: g => {
+        for (let i = 0; i < 2; i++) g.player.deck.push({ ...getCardData('the_coin'), uid: uid() });
+        log('你收集了精灵泉水，获得2张幸运币');
+      } },
+    ]
+  },
 ];
 
 // Helper: get card data by id
@@ -1278,6 +1468,17 @@ function initGame(classId) {
   // Signature treasure (passive relic)
   const sig = PASSIVE_TREASURES.find(t => t.id === cls.signature);
   if (sig) G.relics.push({ ...sig });
+
+  // Apply meta upgrades
+  const meta = getMetaProgress();
+  const upgrades = meta.upgrades || {};
+  if (upgrades.max_hp) { G.player.maxHp += 5 * upgrades.max_hp; G.player.hp = G.player.maxHp; }
+  if (upgrades.start_gold) G.gold += 15 * upgrades.start_gold;
+  if (upgrades.start_armor) G.relics.push({ id: 'meta_armor', name: '护甲精通', icon: '🛡️', effect: 'armor_start', description: `每场战斗开始+${2 * upgrades.start_armor}护甲` });
+  if (upgrades.first_draw) G.relics.push({ id: 'meta_first_draw', name: '先手优势', icon: '🃏', effect: 'extra_draw', description: '第一回合多抽1张' });
+  if (upgrades.first_mana) G.relics.push({ id: 'meta_first_mana', name: '法力涌动', icon: '🔷', effect: 'extra_mana_start', description: '第一回合+1法力' });
+  if (upgrades.hero_power_discount) G.player.heroPower.cost = Math.max(0, G.player.heroPower.cost - 1);
+  if (upgrades.start_relic) grantRelic(G);
 }
 
 function startNewRun() {
@@ -1317,6 +1518,62 @@ function selectClass(classId) {
   initGame(classId);
   G.selectedClass = classId;
   generateMap(0);
+  saveGame();
+  showInitialReward();
+}
+
+function showInitialReward() {
+  const pool = [...STARTING_BONUSES];
+  const choices = [];
+  for (let i = 0; i < 3 && pool.length > 0; i++) {
+    const idx = Math.floor(Math.random() * pool.length);
+    choices.push(pool.splice(idx, 1)[0]);
+  }
+  const container = document.getElementById('initial-reward-choices');
+  container.innerHTML = '';
+  choices.forEach(bonus => {
+    const card = document.createElement('div');
+    card.className = 'reward-type-card';
+    card.style.cssText = 'width:200px;min-height:120px;display:flex;flex-direction:column;align-items:center;gap:6px;';
+    card.innerHTML = `
+      <div class="reward-type-icon" style="font-size:36px;">${bonus.icon}</div>
+      <div class="reward-type-title" style="font-size:16px;color:var(--gold);">${bonus.name}</div>
+      <div class="reward-type-desc" style="font-size:12px;color:#aaa;line-height:1.4;">${bonus.desc}</div>
+    `;
+    card.onclick = () => applyStartingBonus(bonus.id);
+    container.appendChild(card);
+  });
+  showOverlay('overlay-initial-reward');
+}
+
+function applyStartingBonus(bonusId) {
+  const bonus = STARTING_BONUSES.find(b => b.id === bonusId);
+  if (!bonus) return;
+  switch(bonusId) {
+    case 'gold': G.gold += 30; log('开局祝福：+30金币'); break;
+    case 'hp': G.player.maxHp += 8; G.player.hp += 8; log('开局祝福：最大生命值+8'); break;
+    case 'relic': grantRelic(G); log('开局祝福：获得随机遗物'); break;
+    case 'rare_card': {
+      const pool = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
+      const card = pool[Math.floor(Math.random() * pool.length)];
+      G.player.deck.push({ ...card, uid: uid() });
+      log(`开局祝福：获得 ${card.name}`);
+      break;
+    }
+    case 'upgrade': {
+      const upgradable = G.player.deck.filter(c => !c.upgraded);
+      if (upgradable.length > 0) {
+        const card = upgradable[Math.floor(Math.random() * upgradable.length)];
+        upgradeCard(card);
+        log(`开局祝福：${card.name} 被强化`);
+      }
+      break;
+    }
+    case 'armor': G.relics.push({ id: 'bonus_armor', name: '护甲卷轴', icon: '📜', effect: 'armor_start', description: '每场战斗开始+3护甲' }); log('开局祝福：护甲卷轴'); break;
+    case 'draw': G.relics.push({ id: 'bonus_draw', name: '洞察之眼', icon: '👁️', effect: 'extra_draw', description: '每回合多抽1张' }); log('开局祝福：洞察之眼'); break;
+    case 'mana': G.relics.push({ id: 'bonus_mana', name: '法力核心', icon: '🔷', effect: 'extra_mana_start', description: '第一回合+1法力' }); log('开局祝福：法力核心'); break;
+  }
+  hideOverlay('overlay-initial-reward');
   showScreen('map');
   renderMap();
   saveGame();
@@ -1429,6 +1686,8 @@ function completeNode() {
     if (G.act >= 3) {
       clearSave();
       saveMetaProgress('victory');
+      const meta = getMetaProgress();
+      document.getElementById('victory-info').innerHTML = `你征服了暗影裂境！<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 8} 裂境碎晶</span>`;
       showOverlay('overlay-victory');
     } else {
       generateMap(G.act);
@@ -3294,7 +3553,8 @@ function onBattleLost() {
   saveMetaProgress('defeat');
 
   setTimeout(() => {
-    document.getElementById('gameover-info').textContent = `你在第${G.act + 1}幕的战斗中倒下，坚持了${Math.ceil(G.battle.turn / 2)}个回合。`;
+    const meta = getMetaProgress();
+    document.getElementById('gameover-info').innerHTML = `你在第${G.act + 1}幕的战斗中倒下，坚持了${Math.ceil(G.battle.turn / 2)}个回合。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 2} 裂境碎晶</span>`;
     showOverlay('overlay-gameover');
   }, 800);
 }
@@ -3956,14 +4216,20 @@ function saveMetaProgress(result) {
     const raw = localStorage.getItem(META_KEY);
     if (raw) meta = JSON.parse(raw);
     meta.totalRuns = (meta.totalRuns || 0) + 1;
+    let shards = 0;
     if (result === 'victory') {
       meta.victories = (meta.victories || 0) + 1;
+      shards = 8 + G.act * 3;
       const cls = G ? G.selectedClass : null;
       if (cls) {
         meta.classWins = meta.classWins || {};
         meta.classWins[cls] = (meta.classWins[cls] || 0) + 1;
       }
+    } else {
+      shards = 2 + Math.floor(G.act * 1.5);
     }
+    meta.shards = (meta.shards || 0) + shards;
+    meta.lastShards = shards;
     localStorage.setItem(META_KEY, JSON.stringify(meta));
   } catch(e) { console.error('Meta save failed:', e); }
 }
@@ -3971,9 +4237,124 @@ function saveMetaProgress(result) {
 function getMetaProgress() {
   try {
     const raw = localStorage.getItem(META_KEY);
-    if (!raw) return { totalRuns: 0, victories: 0, classWins: {} };
+    if (!raw) return { totalRuns: 0, victories: 0, classWins: {}, shards: 0, upgrades: {} };
     return JSON.parse(raw);
-  } catch(e) { return { totalRuns: 0, victories: 0, classWins: {} }; }
+  } catch(e) { return { totalRuns: 0, victories: 0, classWins: {}, shards: 0, upgrades: {} }; }
+}
+
+function showMetaShop() {
+  const meta = getMetaProgress();
+  document.getElementById('meta-shards').textContent = meta.shards || 0;
+  const container = document.getElementById('meta-upgrades');
+  container.innerHTML = '';
+  META_UPGRADES.forEach(upg => {
+    const level = meta.upgrades?.[upg.id] || 0;
+    const maxed = level >= upg.maxLevel;
+    const cost = maxed ? 0 : upg.costs[level];
+    const canBuy = !maxed && (meta.shards || 0) >= cost;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,0.3);' + (maxed ? 'opacity:0.6;' : '');
+    row.innerHTML = `
+      <div style="font-size:24px;">${upg.icon}</div>
+      <div style="flex:1;">
+        <div style="font-size:14px;color:var(--gold);font-weight:bold;">${upg.name} <span style="color:#666;font-weight:normal;font-size:12px;">Lv.${level}/${upg.maxLevel}</span></div>
+        <div style="font-size:11px;color:#888;">${upg.desc}</div>
+      </div>
+      <div style="text-align:right;min-width:70px;">
+        ${maxed ? '<span style="color:#27ae60;font-size:13px;">已满级</span>' : `<div style="color:${canBuy ? 'var(--gold)' : '#666'};font-size:14px;">💎 ${cost}</div><button class="overlay-btn" style="padding:4px 12px;font-size:12px;margin-top:4px;min-height:28px;${canBuy ? '' : 'opacity:0.4;cursor:not-allowed;'}" ${canBuy ? '' : 'disabled'}>升级</button>`}
+      </div>
+    `;
+    if (canBuy) {
+      row.querySelector('button').onclick = () => buyMetaUpgrade(upg.id);
+    }
+    container.appendChild(row);
+  });
+  showOverlay('overlay-meta-shop');
+}
+
+function closeMetaShop() { hideOverlay('overlay-meta-shop'); }
+
+function buyMetaUpgrade(upgradeId) {
+  const meta = getMetaProgress();
+  const upg = META_UPGRADES.find(u => u.id === upgradeId);
+  if (!upg) return;
+  const upgrades = meta.upgrades || {};
+  const level = upgrades[upgradeId] || 0;
+  if (level >= upg.maxLevel) return;
+  const cost = upg.costs[level];
+  if ((meta.shards || 0) < cost) return;
+  meta.shards -= cost;
+  upgrades[upgradeId] = level + 1;
+  meta.upgrades = upgrades;
+  localStorage.setItem(META_KEY, JSON.stringify(meta));
+  showMetaShop();
+}
+
+// ===================== BACKGROUND MUSIC (Web Audio API) =====================
+let audioCtx = null;
+let musicNodes = [];
+let musicPlaying = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { console.error('Audio init failed', e); }
+}
+
+function playMusic() {
+  initAudio();
+  if (!audioCtx) return;
+  if (musicPlaying) return;
+  musicPlaying = true;
+  document.getElementById('music-toggle').textContent = '🎵';
+
+  const baseNotes = [220, 246.94, 277.18, 329.63];
+  const melody = [440, 493.88, 523.25, 587.33, 659.25, 523.25, 440, 392];
+  let melodyIdx = 0;
+
+  function playNote(freq, duration, time, type = 'sine', vol = 0.08) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, time);
+    gain.gain.linearRampToValueAtTime(vol, time + 0.05);
+    gain.gain.linearRampToValueAtTime(0, time + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(time);
+    osc.stop(time + duration);
+    musicNodes.push(osc);
+  }
+
+  function playChord(freqs, time, duration) {
+    freqs.forEach(f => playNote(f, duration, time, 'sine', 0.04));
+  }
+
+  function scheduleLoop() {
+    if (!musicPlaying || !audioCtx) return;
+    const now = audioCtx.currentTime;
+    const beatLen = 0.5;
+    for (let i = 0; i < 8; i++) {
+      const time = now + i * beatLen;
+      playNote(melody[melodyIdx % melody.length], beatLen * 0.9, time, 'triangle', 0.06);
+      if (i % 2 === 0) playChord(baseNotes, time, beatLen * 1.8);
+      melodyIdx++;
+    }
+    setTimeout(scheduleLoop, 3500);
+  }
+  scheduleLoop();
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  musicNodes.forEach(n => { try { n.stop(); } catch(e) {} });
+  musicNodes = [];
+  document.getElementById('music-toggle').textContent = '🔇';
+}
+
+function toggleMusic() {
+  if (musicPlaying) stopMusic();
+  else playMusic();
 }
 
 function updateMainMenu() {
@@ -3985,9 +4366,9 @@ function updateMainMenu() {
   if (statsEl) {
     const meta = getMetaProgress();
     if (meta.totalRuns > 0) {
-      statsEl.textContent = `总冒险 ${meta.totalRuns} 次 | 通关 ${meta.victories || 0} 次`;
+      statsEl.innerHTML = `总冒险 ${meta.totalRuns} 次 | 通关 ${meta.victories || 0} 次<br>💎 裂境碎晶: ${meta.shards || 0}`;
     } else {
-      statsEl.textContent = '';
+      statsEl.innerHTML = '';
     }
   }
 }
