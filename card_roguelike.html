@@ -2481,53 +2481,69 @@ function executeBattlecry(card, minion, owner, opponent, target) {
 
 function executeSpell(effect, player, enemy, card, target) {
   const sp = (player === G.player ? G.player.spellPower : 0);
+  const isPlayer = player === G.player;
+  const caster = isPlayer ? '你' : '敌方';
+  const logType = isPlayer ? 'player' : 'enemy';
   switch (effect) {
     case 'arcane_missiles':
+      let missileCount = 0;
       for (let i = 0; i < 3 + sp; i++) {
         const targets = [...enemy.minions.filter(m => !m.dead), enemy];
         if (targets.length > 0) {
           const t = targets[Math.floor(Math.random() * targets.length)];
           dealDamage(t, 1, player);
+          missileCount++;
         }
       }
+      addBattleLog(`${caster}的奥术飞弹发射${missileCount}颗，共造成${missileCount}点随机伤害`, logType);
       break;
     case 'heal_5':
-      if (!target) target = player; // Auto-target caster if no target
+      if (!target) target = player;
       if (target === G.player || target === G.enemy) {
         target.hp = Math.min(target.maxHp, target.hp + 5);
         floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '+' + 5, 'heal');
       } else {
         target.currentHp = Math.min(target.maxHp, target.currentHp + 5);
       }
+      addBattleLog(`${caster}恢复5点生命`, logType);
       break;
     case 'deal_3_face':
       dealDamage(target || enemy, 3 + sp, player);
+      addBattleLog(`${caster}造成${3 + sp}点伤害${sp > 0 ? '(含法术强度+' + sp + ')' : ''}`, logType);
       break;
     case 'deal_6_face':
       dealDamage(target || enemy, 6 + sp, player);
+      addBattleLog(`${caster}造成${6 + sp}点伤害${sp > 0 ? '(含法术强度+' + sp + ')' : ''}`, logType);
       break;
     case 'deal_10_face':
       dealDamage(target || enemy, 10 + sp, player);
+      addBattleLog(`${caster}造成${10 + sp}点伤害${sp > 0 ? '(含法术强度+' + sp + ')' : ''}`, logType);
       break;
     case 'draw_2':
       drawCard(player, true);
       drawCard(player, true);
+      addBattleLog(`${caster}抽了两张牌`, logType);
       break;
     case 'fan_of_knives':
       enemy.minions.forEach(m => dealDamage(m, 1 + sp, player));
       drawCard(player, true);
+      addBattleLog(`${caster}对所有敌方随从造成${1 + sp}点伤害，抽一张牌`, logType);
       break;
     case 'consecration':
       enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
+      addBattleLog(`${caster}对所有敌方随从造成${2 + sp}点伤害`, logType);
       break;
     case 'flamestrike':
       enemy.minions.forEach(m => dealDamage(m, 4 + sp, player));
+      addBattleLog(`${caster}对所有敌方随从造成${4 + sp}点伤害`, logType);
       break;
     case 'lightning_storm':
       enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
+      addBattleLog(`${caster}对所有敌方随从造成${2 + sp}点伤害`, logType);
       break;
     case 'blizzard':
       enemy.minions.forEach(m => { dealDamage(m, 2 + sp, player); m.frozen = true; m.canAttack = false; });
+      addBattleLog(`${caster}对所有敌方随从造成${2 + sp}点伤害并冻结`, logType);
       break;
     case 'polymorph':
       if (target && !target.dead) {
@@ -2541,14 +2557,17 @@ function executeSpell(effect, player, enemy, card, target) {
         m.taunt = false; m.divineShield = false;
         m.art = '🐑'; m.name = '绵羊';
       }
+      addBattleLog(`${caster}将随从变形为1/1绵羊`, logType);
       break;
     case 'assassinate':
       if (target && !target.dead) {
+        addBattleLog(`${caster}刺杀了 ${target.name}`, logType);
         target.dead = true;
         checkDeathrattle(target, enemy, player);
         enemy.minions = enemy.minions.filter(x => !x.dead);
       } else if (enemy.minions.length > 0) {
         const m = enemy.minions[0];
+        addBattleLog(`${caster}刺杀了 ${m.name}`, logType);
         m.dead = true;
         checkDeathrattle(m, enemy, player);
         enemy.minions = enemy.minions.filter(x => !x.dead);
@@ -2556,11 +2575,13 @@ function executeSpell(effect, player, enemy, card, target) {
       break;
     case 'mind_control':
       if (target && enemy.minions.includes(target)) {
+        addBattleLog(`${caster}控制了 ${target.name}`, logType);
         target.isPlayer = !target.isPlayer;
         if (player === G.player) { G.enemy.minions = G.enemy.minions.filter(x => x.uid !== target.uid); G.player.minions.push(target); }
         else { G.player.minions = G.player.minions.filter(x => x.uid !== target.uid); G.enemy.minions.push(target); }
       } else if (enemy.minions.length > 0) {
         const m = enemy.minions[0];
+        addBattleLog(`${caster}控制了 ${m.name}`, logType);
         m.isPlayer = !m.isPlayer;
         if (player === G.player) { G.enemy.minions = G.enemy.minions.filter(x => x.uid !== m.uid); G.player.minions.push(m); }
         else { G.player.minions = G.player.minions.filter(x => x.uid !== m.uid); G.enemy.minions.push(m); }
@@ -2568,17 +2589,21 @@ function executeSpell(effect, player, enemy, card, target) {
       break;
     case 'equality':
       [...G.player.minions, ...G.enemy.minions].forEach(m => { m.currentHp = 1; m.maxHp = 1; });
+      addBattleLog(`${caster}将所有随从生命值变为1`, logType);
       break;
     case 'mass_heal':
       player.minions.forEach(m => { m.currentHp = Math.min(m.maxHp, m.currentHp + 2); });
       player.hp = Math.min(player.maxHp, player.hp + 4);
+      addBattleLog(`${caster}恢复友方随从2点生命，英雄恢复4点`, logType);
       break;
     case 'gain_mana_1':
       player.mana = Math.min(10, player.mana + 1);
+      addBattleLog(`${caster}获得1个法力水晶`, logType);
       break;
     case 'deal_5_draw_1':
       dealDamage(target || enemy, 5 + sp, player);
       drawCard(player, true);
+      addBattleLog(`${caster}造成${5 + sp}点伤害，抽一张牌`, logType);
       break;
     case 'summon_two_3_3':
       for (let i = 0; i < 2; i++) {
@@ -2586,6 +2611,7 @@ function executeSpell(effect, player, enemy, card, target) {
           player.minions.push(createMinion({ id: 'treasure_token', name: '宝藏守护者', cost: 3, attack: 3, hp: 3, rarity: 'common', art: '🗿', text: '' }, player === G.player));
         }
       }
+      addBattleLog(`${caster}召唤了两个3/3宝藏守护者`, logType);
       break;
     case 'heal_8':
       if (!target) target = player;
@@ -2595,6 +2621,7 @@ function executeSpell(effect, player, enemy, card, target) {
       } else {
         target.currentHp = Math.min(target.maxHp, target.currentHp + 8);
       }
+      addBattleLog(`${caster}恢复8点生命`, logType);
       break;
   }
 }
@@ -2785,10 +2812,10 @@ function playEnemyMinion(card) {
 function playEnemySpell(card) {
   G.enemy.mana -= card.cost;
   G.enemy.hand = G.enemy.hand.filter(c => c.uid !== card.uid);
+  addBattleLog(`敌方施放 ${card.name}`, 'enemy');
   executeSpell(card.effect, G.enemy, G.player, card);
   cleanupDeadMinions();
   G.enemy.discardPile.push(card);
-  addBattleLog(`敌方施放 ${card.name}`, 'enemy');
   renderBattle();
   if (G.player.hp <= 0) onBattleLost();
   if (G.enemy.hp <= 0) onBattleWon();
