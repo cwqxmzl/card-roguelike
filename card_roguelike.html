@@ -371,10 +371,11 @@ body {
 .relic-bar { display: flex; gap: 6px; align-items: center; }
 .relic-icon { font-size: 16px; cursor: help; position: relative; }
 .relic-tooltip {
-  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  margin-top: 6px;
   background: #1a1a2e; border: 1px solid var(--gold); padding: 8px 12px;
   border-radius: 6px; font-size: 12px; white-space: nowrap; display: none;
-  z-index: 300; color: #ddd;
+  z-index: 300; color: #ddd; max-width: 200px; white-space: normal; text-align: center;
 }
 .relic-icon:hover .relic-tooltip { display: block; }
 
@@ -3592,6 +3593,48 @@ function floatText(elementId, text, type) {
 }
 
 // ===================== CARD DETAIL VIEW =====================
+function getSpellEffectInfo(effect, sp) {
+  const spNote = sp > 0 ? ` <span style="color:#ffd700;">(+${sp} 法术强度)</span>` : '';
+  const entries = {
+    'deal_1': `造成 1 点伤害${spNote}`,
+    'deal_1_face': `对敌方英雄造成 1 点伤害${spNote}`,
+    'heal_3': `恢复 3 点生命`,
+    'arcane_missiles': `随机发射 3 颗飞弹，每颗造成 1 点伤害${spNote}`,
+    'heal_5': `恢复 5 点生命`,
+    'deal_3_face': `对敌方英雄造成 3 点伤害${spNote}`,
+    'deal_6_face': `对敌方英雄造成 6 点伤害${spNote}`,
+    'deal_10_face': `对敌方英雄造成 10 点伤害${spNote}`,
+    'fan_of_knives': `对所有敌方随从造成 1 点伤害${spNote}，抽一张牌`,
+    'consecration': `对所有敌人造成 2 点伤害${spNote}`,
+    'flamestrike': `对所有敌方随从造成 4 点伤害${spNote}`,
+    'lightning_storm': `对所有敌方随从造成 2 点伤害${spNote}`,
+    'blizzard': `对所有敌方随从造成 2 点伤害${spNote}并使其冻结`,
+    'polymorph': `将一个随从变形为 1/1 的绵羊`,
+    'assassinate': `消灭一个敌方随从`,
+    'mind_control': `获得一个敌方随从的控制权`,
+    'equality': `将所有随从的生命值变为 1`,
+    'mass_heal': `恢复所有友方随从 2 点生命，英雄恢复 4 点`,
+    'gain_mana_1': `获得 1 个法力水晶（本回合）`,
+    'deal_5_draw_1': `造成 5 点伤害${spNote}，抽一张牌`,
+    'summon_two_3_3': `召唤两个 3/3 的随从`,
+    'heal_8': `恢复 8 点生命`,
+    'draw_2': `抽两张牌`,
+    'deal_face_1': `对敌方英雄造成 1 点伤害${spNote}`,
+    'summon_2_2': `召唤一个 2/2 的随从`,
+    'summon_4_4': `召唤一个 4/4 的随从`,
+    'summon_0_2_taunt': `召唤一个 0/2 且有嘲讽的随从`,
+    'mind_control_random': `随机获得一个敌方随从的控制权`,
+    'draw_1': `抽一张牌`,
+    'freeze_enemy': `冻结一个敌方随从`,
+    'dragon_buff': `若手牌中有龙牌则获得 +1/+1`,
+    'deathwing': `消灭所有其他随从，弃掉所有手牌`,
+    'faceless_copy': `变为一个友方随从的复制`,
+    'draw_1_owner': `为拥有者抽一张牌`,
+    'buff_friendly_2_2': `使一个友方随从获得 +2/+2`,
+  };
+  return entries[effect] || '';
+}
+
 function showCardDetail(card) {
   const inner = document.getElementById('card-detail-inner');
   if (!inner) return;
@@ -3610,14 +3653,23 @@ function showCardDetail(card) {
   if (card.text) {
     html += `<div style="font-size:13px;color:#ccc;margin-top:8px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:6px;line-height:1.5;">${card.text}</div>`;
   }
+  if (card.type === 'spell' && card.effect) {
+    const sp = (hasRelic('spell_power') || hasRelic('spell_power_1')) ? 1 : 0;
+    const spellInfo = getSpellEffectInfo(card.effect, sp);
+    if (spellInfo) {
+      html += `<div style="font-size:12px;color:#7ec8e3;margin-top:6px;padding:4px 10px;background:rgba(0,0,0,0.2);border-radius:6px;line-height:1.6;">${spellInfo}</div>`;
+    }
+  }
   if (card.race) {
     html += `<div style="font-size:12px;color:#888;margin-top:6px;">种族: ${card.race}</div>`;
   }
   if (card.battlecry) {
-    html += `<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">⚡ 战吼</div>`;
+    const bcInfo = getSpellEffectInfo(card.battlecry, 0);
+    html += `<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">⚡ 战吼${bcInfo ? ': ' + bcInfo : ''}</div>`;
   }
   if (card.deathrattle) {
-    html += `<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">💀 亡语</div>`;
+    const drInfo = getSpellEffectInfo(card.deathrattle, 0);
+    html += `<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">💀 亡语${drInfo ? ': ' + drInfo : ''}</div>`;
   }
   if (card.taunt) html += '<div style="font-size:12px;color:#ffd700;margin-top:4px;">🛡️ 嘲讽</div>';
   if (card.divineShield) html += '<div style="font-size:12px;color:#ffd700;margin-top:4px;">✨ 圣盾</div>';
