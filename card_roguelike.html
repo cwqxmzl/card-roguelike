@@ -1780,13 +1780,56 @@ function renderMap() {
       label.className = 'map-node-label';
       label.textContent = node.completed ? '已完成' : info.label;
       nodeDiv.appendChild(label);
+
+      // Detail view: long-press or right-click
+      nodeDiv.oncontextmenu = (e) => { e.preventDefault(); showNodeDetail(node, info); return false; };
+      let nodePressTimer = null;
+      let nodeLongPressed = false;
+      nodeDiv.addEventListener('touchstart', () => {
+        nodeLongPressed = false;
+        nodePressTimer = setTimeout(() => {
+          nodeLongPressed = true;
+          showNodeDetail(node, info);
+          if (navigator.vibrate) navigator.vibrate(30);
+        }, 500);
+      });
+      nodeDiv.addEventListener('touchend', (e) => {
+        if (nodePressTimer) { clearTimeout(nodePressTimer); nodePressTimer = null; }
+        if (nodeLongPressed) { e.preventDefault(); e.stopPropagation(); }
+      });
+      nodeDiv.addEventListener('touchmove', () => { if (nodePressTimer) { clearTimeout(nodePressTimer); nodePressTimer = null; } });
+
       if (node.available) {
-        nodeDiv.onclick = () => enterNode(node);
+        nodeDiv.onclick = () => { if (!nodeLongPressed) enterNode(node); };
       }
       rowDiv.appendChild(nodeDiv);
     });
     container.appendChild(rowDiv);
   });
+}
+
+function showNodeDetail(node, info) {
+  const nodeDesc = {
+    battle: '普通战斗，击败敌人可获得金币和卡牌奖励',
+    elite: '精英战斗，难度较高但奖励更丰厚',
+    shop: '商店，可花费金币购买卡牌和遗物',
+    event: '随机事件，可能带来机遇或风险',
+    rest: '酒馆，可恢复生命值或强化卡牌',
+    treasure: '宝箱，免费获取一件遗物',
+    boss: '首领战，击败后进入下一幕',
+  };
+  const inner = document.getElementById('card-detail-inner');
+  if (!inner) return;
+  let html = '<div style="text-align:center;">';
+  html += `<div style="font-size:36px;margin-bottom:6px;">${info.icon}</div>`;
+  html += `<div style="font-size:16px;font-weight:bold;color:${info.color || 'var(--gold)'};">${info.label}</div>`;
+  html += `<div style="font-size:13px;color:#ccc;margin-top:8px;padding:6px 10px;background:rgba(0,0,0,0.3);border-radius:6px;line-height:1.5;">${nodeDesc[node.type] || '未知节点'}</div>`;
+  if (node.completed) html += '<div style="font-size:12px;color:#888;margin-top:6px;">✓ 已完成</div>';
+  else if (node.available) html += '<div style="font-size:12px;color:#ffd700;margin-top:6px;">▶ 可进入</div>';
+  else html += '<div style="font-size:12px;color:#666;margin-top:6px;">🔒 未解锁</div>';
+  html += '</div>';
+  inner.innerHTML = html;
+  document.getElementById('card-detail-overlay').classList.add('active');
 }
 
 function enterNode(node) {
@@ -3881,7 +3924,6 @@ function renderCardStatic(card) {
   }
 
   div.style.cursor = 'pointer';
-  div.onclick = () => showCardDetail(card);
   div.oncontextmenu = (e) => { e.preventDefault(); showCardDetail(card); return false; };
   let pressTimer = null;
   let longPressed = false;
@@ -3896,6 +3938,12 @@ function renderCardStatic(card) {
   div.addEventListener('touchmove', () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } });
 
   return div;
+}
+
+function makeCardClickable(el, card) {
+  el.style.cursor = 'pointer';
+  el.onclick = (e) => { e.stopPropagation(); showCardDetail(card); };
+  return el;
 }
 
 function skipReward() {
@@ -3959,7 +4007,7 @@ function renderShop() {
   G.shopInventory.cards.forEach((item, i) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'shop-item';
-    wrapper.appendChild(renderCardStatic(item));
+    makeCardClickable(wrapper.appendChild(renderCardStatic(item)), item);
     const price = document.createElement('div');
     price.className = 'shop-price';
     price.textContent = `💰 ${item.price}`;
@@ -4004,7 +4052,7 @@ function renderShop() {
     wrapper.appendChild(name);
     const desc = document.createElement('div');
     desc.style.cssText = 'font-size:11px;color:#888;text-align:center;max-width:120px;';
-    desc.textContent = item.desc;
+    desc.textContent = item.desc || item.description || '';
     wrapper.appendChild(desc);
     const price = document.createElement('div');
     price.className = 'shop-price';
@@ -4321,7 +4369,7 @@ function renderRelics(containerId) {
     icon.style.touchAction = 'manipulation';
     const tooltip = document.createElement('div');
     tooltip.className = 'relic-tooltip';
-    tooltip.innerHTML = `<b>${r.name}</b><br>${r.desc}`;
+    tooltip.innerHTML = `<b>${r.name}</b><br>${r.desc || r.description || ''}`;
     icon.appendChild(tooltip);
     icon.onclick = () => {
       document.querySelectorAll('.relic-tooltip').forEach(t => { if (t !== tooltip) t.style.display = ''; });
@@ -4340,7 +4388,7 @@ function viewDeck() {
     return a.name.localeCompare(b.name);
   });
   sorted.forEach(card => {
-    container.appendChild(renderCardStatic(card));
+    makeCardClickable(container.appendChild(renderCardStatic(card)), card);
   });
   document.getElementById('deck-view-title').textContent = `你的牌组 (${G.player.deck.length}张)`;
   showOverlay('overlay-deck');
@@ -4355,7 +4403,7 @@ function viewDrawPile() {
   container.innerHTML = '';
   if (G.battle && G.player.drawPile) {
     const sorted = [...G.player.drawPile].sort((a, b) => a.cost - b.cost);
-    sorted.forEach(card => container.appendChild(renderCardStatic(card)));
+    sorted.forEach(card => makeCardClickable(container.appendChild(renderCardStatic(card)), card));
     document.getElementById('deck-view-title').textContent = `抽牌堆 (${G.player.drawPile.length}张)`;
   }
   showOverlay('overlay-deck');
@@ -4366,7 +4414,7 @@ function viewDiscardPile() {
   container.innerHTML = '';
   if (G.battle && G.player.discardPile) {
     const sorted = [...G.player.discardPile].sort((a, b) => a.cost - b.cost);
-    sorted.forEach(card => container.appendChild(renderCardStatic(card)));
+    sorted.forEach(card => makeCardClickable(container.appendChild(renderCardStatic(card)), card));
     document.getElementById('deck-view-title').textContent = `弃牌堆 (${G.player.discardPile.length}张)`;
   }
   showOverlay('overlay-deck');
