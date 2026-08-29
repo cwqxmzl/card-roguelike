@@ -1133,6 +1133,11 @@ const CARD_POOL = [
   { id: 'deathwing', name: '死亡之翼', cost: 10, type: 'minion', attack: 12, hp: 12, rarity: 'legendary', art: '🐲', text: '战吼：消灭所有其他随从，弃掉手牌', battlecry: 'deathwing' },
   { id: 'loot_hoarder', name: '藏宝地精', cost: 2, type: 'minion', attack: 2, hp: 1, rarity: 'rare', art: '💰', text: '亡语：抽一张牌', deathrattle: 'draw_1_owner' },
   { id: 'faceless', name: '无面操纵者', cost: 6, type: 'minion', attack: 3, hp: 3, rarity: 'epic', art: '🎭', text: '战吼：变成一个友方随从的复制', battlecry: 'faceless_copy' },
+  // --- Class Legendaries ---
+  { id: 'arcane_wyrm', name: '奥术巨龙', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🐉', text: '战吼：对所有敌方随从造成2点伤害', battlecry: 'deal_2_all' },
+  { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 5, hp: 7, rarity: 'legendary', art: '🏰', text: '嘲讽·战吼：获得3点护甲', taunt: true, battlecry: 'gain_armor_3' },
+  { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'legendary', art: '🦅', text: '冲锋·风怒', charge: true, windfury: true },
+  { id: 'lightbringer', name: '光明使者', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🕊️', text: '战吼：使所有友方随从+1/+1', battlecry: 'buff_all_1_1' },
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -1141,28 +1146,28 @@ const CLASSES = {
     name: '法师', portrait: '🧙', color: '#4169E1', hp: 30,
     heroPower: { name: '火焰冲击', cost: 2, type: 'mage', description: '对任意目标造成1点伤害' },
     starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','arcane_missiles','holy_light','lightning_bolt','fireball','arcane_intellect'],
-    cardPool: ['arcane_missiles','fireball','blizzard','flamestrike','pyroblast','polymorph','arcane_intellect','spellblade','water_elemental','mirror_entity','freeze_elem','card_drawer','healer','stone_golem','lightning_bolt'],
+    cardPool: ['arcane_missiles','fireball','blizzard','flamestrike','pyroblast','polymorph','arcane_intellect','spellblade','water_elemental','mirror_entity','freeze_elem','card_drawer','healer','stone_golem','lightning_bolt','arcane_wyrm'],
     signature: 'spell_power_1',
   },
   warrior: {
     name: '战士', portrait: '⚔️', color: '#B22222', hp: 30,
     heroPower: { name: '全副武装', cost: 2, type: 'warrior', description: '获得2点护甲' },
     starterDeck: ['guardsman','stone_golem','orc_grunt','berserker','wolf','war_hammer','rusty_knife','healer','shield_bearer','ogre'],
-    cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist'],
+    cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist','iron_bastion'],
     signature: 'armor_start',
   },
   hunter: {
     name: '猎人', portrait: '🏹', color: '#228B22', hp: 30,
     heroPower: { name: '稳固射击', cost: 2, type: 'hunter', description: '对敌方英雄造成2点伤害' },
     starterDeck: ['wolf','murloc','archer','blood_imp','charge_knight','lightning_bolt','rusty_knife','berserker','ogre','fan_of_knives'],
-    cardPool: ['wolf','murloc','archer','charge_knight','windfury_harpy','blood_imp','fan_of_knives','lightning_bolt','berserker','ogre','sylvanas','loot_hoarder'],
+    cardPool: ['wolf','murloc','archer','charge_knight','windfury_harpy','blood_imp','fan_of_knives','lightning_bolt','berserker','ogre','sylvanas','loot_hoarder','storm_falcon'],
     signature: 'beast_master',
   },
   paladin: {
     name: '圣骑士', portrait: '🛡️', color: '#FFD700', hp: 30,
     heroPower: { name: '援军', cost: 2, type: 'paladin', description: '召唤一个1/1白银之手新兵' },
     starterDeck: ['guardsman','stone_golem','healer','paladin_knight','shield_bearer','holy_light','consecration','archer','card_drawer','wolf'],
-    cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas'],
+    cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas','lightbringer'],
     signature: 'divine_protection',
   },
 };
@@ -2578,6 +2583,17 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
           minion.name = copy.name + ' (复制)';
         }
       }
+      break;
+    case 'deal_2_all':
+      opponent.minions.filter(m => !m.dead).forEach(m => dealDamage(m, 2, owner));
+      break;
+    case 'gain_armor_3':
+      owner.armor += 3;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得3点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'buff_all_1_1':
+      owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
+      addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');
       break;
   }
 }
