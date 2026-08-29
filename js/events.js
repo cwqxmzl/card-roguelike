@@ -71,7 +71,7 @@ function openEvent() {
 
 // ===================== REST =====================
 function restHeal() {
-  const healAmount = Math.floor(G.player.maxHp * 0.3);
+  const healAmount = Math.floor(G.player.maxHp * GAME_CONFIG.rest.healPercent);
   G.player.hp = Math.min(G.player.maxHp, G.player.hp + healAmount);
   hideOverlay('overlay-rest');
   completeNode();

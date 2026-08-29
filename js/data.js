@@ -2,6 +2,33 @@
    Split from card_roguelike.html inline <script> for maintainability.
    Classic script loaded via <script src>; shares global scope with siblings. */
 
+// ===================== GAME BALANCE CONFIG =====================
+// Centralized tunable values. Edit here, not scattered across modules.
+const GAME_CONFIG = {
+  shop: {
+    cardPrices: { common: 15, rare: 30, epic: 50, legendary: 80 },
+    relicPriceBase: 40,
+    relicPriceRange: 30,
+    healCost: 20,
+    discoverCost: 40,
+    rerollBaseCost: 10,
+    rerollIncrement: 5,
+    removeCardCost: 60,
+  },
+  rest: {
+    healPercent: 0.3,
+  },
+  battle: {
+    maxMinions: 7,
+    maxMana: 10,
+    maxHandSize: 10,
+    battleLogLimit: 60,
+  },
+  boss: {
+    enrageHpThreshold: 0.5,
+  },
+};
+
 // ===================== GAME DATA =====================
 const CARD_POOL = [
   // --- Commons ---

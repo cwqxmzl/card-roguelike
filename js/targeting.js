@@ -57,7 +57,7 @@ function executeBattlecryOnTarget(target) {
   G.player.hand.splice(bt.index, 1);
   if (G.battleStats) G.battleStats.cardsPlayed++;
 
-  if (G.player.minions.length >= 7) {
+  if (G.player.minions.length >= GAME_CONFIG.battle.maxMinions) {
     G.player.hand.push(card);
     G.player.mana += getCardCost(card);
     G.battle.battlecryTargeting = null;

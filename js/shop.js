@@ -4,7 +4,7 @@
 
 // ===================== SHOP =====================
 function openShop() {
-  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: 40, discoverSold: false, rerollCount: 0, removeCost: 60, removeSold: false };
+  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: GAME_CONFIG.shop.discoverCost, discoverSold: false, rerollCount: 0, removeCost: GAME_CONFIG.shop.removeCardCost, removeSold: false };
   
   // Generate shop cards (5)
   const pool = CARD_POOL.filter(c => {
@@ -16,7 +16,7 @@ function openShop() {
     G.shopInventory.cards.push({
       ...card,
       uid: uid(),
-      price: card.rarity === 'common' ? 15 : card.rarity === 'rare' ? 30 : card.rarity === 'epic' ? 50 : 80,
+      price: GAME_CONFIG.shop.cardPrices[card.rarity] || 80,
       sold: false,
     });
   }
@@ -26,11 +26,11 @@ function openShop() {
   for (let i = 0; i < Math.min(3, availableRelics.length); i++) {
     const idx = Math.floor(Math.random() * availableRelics.length);
     const relic = availableRelics.splice(idx, 1)[0];
-    G.shopInventory.relics.push({ ...relic, price: 40 + Math.floor(Math.random() * 30), sold: false });
+    G.shopInventory.relics.push({ ...relic, price: GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange), sold: false });
   }
   
   // Heal option
-  G.shopInventory.healCost = 20;
+  G.shopInventory.healCost = GAME_CONFIG.shop.healCost;
   
   renderShop();
   showOverlay('overlay-shop');
@@ -205,7 +205,7 @@ function renderShop() {
   svcSection.appendChild(svcTitle);
 
   // Reroll shop
-  const rerollCost = 10 + G.shopInventory.rerollCount * 5;
+  const rerollCost = GAME_CONFIG.shop.rerollBaseCost + G.shopInventory.rerollCount * GAME_CONFIG.shop.rerollIncrement;
   const rerollDiv = document.createElement('div');
   rerollDiv.className = 'shop-item';
   rerollDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:10px;';
@@ -258,7 +258,7 @@ function renderShop() {
 }
 
 function rerollShop() {
-  const cost = 10 + G.shopInventory.rerollCount * 5;
+  const cost = GAME_CONFIG.shop.rerollBaseCost + G.shopInventory.rerollCount * GAME_CONFIG.shop.rerollIncrement;
   if (G.gold < cost) return;
   G.gold -= cost;
   G.shopInventory.rerollCount++;
@@ -271,7 +271,7 @@ function rerollShop() {
     const card = pool[Math.floor(Math.random() * pool.length)];
     G.shopInventory.cards.push({
       ...card, uid: uid(),
-      price: card.rarity === 'common' ? 15 : card.rarity === 'rare' ? 30 : card.rarity === 'epic' ? 50 : 80,
+      price: GAME_CONFIG.shop.cardPrices[card.rarity] || 80,
       sold: false,
     });
   }
@@ -280,7 +280,7 @@ function rerollShop() {
   for (let i = 0; i < Math.min(3, availableRelics.length); i++) {
     const idx = Math.floor(Math.random() * availableRelics.length);
     const relic = availableRelics.splice(idx, 1)[0];
-    G.shopInventory.relics.push({ ...relic, price: 40 + Math.floor(Math.random() * 30), sold: false });
+    G.shopInventory.relics.push({ ...relic, price: GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange), sold: false });
   }
   renderShop();
   renderMap();

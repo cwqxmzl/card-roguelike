@@ -8,7 +8,7 @@ let logOpen = true;
 function addBattleLog(msg, type) {
   if (!G.battle || !G.battle.log) return;
   G.battle.log.push({ msg, type: type || 'system' });
-  if (G.battle.log.length > 60) G.battle.log.shift();
+  if (G.battle.log.length > GAME_CONFIG.battle.battleLogLimit) G.battle.log.shift();
   renderBattleLog();
 }
 

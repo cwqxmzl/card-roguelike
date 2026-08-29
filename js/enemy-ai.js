@@ -191,7 +191,7 @@ function drawCard(entity, showLog) {
     return;
   }
   const card = entity.drawPile.pop();
-  if (entity.hand.length >= 10) {
+  if (entity.hand.length >= GAME_CONFIG.battle.maxHandSize) {
     entity.discardPile.push(card);
     if (showLog) {
       if (entity === G.player) addBattleLog(`手牌已满，${card.name}被弃置`, 'system');

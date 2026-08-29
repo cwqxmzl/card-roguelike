@@ -104,7 +104,7 @@ function startPlayerTurn() {
   G.battle.turnPhase = 'player';
   G.battle.turn++;
   if (G.battle.turn > 1) {
-    G.player.maxMana = Math.min(10, G.player.maxMana + 1);
+    G.player.maxMana = Math.min(GAME_CONFIG.battle.maxMana, G.player.maxMana + 1);
   }
   G.player.mana = G.player.maxMana - G.player.overload;
   if (G.player.overload > 0) { addBattleLog(`你的法力被过载削减${G.player.overload}点`, 'system'); }
@@ -201,7 +201,7 @@ function startEnemyTurn() {
   G.battle.turnPhase = 'enemy_play';
   G.battle.turn++;
   addBattleLog(`—— 敌方回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'enemy');
-  G.enemy.maxMana = Math.min(10, G.enemy.maxMana + 1);
+  G.enemy.maxMana = Math.min(GAME_CONFIG.battle.maxMana, G.enemy.maxMana + 1);
   G.enemy.mana = G.enemy.maxMana - (G.enemy.overload || 0);
   G.enemy.overload = 0;
 
@@ -498,7 +498,7 @@ function playCard(card, index) {
   }
 
   // Board full: refuse to summon before spending mana (keeps hand order intact)
-  if (card.type === 'minion' && G.player.minions.length >= 7) {
+  if (card.type === 'minion' && G.player.minions.length >= GAME_CONFIG.battle.maxMinions) {
     addBattleLog('战场已满，无法召唤更多随从', 'system');
     return;
   }
@@ -1002,7 +1002,7 @@ function dealDamage(target, amount, source) {
     logMsg += `（剩余${target.hp}）`;
     addBattleLog(logMsg, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
     // Boss enrage: triggers once when the boss drops to half HP
-    if (target === G.enemy && G.enemy.isBoss && !G.enemy.enraged && !G.enemy.dead && G.enemy.hp <= G.enemy.maxHp * 0.5) {
+    if (target === G.enemy && G.enemy.isBoss && !G.enemy.enraged && !G.enemy.dead && G.enemy.hp <= G.enemy.maxHp * GAME_CONFIG.boss.enrageHpThreshold) {
       triggerBossEnrage();
     }
     // Lifesteal: source minion with lifesteal heals its owner by damage dealt
