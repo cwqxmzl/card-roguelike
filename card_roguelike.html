@@ -1626,6 +1626,20 @@ const EVENTS = [
       { text: '拒绝低语', cond: g => true, action: g => { log('你捂住耳朵，快步离开'); } },
     ]
   },
+  {
+    title: '神秘书架', act: 2,
+    text: '一间废弃书房里矗立着高大的书架，魔法卷轴与古老典籍在微光中低语。',
+    choices: [
+      { text: '研读典籍（发现一张稀有或史诗卡牌）', cond: g => true, action: g => {
+        g.pendingDiscover = true;
+        g.pendingDiscoverPool = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
+        g.pendingDiscoverTitle = '发现一张卡牌';
+        log('书架上泛起魔法光芒，典籍在你面前展开...');
+      } },
+      { text: '搜索书架（获得15金币）', cond: g => true, action: g => { g.gold += 15; log('你在书页之间找到了15金币'); } },
+      { text: '离开书房', cond: g => true, action: g => { log('你轻轻合上门离去'); } },
+    ]
+  },
 ];
 
 // Helper: get card data by id
@@ -2198,7 +2212,8 @@ function enemyAITurn() {
     if (G.enemy.hp <= 0) { onBattleWon(); return; }
     if (G.enemy.mana <= 0 || G.enemy.hand.length === 0) { proceedToAttacks(); return; }
 
-    const sortedHand = [...G.enemy.hand].sort((a, b) => (b.cost || 0) - (a.cost || 0));
+    const aiType = G.enemy.ai;
+    const sortedHand = [...G.enemy.hand].sort((a, b) => enemyCardScore(b, aiType) - enemyCardScore(a, aiType));
     let played = false;
     for (let i = 0; i < sortedHand.length; i++) {
       const card = sortedHand[i];
@@ -2256,6 +2271,30 @@ function enemyAIProfile() {
     case 'boss':       return { minionChance: 0.5,  preferHighAtk: true };
     default:           return { minionChance: 0.3,  preferHighAtk: false };
   }
+}
+
+// Score how much this enemy AI wants to play a given card (higher = earlier)
+function enemyCardScore(card, ai) {
+  let score = (card.cost || 0) * 10;
+  const removal = ['assassinate','polymorph','mind_control','flamestrike','consecration','equality','blizzard','lightning_storm'];
+  const faceDmg = ['deal_3_face','deal_6_face','deal_10_face','arcane_missiles'];
+  if (ai === 'aggressive') {
+    if (card.type === 'minion') score += 6;
+    if (card.charge) score += 4;
+    if (card.type === 'weapon') score += 5;
+    if (card.type === 'spell' && card.effect && faceDmg.includes(card.effect)) score += 15;
+    if (card.taunt) score -= 2;
+  } else if (ai === 'control') {
+    if (card.type === 'spell' && removal.includes(card.effect)) score += 20;
+    if (card.taunt) score += 8;
+    if (card.type === 'spell' && card.effect === 'heal_5') score += 6;
+    if (card.type === 'minion' && card.attack <= 2) score -= 5;
+  } else if (ai === 'spell') {
+    if (card.type === 'spell') score += 9;
+    if (card.spellDamage) score += 6;
+    if (card.type === 'spell' && removal.includes(card.effect)) score += 8;
+  }
+  return score;
 }
 
 function enemyAttacks() {
@@ -4068,6 +4107,44 @@ function showPassiveTreasureReward() {
   container.replaceChildren(treasureFrag);
 }
 
+// Discover: offer 1 of 3 random cards from a pool; onPick(card) is called with the chosen card (or null if skipped)
+function offerDiscover(pool, title, onPick) {
+  const rewardTitle = document.getElementById('reward-title');
+  if (rewardTitle) rewardTitle.textContent = title || '发现一张卡牌';
+  const container = document.getElementById('reward-cards');
+  if (!container) return;
+  const offers = [];
+  const temp = [...pool];
+  for (let i = 0; i < 3 && temp.length > 0; i++) {
+    const idx = Math.floor(Math.random() * temp.length);
+    offers.push(temp.splice(idx, 1)[0]);
+  }
+  const frag = document.createDocumentFragment();
+  offers.forEach(card => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'reward-card-wrapper';
+    wrapper.appendChild(renderCardStatic(card));
+    const btn = document.createElement('div');
+    btn.style.textAlign = 'center';
+    btn.style.marginTop = '8px';
+    btn.style.color = 'var(--gold)';
+    btn.style.fontSize = '13px';
+    btn.textContent = '选择';
+    wrapper.appendChild(btn);
+    wrapper.onclick = () => {
+      hideOverlay('overlay-reward');
+      onPick(card);
+    };
+    frag.appendChild(wrapper);
+  });
+  container.replaceChildren(frag);
+  const skipBtn = document.querySelector('#overlay-reward .overlay-btn');
+  if (skipBtn) {
+    skipBtn.onclick = () => { hideOverlay('overlay-reward'); onPick(null); };
+  }
+  showOverlay('overlay-reward');
+}
+
 function renderRewardCards(cards, title) {
   const rewardTitle = document.getElementById('reward-title');
   if (rewardTitle) rewardTitle.textContent = title;
@@ -4389,6 +4466,15 @@ function openEvent() {
           if (G.pendingUpgrade) {
             G.pendingUpgrade = false;
             showUpgradeScreen();
+          } else if (G.pendingDiscover) {
+            G.pendingDiscover = false;
+            const pool = G.pendingDiscoverPool || [];
+            const dTitle = G.pendingDiscoverTitle || '发现一张卡牌';
+            G.pendingDiscoverPool = null; G.pendingDiscoverTitle = null;
+            offerDiscover(pool, dTitle, (card) => {
+              if (card) G.player.deck.push({ ...card, uid: uid() });
+              completeNode();
+            });
           } else {
             completeNode();
           }
