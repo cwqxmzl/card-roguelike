@@ -134,6 +134,12 @@ function useHeroPower() {
         return;
       }
       break;
+    case 'warlock':
+      G.player.hp -= 2;
+      floatText('player-portrait', '-2', 'damage');
+      drawCard();
+      addBattleLog(`你使用了英雄技能：${G.player.heroPower.name}，受到2点伤害并抽一张牌`, 'player');
+      break;
     case 'rogue':
       G.player.weapon = { id: 'rogue_dagger', name: '匕首', attack: 1, durability: 2, currentDurability: 2, cost: 1, type: 'weapon', art: '🗡️' };
       G.battle.heroCanAttack = true;

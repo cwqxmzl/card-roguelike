@@ -415,7 +415,14 @@ function renderCardStatic(card) {
   
   const art = document.createElement('div');
   art.className = 'card-art';
-  art.textContent = card.art;
+  if (card.artImg) {
+    art.style.backgroundImage = `url('${card.artImg}')`;
+    art.style.backgroundSize = 'cover';
+    art.style.backgroundPosition = 'center';
+    art.textContent = '';
+  } else {
+    art.textContent = card.art;
+  }
   div.appendChild(art);
   
   const text = document.createElement('div');

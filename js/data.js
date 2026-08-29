@@ -94,15 +94,15 @@ const CARD_POOL = [
   { id: 'mind_control', name: '精神控制', cost: 6, type: 'spell', rarity: 'epic', art: '🧠', text: '获得一个敌方随从的控制权', effect: 'mind_control' },
   { id: 'equality', name: '生而平等', cost: 3, type: 'spell', rarity: 'epic', art: '⚖️', text: '将所有随从的生命值变为1', effect: 'equality' },
   // --- Legendaries ---
-  { id: 'ragnaros', name: '炎魔之王', cost: 8, type: 'minion', attack: 8, hp: 8, rarity: 'legendary', art: '🔥', text: '冲锋·回合结束时对随机敌人造成8点伤害', charge: true, endTurn: 'rag_damage' },
-  { id: 'sylvanas', name: '黑暗女王', cost: 5, type: 'minion', attack: 5, hp: 4, rarity: 'legendary', art: '👸', text: '亡语：获得一个敌方随从的控制权', deathrattle: 'mind_control_random' },
-  { id: 'deathwing', name: '死亡之翼', cost: 10, type: 'minion', attack: 12, hp: 12, rarity: 'legendary', art: '🐲', text: '战吼：消灭所有其他随从，弃掉手牌', battlecry: 'deathwing' },
+  { id: 'ragnaros', name: '炎魔之王', cost: 8, type: 'minion', attack: 8, hp: 8, rarity: 'legendary', art: '🔥', artImg: 'assets/card-ragnaros.jpg', text: '冲锋·回合结束时对随机敌人造成8点伤害', charge: true, endTurn: 'rag_damage' },
+  { id: 'sylvanas', name: '黑暗女王', cost: 5, type: 'minion', attack: 5, hp: 4, rarity: 'legendary', art: '👸', artImg: 'assets/card-sylvanas.jpg', text: '亡语：获得一个敌方随从的控制权', deathrattle: 'mind_control_random' },
+  { id: 'deathwing', name: '死亡之翼', cost: 10, type: 'minion', attack: 12, hp: 12, rarity: 'legendary', art: '🐲', artImg: 'assets/card-deathwing.jpg', text: '战吼：消灭所有其他随从，弃掉手牌', battlecry: 'deathwing' },
   { id: 'loot_hoarder', name: '藏宝地精', cost: 2, type: 'minion', attack: 2, hp: 1, rarity: 'rare', art: '💰', text: '亡语：抽一张牌', deathrattle: 'draw_1_owner' },
   { id: 'faceless', name: '无面操纵者', cost: 6, type: 'minion', attack: 3, hp: 3, rarity: 'epic', art: '🎭', text: '战吼：变成一个友方随从的复制', battlecry: 'faceless_copy' },
   // --- Class Legendaries ---
-  { id: 'arcane_wyrm', name: '奥术巨龙', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🐉', text: '战吼：对所有敌方随从造成2点伤害', battlecry: 'deal_2_all' },
-  { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 5, hp: 7, rarity: 'legendary', art: '🏰', text: '嘲讽·战吼：获得3点护甲', taunt: true, battlecry: 'gain_armor_3' },
-  { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'legendary', art: '🦅', text: '冲锋·风怒', charge: true, windfury: true },
+  { id: 'arcane_wyrm', name: '奥术巨龙', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🐉', artImg: 'assets/card-arcane-wyrm.jpg', text: '战吼：对所有敌方随从造成2点伤害', battlecry: 'deal_2_all' },
+  { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 5, hp: 7, rarity: 'legendary', art: '🏰', artImg: 'assets/card-iron-bastion.jpg', text: '嘲讽·战吼：获得3点护甲', taunt: true, battlecry: 'gain_armor_3' },
+  { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'legendary', art: '🦅', artImg: 'assets/card-storm-falcon.jpg', text: '冲锋·风怒', charge: true, windfury: true },
   { id: 'lightbringer', name: '光明使者', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🕊️', text: '战吼：使所有友方随从+1/+1', battlecry: 'buff_all_1_1' },
   // --- Priest ---
   { id: 'holy_smite', name: '圣光惩击', cost: 1, type: 'spell', rarity: 'common', art: '✨', text: '对任意目标造成3点伤害', effect: 'smite' },
@@ -150,6 +150,13 @@ const CLASSES = {
     starterDeck: ['guardsman','stone_golem','northshire','northshire','healer','holy_smite','soul_purify','power_word_shield','circle_healing','card_drawer'],
     cardPool: ['holy_smite','power_word_shield','northshire','soul_purify','holy_nova','holy_fire','circle_healing','healer','light_pope','holy_light','guardsman','stone_golem','card_drawer','sylvanas','lightbringer'],
     signature: 'light_well',
+  },
+  warlock: {
+    name: '术士', portrait: '😈', portraitImg: 'assets/portrait-warlock.jpg', color: '#8B008B', hp: 30,
+    heroPower: { name: '生命分流', cost: 2, type: 'warlock', description: '受到2点伤害，抽一张牌' },
+    starterDeck: ['blood_imp','guardsman','stone_golem','murloc','archer','lightning_bolt','holy_light','fan_of_knives','berserker','ogre'],
+    cardPool: ['blood_imp','death_stalker','undead_knight','cultist','sylvanas','deathwing','mind_control','faceless','lightning_bolt','fan_of_knives','berserker','ogre','wolf','murloc'],
+    signature: 'regen',
   },
 };
 
