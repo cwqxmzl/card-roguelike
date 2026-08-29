@@ -1216,9 +1216,9 @@ const ENEMIES = {
     { name: '风暴召唤者', portrait: '⛈️', hp: 36, deck: ['freeze_elem','lightning_storm','blizzard','water_elemental','arcane_missiles','lightning_bolt','spellblade','flamestrike','consecration','card_drawer'], ai: 'spell' },
   ],
   boss: [
-    { name: '森林之王·古树', portrait: '🌳', hp: 50, deck: ['stone_golem','war_golem','shield_bearer','giant','undead_knight','healer','paladin_knight','summoner','ogre','flamestrike','consecration','cultist','ragnaros','guardsman'], ai: 'control', isBoss: true, act: 1, rewardRelic: true },
-    { name: '暗影领主', portrait: '🦇', hp: 60, deck: ['sylvanas','mind_control','assassinate','undead_knight','cultist','summoner','mirror_entity','deathwing','loot_hoarder','flamestrike','blizzard','equality','doom_blade','ragnaros'], ai: 'control', isBoss: true, act: 2, rewardRelic: true },
-    { name: '裂境之主·虚空', portrait: '👁️', hp: 80, deck: ['ragnaros','deathwing','sylvanas','undead_knight','giant','dragon','pyroblast','mind_control','flamestrike','equality','assassinate','blizzard','doom_blade','water_elemental','faceless'], ai: 'boss', isBoss: true, act: 3, rewardRelic: true },
+    { name: '森林之王·古树', portrait: '🌳', hp: 50, deck: ['stone_golem','war_golem','shield_bearer','giant','undead_knight','healer','paladin_knight','summoner','ogre','flamestrike','consecration','cultist','ragnaros','guardsman'], ai: 'control', isBoss: true, act: 1, rewardRelic: true, enrage: { summons: [{ name: '古树守卫', attack: 3, hp: 3, art: '🌳', taunt: true }] } },
+    { name: '暗影领主', portrait: '🦇', hp: 60, deck: ['sylvanas','mind_control','assassinate','undead_knight','cultist','summoner','mirror_entity','deathwing','loot_hoarder','flamestrike','blizzard','equality','doom_blade','ragnaros'], ai: 'control', isBoss: true, act: 2, rewardRelic: true, enrage: { buff: 2 } },
+    { name: '裂境之主·虚空', portrait: '👁️', hp: 80, deck: ['ragnaros','deathwing','sylvanas','undead_knight','giant','dragon','pyroblast','mind_control','flamestrike','equality','assassinate','blizzard','doom_blade','water_elemental','faceless'], ai: 'boss', isBoss: true, act: 3, rewardRelic: true, enrage: { summons: [{ name: '虚空行者', attack: 4, hp: 4, art: '👁️' }], buff: 1 } },
   ]
 };
 
@@ -2886,6 +2886,27 @@ function applyLifesteal(source, dmg) {
   }
 }
 
+// Boss enrage: special effect once when a boss drops to half HP
+function triggerBossEnrage() {
+  const b = G.enemy;
+  if (!b || !b.isBoss || b.enraged || !b.enrage || b.dead) return;
+  b.enraged = true;
+  addBattleLog(`⚡ ${b.name} 被激怒了！`, 'enemy');
+  if (b.enrage.summons) {
+    b.enrage.summons.forEach(s => {
+      if (b.minions.length < 7) {
+        b.minions.push(createMinion({ id: 'enrage_' + uid(), name: s.name, cost: 0, type: 'minion', attack: s.attack, hp: s.hp, art: s.art, taunt: !!s.taunt }, false));
+      }
+    });
+    addBattleLog(`${b.name} 召唤了援军！`, 'enemy');
+  }
+  if (b.enrage.buff) {
+    b.minions.forEach(m => { if (!m.dead) { m.currentAttack += b.enrage.buff; m.currentHp += b.enrage.buff; m.maxHp += b.enrage.buff; } });
+    addBattleLog(`${b.name} 使随从获得+${b.enrage.buff}/+${b.enrage.buff}`, 'enemy');
+  }
+  renderBattle();
+}
+
 function dealDamage(target, amount, source) {
   if (target.dead || amount <= 0) return;
   const targetName = target === G.player ? '你的英雄' : target === G.enemy ? '敌方英雄' : (target.name || '随从');
@@ -2913,6 +2934,10 @@ function dealDamage(target, amount, source) {
     if (armorAbsorbed > 0) logMsg += `（护盾抵消${armorAbsorbed}）`;
     logMsg += `（剩余${target.hp}）`;
     addBattleLog(logMsg, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
+    // Boss enrage: triggers once when the boss drops to half HP
+    if (target === G.enemy && G.enemy.isBoss && !G.enemy.enraged && !G.enemy.dead && G.enemy.hp <= G.enemy.maxHp * 0.5) {
+      triggerBossEnrage();
+    }
     // Lifesteal: source minion with lifesteal heals its owner by damage dealt
     applyLifesteal(source, remaining);
   } else {
@@ -3047,6 +3072,12 @@ function playEnemyWeapon(card) {
   renderBattle();
 }
 
+function getEnemyIntentText() {
+  if (!G || !G.enemy) return '';
+  const enraged = G.enemy.enraged ? ' ⚡激怒' : '';
+  return G.enemy.intent ? `敌方意图：${G.enemy.intent}${enraged}` : (enraged ? `${G.enemy.name || '敌方'}已激怒` : '');
+}
+
 function computeEnemyIntent() {
   if (!G.enemy) return;
   const playableCards = G.enemy.hand.filter(c => (c.cost || 0) <= G.enemy.maxMana + 1);
@@ -3059,7 +3090,7 @@ function computeEnemyIntent() {
     else G.enemy.intent = '装备武器';
   }
   const intentEl = document.getElementById('enemy-intent');
-  if (intentEl) intentEl.textContent = G.enemy.intent ? `敌方意图：${G.enemy.intent}` : '';
+  if (intentEl) intentEl.textContent = getEnemyIntentText();
 }
 
 // ===================== HERO POWER =====================
@@ -3193,7 +3224,7 @@ function renderBattle() {
   document.getElementById('enemy-hp-fill').style.width = (G.enemy.hp / G.enemy.maxHp * 100) + '%';
   document.getElementById('enemy-armor').textContent = G.enemy.armor > 0 ? `🛡️ ${G.enemy.armor}` : '';
   const intentEl = document.getElementById('enemy-intent');
-  if (intentEl) intentEl.textContent = G.enemy.intent ? `敌方意图：${G.enemy.intent}` : '';
+  if (intentEl) intentEl.textContent = getEnemyIntentText();
 
   // Enemy hand count, mana, and skill
   const enemyHandEl = document.getElementById('enemy-hand-count');
@@ -4270,7 +4301,7 @@ function skipReward() {
 
 // ===================== SHOP =====================
 function openShop() {
-  G.shopInventory = { cards: [], relics: [], healCost: 0 };
+  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: 40, discoverSold: false };
   
   // Generate shop cards (5)
   const pool = CARD_POOL.filter(c => {
@@ -4341,6 +4372,46 @@ function renderShop() {
   });
   cardGrid.appendChild(cardFrag);
   cardSection.appendChild(cardGrid);
+
+  // Discover pack option
+  const discoverDiv = document.createElement('div');
+  discoverDiv.className = 'shop-item';
+  discoverDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:12px;';
+  const dIcon = document.createElement('div');
+  dIcon.style.fontSize = '36px';
+  dIcon.textContent = '📖';
+  discoverDiv.appendChild(dIcon);
+  const dName = document.createElement('div');
+  dName.style.cssText = 'font-size:13px;color:var(--gold);';
+  dName.textContent = '发现卡包';
+  discoverDiv.appendChild(dName);
+  const dDesc = document.createElement('div');
+  dDesc.style.cssText = 'font-size:11px;color:#888;text-align:center;max-width:140px;';
+  dDesc.textContent = '从3张稀有/史诗卡中选1张加入牌组';
+  discoverDiv.appendChild(dDesc);
+  const dPrice = document.createElement('div');
+  dPrice.className = 'shop-price';
+  dPrice.textContent = `💰 ${G.shopInventory.discoverCost}`;
+  discoverDiv.appendChild(dPrice);
+  const dBtn = document.createElement('button');
+  dBtn.className = 'shop-buy-btn';
+  dBtn.textContent = '发现';
+  dBtn.disabled = G.shopInventory.discoverSold || G.gold < G.shopInventory.discoverCost;
+  dBtn.onclick = () => {
+    if (G.shopInventory.discoverSold || G.gold < G.shopInventory.discoverCost) return;
+    offerDiscover(CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic'), '发现一张卡牌', (card) => {
+      if (card) {
+        G.gold -= G.shopInventory.discoverCost;
+        G.shopInventory.discoverSold = true;
+        G.player.deck.push({ ...card, uid: uid() });
+        renderShop();
+        renderMap();
+      }
+    });
+  };
+  if (G.shopInventory.discoverSold) { dBtn.textContent = '已购'; dBtn.disabled = true; }
+  discoverDiv.appendChild(dBtn);
+  cardSection.appendChild(discoverDiv);
   
   // Relics section
   const relicSection = document.createElement('div');
