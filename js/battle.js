@@ -1,0 +1,1079 @@
+/* card-roguelike — battle module
+   Split from card_roguelike.html inline <script> for maintainability.
+   Classic script loaded via <script src>; shares global scope with siblings. */
+
+// ===================== BATTLE =====================
+function startBattle(type) {
+  let enemyData;
+  if (type === 'boss') {
+    enemyData = { ...ENEMIES.boss[G.act] };
+  } else if (type === 'elite') {
+    enemyData = { ...ENEMIES.elite[Math.floor(Math.random() * ENEMIES.elite.length)] };
+  } else {
+    enemyData = { ...ENEMIES.normal[Math.floor(Math.random() * ENEMIES.normal.length)] };
+  }
+  
+  G.enemy = {
+    ...enemyData,
+    hp: enemyData.hp, maxHp: enemyData.hp,
+    armor: 0,
+    hand: [], drawPile: [], minions: [],
+    maxMana: 0, mana: 0, overload: 0,
+    weapon: null,
+    spellPower: 0,
+    intent: null,
+  };
+  
+  // Apply difficulty to enemy stats
+  if (G.difficulty) {
+    const d = DIFFICULTY_SETTINGS[G.difficulty];
+    if (d) {
+      G.enemy.maxHp = Math.floor(G.enemy.maxHp * d.enemyHpMult);
+      G.enemy.hp = G.enemy.maxHp;
+    }
+  }
+  
+  // Build enemy deck
+  const dEnemyAtk = (G.difficulty && DIFFICULTY_SETTINGS[G.difficulty]) ? (DIFFICULTY_SETTINGS[G.difficulty].enemyAtkMult || 1) : 1;
+  enemyData.deck.forEach(id => {
+    const data = getCardData(id);
+    if (data) {
+      // Apply difficulty attack multiplier to enemy minions/weapons (getCardData returns a fresh copy)
+      if (dEnemyAtk !== 1 && (data.type === 'minion' || data.type === 'weapon')) {
+        data.attack = Math.max(1, Math.round((data.attack || 0) * dEnemyAtk));
+      }
+      G.enemy.drawPile.push({ ...data, uid: uid() });
+    }
+  });
+  shuffle(G.enemy.drawPile);
+  
+  // Reset player for battle
+  G.player.drawPile = [...G.player.deck];
+  shuffle(G.player.drawPile);
+  G.player.hand = [];
+  G.player.discardPile = [];
+  G.player.minions = [];
+  G.player.weapon = null;
+  G.player.armor = 0;
+  G.player.mana = 0;
+  G.player.maxMana = 0;
+  G.player.spellPower = hasRelic('spell_power') ? 1 : 0;
+  G.player.heroPower.used = false;
+
+  // Relic: armor start
+  if (hasRelic('armor_start')) {
+    G.player.armor += 3;
+  }
+  
+  // Relic: extra mana start
+  if (hasRelic('extra_mana_start')) {
+    G.player.maxMana = 1;
+    G.player.mana = 1;
+  }
+  
+  // Draw starting hand (3 cards + relic bonus)
+  let drawCount = 3 + (hasRelic('extra_draw') ? 1 : 0);
+  for (let i = 0; i < drawCount; i++) {
+    drawCard(G.player, false);
+  }
+  // Enemy starting hand (difficulty affects it)
+  const enemyDrawCount = G.difficulty === 'easy' ? 3 : G.difficulty === 'hard' ? 5 : 4;
+  for (let i = 0; i < enemyDrawCount; i++) {
+    drawCard(G.enemy, false);
+  }
+  // Coin start
+  if (hasRelic('coin_start')) {
+    G.player.hand.push({ ...getCardData('the_coin'), uid: uid() });
+  }
+  
+  G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null };
+  G.battleStats = { dmgDealt: 0, dmgTaken: 0, cardsPlayed: 0, spellsCast: 0, minionsKilled: 0 };
+  
+  // Start player turn
+  startPlayerTurn();
+  
+  showScreen('battle');
+  renderBattle();
+  addBattleLog(`战斗开始！对手：${enemyData.name}`, 'system');
+}
+
+function startPlayerTurn() {
+  if (G.battle.safetyTimer) { clearTimeout(G.battle.safetyTimer); G.battle.safetyTimer = null; }
+  if (G.battle.attackSafetyTimer) { clearTimeout(G.battle.attackSafetyTimer); G.battle.attackSafetyTimer = null; }
+  G.battle.isPlayerTurn = true;
+  G.battle.turnPhase = 'player';
+  G.battle.turn++;
+  if (G.battle.turn > 1) {
+    G.player.maxMana = Math.min(10, G.player.maxMana + 1);
+  }
+  G.player.mana = G.player.maxMana - G.player.overload;
+  if (G.player.overload > 0) { addBattleLog(`你的法力被过载削减${G.player.overload}点`, 'system'); }
+  addBattleLog(`—— 你的回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'system');
+  G.player.overload = 0;
+  G.player.heroPower.used = false;
+  G.battle.heroCanAttack = !!G.player.weapon;
+
+  // Draw card (extra draw relic)
+  drawCard(G.player, true);
+  if (hasRelic('extra_draw')) drawCard(G.player, true);
+  if (G.player.hp <= 0) { onBattleLost(); return; }
+
+  // Unfreeze player minions and reset attacks
+  G.player.minions.forEach(m => {
+    if (m.frozen) {
+      m.frozen = false;
+      m.canAttack = false;
+    } else {
+      m.canAttack = true;
+    }
+    if (m.windfury) m.attacksLeft = 2;
+    else m.attacksLeft = 1;
+    if (!m.charge && m.turnPlayed === G.battle.turn) {
+      m.canAttack = false;
+      m.attacksLeft = 0;
+    }
+  });
+
+  setEndTurnButtonState('player');
+  const turnInfoEl = document.getElementById('battle-turn-info');
+  if (turnInfoEl) turnInfoEl.textContent = `第 ${Math.ceil(G.battle.turn / 2)} 回合 - 你的回合`;
+
+  computeEnemyIntent();
+  renderBattle();
+}
+
+function endTurn() {
+  if (G.battle.ended || !G.battle.isPlayerTurn) return;
+  G.battle.isPlayerTurn = false;
+  G.battle.turnPhase = 'enemy_start';
+  setEndTurnButtonState('enemy');
+
+  // End of turn effects (player)
+  G.player.minions.forEach(m => {
+    if (m.endTurn === 'rag_damage') {
+      const targets = [...G.enemy.minions, G.enemy].filter(t => !t.dead);
+      if (targets.length > 0) {
+        const target = targets[Math.floor(Math.random() * targets.length)];
+        dealDamage(target, 8, G.player);
+        addBattleLog(`${m.name}的火焰打击造成8点伤害！`, 'player');
+      }
+    }
+  });
+
+  // Relic: fire aura
+  if (hasRelic('fire_aura')) {
+    dealDamage(G.enemy, 1, G.player);
+    addBattleLog('灼热光环对敌方造成1点伤害', 'player');
+  }
+
+  // Relic: regen (end of turn)
+  if (hasRelic('regen')) {
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 1);
+  }
+
+  // Relic: light_well (priest signature, end of turn)
+  if (hasRelic('light_well')) {
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 2);
+    floatText('player-portrait', '+2', 'heal');
+  }
+
+  renderBattle();
+  if (G.enemy.hp <= 0) { onBattleWon(); return; }
+
+  // Safety timer: force enemy turn to end after 10 seconds
+  G.battle.safetyTimer = setTimeout(() => {
+    if (G.battle && !G.battle.ended && !G.battle.isPlayerTurn) {
+      /* error handled */
+      try { finishEnemyTurn(); } catch(e) { /* error handled */ }
+    }
+  }, 10000);
+
+  setTimeout(() => {
+    try { startEnemyTurn(); }
+    catch(e) { console.error('[battle]', e); /* error handled */ forceStartPlayerTurn(); }
+  }, animDelay(300));
+}
+
+function startEnemyTurn() {
+  if (G.battle.ended) return;
+  G.battle.isPlayerTurn = false;
+  G.battle.turnPhase = 'enemy_play';
+  G.battle.turn++;
+  addBattleLog(`—— 敌方回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'enemy');
+  G.enemy.maxMana = Math.min(10, G.enemy.maxMana + 1);
+  G.enemy.mana = G.enemy.maxMana - (G.enemy.overload || 0);
+  G.enemy.overload = 0;
+
+  drawCard(G.enemy, false);
+  addBattleLog(`敌方抽牌（手牌${G.enemy.hand.length}张）`, 'enemy');
+  if (G.enemy.hp <= 0) { onBattleWon(); return; }
+
+  // Unfreeze enemy minions
+  G.enemy.minions.forEach(m => {
+    if (m.frozen) { m.frozen = false; m.canAttack = false; }
+    else { m.canAttack = true; m.attacksLeft = m.windfury ? 2 : 1; }
+  });
+
+  G.enemy.intent = '思考中...';
+  document.getElementById('battle-turn-info').textContent = `第 ${Math.ceil(G.battle.turn / 2)} 回合 - 敌方回合`;
+  setEndTurnButtonState('enemy');
+  renderBattle();
+
+  setTimeout(() => {
+    try { enemyAITurn(); }
+    catch(e) { console.error('[battle]', e); /* error handled */ forceFinishEnemyTurn(); }
+  }, animDelay(700));
+}
+
+function enemyAITurn() {
+  if (G.battle.ended) return;
+  tryPlayEnemyCard();
+
+  function tryPlayEnemyCard() {
+    if (G.battle.ended) return;
+    if (G.enemy.hp <= 0) { onBattleWon(); return; }
+    if (G.enemy.mana <= 0 || G.enemy.hand.length === 0) { proceedToAttacks(); return; }
+
+    const aiType = G.enemy.ai;
+    const sortedHand = [...G.enemy.hand].sort((a, b) => enemyCardScore(b, aiType) - enemyCardScore(a, aiType));
+    let played = false;
+    for (let i = 0; i < sortedHand.length; i++) {
+      const card = sortedHand[i];
+      if ((card.cost || 0) <= G.enemy.mana) {
+        if (card.type === 'minion' && G.enemy.minions.length < 7) {
+          playEnemyMinion(card);
+          played = true;
+          break;
+        } else if (card.type === 'spell') {
+          if (canEnemyUseSpell(card)) {
+            playEnemySpell(card);
+            if (G.player.hp <= 0) { onBattleLost(); return; }
+            played = true;
+            break;
+          }
+        } else if (card.type === 'weapon' && !G.enemy.weapon) {
+          playEnemyWeapon(card);
+          played = true;
+          break;
+        }
+      }
+    }
+
+    if (played) {
+      renderBattle();
+      setTimeout(() => {
+        try { tryPlayEnemyCard(); }
+        catch(e) { /* error handled */ proceedToAttacks(); }
+      }, animDelay(600));
+    } else {
+      proceedToAttacks();
+    }
+  }
+
+  function proceedToAttacks() {
+    if (G.battle.ended) return;
+    if (G.enemy.hp <= 0) { onBattleWon(); return; }
+    G.enemy.intent = '攻击中...';
+    renderBattle();
+    setTimeout(() => {
+      try { enemyAttacks(); }
+      catch(e) { console.error('[battle]', e); /* error handled */ forceFinishEnemyTurn(); }
+    }, animDelay(500));
+  }
+}
+
+// Enemy AI behavior profile: aggressive goes face, control clears minions,
+// spell is balanced, boss is aggressive-but-clear. Falls back to balanced.
+function enemyAIProfile() {
+  const t = G && G.enemy && G.enemy.ai;
+  switch (t) {
+    case 'aggressive': return { minionChance: 0.12, preferHighAtk: false };
+    case 'control':    return { minionChance: 0.65, preferHighAtk: true };
+    case 'spell':      return { minionChance: 0.35, preferHighAtk: true };
+    case 'boss':       return { minionChance: 0.5,  preferHighAtk: true };
+    default:           return { minionChance: 0.3,  preferHighAtk: false };
+  }
+}
+
+// Score how much this enemy AI wants to play a given card (higher = earlier)
+function enemyCardScore(card, ai) {
+  let score = (card.cost || 0) * 10;
+  const removal = ['assassinate','polymorph','mind_control','flamestrike','consecration','equality','blizzard','lightning_storm'];
+  const faceDmg = ['deal_3_face','deal_6_face','deal_10_face','arcane_missiles'];
+  if (ai === 'aggressive') {
+    if (card.type === 'minion') score += 6;
+    if (card.charge) score += 4;
+    if (card.type === 'weapon') score += 5;
+    if (card.type === 'spell' && card.effect && faceDmg.includes(card.effect)) score += 15;
+    if (card.taunt) score -= 2;
+  } else if (ai === 'control') {
+    if (card.type === 'spell' && removal.includes(card.effect)) score += 20;
+    if (card.taunt) score += 8;
+    if (card.type === 'spell' && card.effect === 'heal_5') score += 6;
+    if (card.type === 'minion' && card.attack <= 2) score -= 5;
+  } else if (ai === 'spell') {
+    if (card.type === 'spell') score += 9;
+    if (card.spellDamage) score += 6;
+    if (card.type === 'spell' && removal.includes(card.effect)) score += 8;
+  }
+  return score;
+}
+
+function enemyAttacks() {
+  if (G.battle.ended) return;
+  G.battle.turnPhase = 'enemy_attack';
+  const minions = G.enemy.minions.filter(m => m.canAttack && m.attacksLeft > 0 && !m.dead);
+  let idx = 0;
+
+  // Safety: if attack phase takes too long, force finish
+  G.battle.attackSafetyTimer = setTimeout(() => {
+    if (G.battle && !G.battle.ended && !G.battle.isPlayerTurn && G.battle.turnPhase === 'enemy_attack') {
+      /* error handled */
+      forceFinishEnemyTurn();
+    }
+  }, 8000);
+
+  function attackNext() {
+    if (G.battle.ended) return;
+    if (idx >= minions.length) {
+      // Enemy hero weapon attack
+      if (G.enemy.weapon && G.enemy.weapon.currentDurability > 0 && !G.battle.ended) {
+        const taunts2 = G.player.minions.filter(pm => pm.taunt && !pm.dead);
+        let wTarget;
+        if (taunts2.length > 0) {
+          wTarget = taunts2[Math.floor(Math.random() * taunts2.length)];
+        } else if (G.player.minions.length > 0 && Math.random() < enemyAIProfile().minionChance) {
+          wTarget = G.player.minions[Math.floor(Math.random() * G.player.minions.length)];
+        } else {
+          wTarget = G.player;
+        }
+        enemyWeaponAttack(wTarget);
+        renderBattle();
+        if (G.player.hp <= 0) { onBattleLost(); return; }
+        if (G.enemy.hp <= 0) { onBattleWon(); return; }
+      }
+      finishEnemyTurn();
+      return;
+    }
+    const m = minions[idx];
+    idx++;
+    if (!m || m.dead || !m.canAttack || m.attacksLeft <= 0) { setTimeout(() => { try { attackNext(); } catch(e) { console.error('[battle]', e); /* error handled */ forceFinishEnemyTurn(); } }, animDelay(50)); return; }
+
+    // Choose target (AI-dependent: aggressive goes face, control clears minions)
+    const taunts = G.player.minions.filter(pm => pm.taunt && !pm.dead);
+    const aiProfile = enemyAIProfile();
+    let target;
+    if (taunts.length > 0) {
+      target = taunts[Math.floor(Math.random() * taunts.length)];
+    } else if (G.player.minions.length > 0 && Math.random() < aiProfile.minionChance) {
+      const candidates = [...G.player.minions];
+      if (aiProfile.preferHighAtk) candidates.sort((a, b) => (b.currentAttack || 0) - (a.currentAttack || 0));
+      target = candidates[Math.floor(Math.random() * Math.min(3, candidates.length))];
+    } else {
+      target = G.player;
+    }
+
+    attack(m, target, true);
+    m.attacksLeft--;
+    if (m.attacksLeft <= 0) m.canAttack = false;
+    renderBattle();
+
+    if (G.player.hp <= 0) { onBattleLost(); return; }
+    if (G.enemy.hp <= 0) { onBattleWon(); return; }
+
+    setTimeout(() => {
+      try { attackNext(); }
+      catch(e) { console.error('[battle]', e); /* error handled */ forceFinishEnemyTurn(); }
+    }, animDelay(600));
+  }
+  attackNext();
+}
+
+function enemyWeaponAttack(target) {
+  if (!G.enemy.weapon) return;
+  const atkDmg = G.enemy.weapon.attack;
+  const targetName = target === G.player ? '你的英雄' : (target.name || '随从');
+  addBattleLog(`敌方英雄装备 ${G.enemy.weapon.name} 攻击 ${targetName}，造成${atkDmg}点伤害`, 'enemy');
+  if (target === G.player) {
+    dealDamage(G.player, atkDmg, G.enemy);
+    floatText('player-portrait', '-' + atkDmg, 'damage');
+  } else {
+    const targetDmg = target.currentAttack || 0;
+    dealDamage(target, atkDmg, G.enemy);
+    if (!target.dead && targetDmg > 0) {
+      dealDamage(G.enemy, targetDmg, G.player);
+    }
+  }
+  G.enemy.weapon.currentDurability--;
+  if (G.enemy.weapon.currentDurability <= 0) G.enemy.weapon = null;
+  cleanupDeadMinions();
+}
+
+function finishEnemyTurn() {
+  if (G.battle.ended) return;
+  if (G.battle.isPlayerTurn) return; // Already transitioned to player turn
+  // Clear safety timers
+  if (G.battle.safetyTimer) { clearTimeout(G.battle.safetyTimer); G.battle.safetyTimer = null; }
+  if (G.battle.attackSafetyTimer) { clearTimeout(G.battle.attackSafetyTimer); G.battle.attackSafetyTimer = null; }
+  addBattleLog(`—— 敌方回合结束 ——`, 'enemy');
+
+  // End of enemy turn effects
+  G.enemy.minions.forEach(m => {
+    if (m.endTurn === 'rag_damage') {
+      const targets = [...G.player.minions, G.player].filter(t => !t.dead);
+      if (targets.length > 0) {
+        const target = targets[Math.floor(Math.random() * targets.length)];
+        dealDamage(target, 8, G.enemy);
+      }
+    }
+  });
+
+  renderBattle();
+  if (G.player.hp <= 0) { onBattleLost(); return; }
+  if (G.enemy.hp <= 0) { onBattleWon(); return; }
+
+  // Start player turn
+  setTimeout(() => {
+    try { startPlayerTurn(); }
+    catch(e) { console.error('[battle]', e); /* error handled */ forceStartPlayerTurn(); }
+  }, animDelay(300));
+}
+
+// Safety fallbacks
+function forceFinishEnemyTurn() {
+  /* error handled */
+  try { finishEnemyTurn(); } catch(e) { console.error('[battle]', e); /* error handled */ forceStartPlayerTurn(); }
+}
+
+function forceStartPlayerTurn() {
+  /* error handled */
+  if (G.battle.safetyTimer) { clearTimeout(G.battle.safetyTimer); G.battle.safetyTimer = null; }
+  if (G.battle.attackSafetyTimer) { clearTimeout(G.battle.attackSafetyTimer); G.battle.attackSafetyTimer = null; }
+  G.battle.isPlayerTurn = true;
+  G.battle.turnPhase = 'player';
+  G.battle.ended = false;
+  G.enemy.intent = null;
+  G.player.heroPower.used = false;
+  G.player.minions.forEach(m => {
+    if (m.frozen) { m.frozen = false; m.canAttack = false; }
+    else { m.canAttack = true; m.attacksLeft = m.windfury ? 2 : 1; }
+  });
+  try { drawCard(G.player, true); if (hasRelic('extra_draw')) drawCard(G.player, true); } catch(e) { /* error handled */ }
+  setEndTurnButtonState('player');
+  renderBattle();
+}
+
+function setEndTurnButtonState(state) {
+  const btn = document.getElementById('end-turn-btn');
+  if (!btn) return;
+  btn.classList.remove('enemy-turn');
+  if (state === 'enemy') {
+    btn.classList.add('enemy-turn');
+    btn.disabled = true;
+    btn.textContent = '敌方回合';
+  } else {
+    btn.disabled = false;
+    btn.textContent = '结束回合';
+  }
+}
+
+// ===================== CARD PLAYING =====================
+function playCard(card, index) {
+  if (!G.battle.isPlayerTurn || G.battle.ended) return;
+  if (getCardCost(card) > G.player.mana) return;
+
+  // For targeted cards, enter targeting mode WITHOUT spending mana yet
+  if (card.type === 'minion' && card.battlecry && needsBattlecryTarget(card) && hasBattlecryTargets(card) && G.player.minions.length < 7) {
+    G.battle.battlecryTargeting = { card: card, index: index, targetType: getBattlecryTargetType(card) };
+    G.battle.targetingMode = 'battlecry';
+    renderBattle();
+    return;
+  }
+  if (card.type === 'spell' && needsTarget(card)) {
+    G.battle.spellTargeting = { card: card, index: index, targetType: getSpellTargetType(card) };
+    G.battle.targetingMode = 'spell';
+    renderBattle();
+    return;
+  }
+
+  // Board full: refuse to summon before spending mana (keeps hand order intact)
+  if (card.type === 'minion' && G.player.minions.length >= 7) {
+    addBattleLog('战场已满，无法召唤更多随从', 'system');
+    return;
+  }
+
+  // Spend mana and remove from hand
+  const effCost = getCardCost(card);
+  G.player.mana -= effCost;
+  if (G.battleStats) G.battleStats.cardsPlayed++;
+  if (card.type === 'spell' && G.battleStats) G.battleStats.spellsCast++;
+  // Overload: this card taxes your next turn's mana
+  if (card.overload) {
+    G.player.overload += card.overload;
+    addBattleLog(`${card.name} 造成过载${card.overload}`, 'system');
+  }
+  G.player.hand.splice(index, 1);
+  playSfx('play');
+
+  if (card.type === 'minion') {
+    const minion = createMinion(card, true);
+    G.player.minions.push(minion);
+    addBattleLog(`你打出 ${card.name}`, 'player');
+
+    // Battlecry
+    if (card.battlecry) {
+      executeBattlecry(card, minion, G.player, G.enemy);
+    }
+    renderBattle();
+    if (G.enemy.hp <= 0) { onBattleWon(); return; }
+    if (G.player.hp <= 0) { onBattleLost(); return; }
+  } else if (card.type === 'spell') {
+    addBattleLog(`你施放 ${card.name}`, 'player');
+    executeSpell(card.effect, G.player, G.enemy, card);
+    cleanupDeadMinions();
+    G.player.discardPile.push(card);
+    renderBattle();
+    if (G.enemy.hp <= 0) { onBattleWon(); return; }
+    if (G.player.hp <= 0) { onBattleLost(); return; }
+  } else if (card.type === 'weapon') {
+    G.player.weapon = { ...card, durability: card.durability, currentDurability: card.durability };
+    G.battle.heroCanAttack = true;
+    if (card.battlecry === 'deal_1_face') {
+      dealDamage(G.enemy, 1, G.player);
+    }
+    addBattleLog(`你装备了 ${card.name}`, 'player');
+    renderBattle();
+    if (G.enemy.hp <= 0) { onBattleWon(); return; }
+  }
+}
+
+function createMinion(card, isPlayer) {
+  let attack = card.attack || 0;
+  let hp = card.hp || 0;
+  // Relic: 强化水晶 (+1/+1)
+  if (isPlayer && hasRelic('plus_1_1')) { attack += 1; hp += 1; }
+  // Relic: 力量符文 (+1 攻击力)
+  if (isPlayer && hasRelic('strength')) { attack += 1; }
+  // Relic: beast master (+1/+1 for beasts)
+  if (isPlayer && hasRelic('beast_master') && card.race === 'beast') { attack += 1; hp += 1; }
+  // Relic: divine protection (divine shield on summon)
+  const hasDivine = (isPlayer && hasRelic('divine_protection')) || card.divineShield || false;
+
+  return {
+    ...card,
+    uid: uid(),
+    currentAttack: attack,
+    currentHp: hp,
+    maxHp: hp,
+    taunt: card.taunt || false,
+    divineShield: hasDivine,
+    frozen: false,
+    canAttack: card.charge || false,
+    attacksLeft: card.charge ? (card.windfury ? 2 : 1) : 0,
+    turnPlayed: G.battle.turn,
+    windfury: card.windfury || false,
+    charge: card.charge || false,
+    spellDamage: card.spellDamage || 0,
+    isPlayer: isPlayer,
+    dead: false,
+  };
+}
+
+// Battlecry core: applies a single battlecry trigger
+function applyBattlecryOnce(card, minion, owner, opponent, target) {
+  switch (card.battlecry) {
+    case 'deal_1':
+      dealDamage(target || opponent, 1, owner);
+      break;
+    case 'deal_1_face':
+      dealDamage(opponent, 1, owner);
+      break;
+    case 'heal_3':
+      if (target) {
+        if (target === G.player || target === G.enemy) {
+          target.hp = Math.min(target.maxHp, target.hp + 3);
+          floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '+3', 'heal');
+        } else {
+          target.currentHp = Math.min(target.maxHp, target.currentHp + 3);
+        }
+      } else {
+        owner.hp = Math.min(owner.maxHp, owner.hp + 3);
+        floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+3', 'heal');
+      }
+      break;
+    case 'draw_1':
+      drawCard(owner, true);
+      break;
+    case 'freeze_enemy':
+      if (target && !target.dead) {
+        target.frozen = true;
+        target.canAttack = false;
+      } else if (opponent.minions.length > 0) {
+        const m = opponent.minions[0];
+        m.frozen = true;
+        m.canAttack = false;
+      }
+      break;
+    case 'dragon_buff':
+      const hasDragon = owner.hand.some(c => c.id === 'dragon' || c.art === '🐉');
+      if (hasDragon) { minion.currentAttack += 1; minion.currentHp += 1; minion.maxHp += 1; }
+      break;
+    case 'deathwing':
+      // Destroy all other minions, discard hand
+      G.player.minions = G.player.minions.filter(m => m.uid === minion.uid);
+      G.enemy.minions = [];
+      G.player.hand = [];
+      break;
+    case 'faceless_copy':
+      if (target && target.uid !== minion.uid) {
+        minion.currentAttack = target.currentAttack;
+        minion.currentHp = target.currentHp;
+        minion.maxHp = target.maxHp;
+        minion.taunt = target.taunt;
+        minion.divineShield = target.divineShield;
+        minion.art = target.art;
+        minion.name = target.name + ' (复制)';
+      } else {
+        const targets = owner.minions.filter(m => m.uid !== minion.uid);
+        if (targets.length > 0) {
+          const copy = targets[0];
+          minion.currentAttack = copy.currentAttack;
+          minion.currentHp = copy.currentHp;
+          minion.maxHp = copy.maxHp;
+          minion.taunt = copy.taunt;
+          minion.divineShield = copy.divineShield;
+          minion.art = copy.art;
+          minion.name = copy.name + ' (复制)';
+        }
+      }
+      break;
+    case 'deal_2_all':
+      opponent.minions.filter(m => !m.dead).forEach(m => dealDamage(m, 2, owner));
+      break;
+    case 'gain_armor_3':
+      owner.armor += 3;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得3点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'heal_4':
+      owner.hp = Math.min(owner.maxHp, owner.hp + 4);
+      floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+4', 'heal');
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}恢复4点生命`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'buff_all_1_1':
+      owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
+      addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');
+      break;
+  }
+}
+
+function executeBattlecry(card, minion, owner, opponent, target) {
+  applyBattlecryOnce(card, minion, owner, opponent, target);
+  // Relic: double battlecry (player only, not for deathwing/faceless)
+  if (owner === G.player && hasRelic('double_battlecry') && card.battlecry !== 'deathwing' && card.battlecry !== 'faceless_copy') {
+    applyBattlecryOnce(card, minion, owner, opponent, target);
+  }
+}
+
+function getSpellPower(player) {
+  let sp = player.spellPower || 0;
+  player.minions.forEach(m => {
+    if (!m.dead && m.spellDamage) sp += m.spellDamage;
+  });
+  return sp;
+}
+
+function applyRelicToMinion(m) {
+  if (hasRelic('plus_1_1')) { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
+  if (hasRelic('strength')) { m.currentAttack += 1; }
+  if (hasRelic('beast_master') && m.race === 'beast') { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
+}
+
+function executeSpell(effect, player, enemy, card, target) {
+  const sp = getSpellPower(player);
+  const isPlayer = player === G.player;
+  const caster = isPlayer ? '你' : '敌方';
+  const logType = isPlayer ? 'player' : 'enemy';
+  switch (effect) {
+    case 'arcane_missiles':
+      let missileCount = 0;
+      for (let i = 0; i < 3 + sp; i++) {
+        const targets = [...enemy.minions.filter(m => !m.dead), enemy];
+        if (targets.length > 0) {
+          const t = targets[Math.floor(Math.random() * targets.length)];
+          dealDamage(t, 1, player);
+          missileCount++;
+        }
+      }
+      break;
+    case 'heal_5':
+      if (!target) target = player;
+      if (target === G.player || target === G.enemy) {
+        target.hp = Math.min(target.maxHp, target.hp + 5);
+        floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '+' + 5, 'heal');
+      } else {
+        target.currentHp = Math.min(target.maxHp, target.currentHp + 5);
+      }
+      addBattleLog(`${caster}恢复5点生命（${target === G.player ? '你的英雄' : target === G.enemy ? '敌方英雄' : target.name}）`, logType);
+      break;
+    case 'deal_3_face':
+      dealDamage(target || enemy, 3 + sp, player);
+      break;
+    case 'deal_6_face':
+      dealDamage(target || enemy, 6 + sp, player);
+      break;
+    case 'deal_10_face':
+      dealDamage(target || enemy, 10 + sp, player);
+      break;
+    case 'draw_2':
+      drawCard(player, true);
+      drawCard(player, true);
+      addBattleLog(`${caster}抽了两张牌`, logType);
+      break;
+    case 'fan_of_knives':
+      enemy.minions.forEach(m => dealDamage(m, 1 + sp, player));
+      drawCard(player, true);
+      addBattleLog(`${caster}使用刀扇${sp > 0 ? '(法术强度+' + sp + ')' : ''}，抽一张牌`, logType);
+      break;
+    case 'consecration':
+      enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
+      break;
+    case 'flamestrike':
+      enemy.minions.forEach(m => dealDamage(m, 4 + sp, player));
+      break;
+    case 'lightning_storm':
+      enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
+      break;
+    case 'blizzard':
+      enemy.minions.forEach(m => { dealDamage(m, 2 + sp, player); m.frozen = true; m.canAttack = false; });
+      addBattleLog(`${caster}暴风雪${sp > 0 ? '(法术强度+' + sp + ')' : ''}冻结所有敌方随从`, logType);
+      break;
+    case 'polymorph':
+      if (target && !target.dead) {
+        const m = target;
+        m.currentAttack = 1; m.currentHp = 1; m.maxHp = 1;
+        m.taunt = false; m.divineShield = false;
+        m.art = '🐑'; m.name = '绵羊';
+      } else if (enemy.minions.length > 0) {
+        const m = enemy.minions[0];
+        m.currentAttack = 1; m.currentHp = 1; m.maxHp = 1;
+        m.taunt = false; m.divineShield = false;
+        m.art = '🐑'; m.name = '绵羊';
+      }
+      addBattleLog(`${caster}将随从变形为1/1绵羊`, logType);
+      break;
+    case 'assassinate':
+      if (target && !target.dead) {
+        addBattleLog(`${caster}刺杀了 ${target.name}`, logType);
+        target.dead = true;
+        checkDeathrattle(target, enemy, player);
+        enemy.minions = enemy.minions.filter(x => !x.dead);
+      } else if (enemy.minions.length > 0) {
+        const m = enemy.minions[0];
+        addBattleLog(`${caster}刺杀了 ${m.name}`, logType);
+        m.dead = true;
+        checkDeathrattle(m, enemy, player);
+        enemy.minions = enemy.minions.filter(x => !x.dead);
+      }
+      break;
+    case 'mind_control':
+      if (target && enemy.minions.includes(target)) {
+        addBattleLog(`${caster}控制了 ${target.name}`, logType);
+        target.isPlayer = !target.isPlayer;
+        if (player === G.player) {
+          G.enemy.minions = G.enemy.minions.filter(x => x.uid !== target.uid);
+          applyRelicToMinion(target);
+          G.player.minions.push(target);
+        } else {
+          G.player.minions = G.player.minions.filter(x => x.uid !== target.uid);
+          G.enemy.minions.push(target);
+        }
+      } else if (enemy.minions.length > 0) {
+        const m = enemy.minions[0];
+        addBattleLog(`${caster}控制了 ${m.name}`, logType);
+        m.isPlayer = !m.isPlayer;
+        if (player === G.player) {
+          G.enemy.minions = G.enemy.minions.filter(x => x.uid !== m.uid);
+          applyRelicToMinion(m);
+          G.player.minions.push(m);
+        } else {
+          G.player.minions = G.player.minions.filter(x => x.uid !== m.uid);
+          G.enemy.minions.push(m);
+        }
+      }
+      break;
+    case 'equality':
+      [...G.player.minions, ...G.enemy.minions].forEach(m => { m.currentHp = 1; m.maxHp = 1; });
+      addBattleLog(`${caster}将所有随从生命值变为1`, logType);
+      break;
+    case 'mass_heal':
+      player.minions.forEach(m => { m.currentHp = Math.min(m.maxHp, m.currentHp + 2); });
+      player.hp = Math.min(player.maxHp, player.hp + 4);
+      addBattleLog(`${caster}恢复友方随从2点生命，英雄恢复4点`, logType);
+      break;
+    case 'gain_mana_1':
+      player.mana = Math.min(10, player.mana + 1);
+      addBattleLog(`${caster}获得1个法力水晶`, logType);
+      break;
+    case 'deal_5_draw_1':
+      dealDamage(target || enemy, 5 + sp, player);
+      drawCard(player, true);
+      addBattleLog(`${caster}抽了一张牌`, logType);
+      break;
+    case 'summon_two_3_3':
+      for (let i = 0; i < 2; i++) {
+        if (player.minions.length < 7) {
+          player.minions.push(createMinion({ id: 'treasure_token', name: '宝藏守护者', cost: 3, attack: 3, hp: 3, rarity: 'common', art: '🗿', text: '' }, player === G.player));
+        }
+      }
+      addBattleLog(`${caster}召唤了两个3/3宝藏守护者`, logType);
+      break;
+    case 'heal_8':
+      if (!target) target = player;
+      if (target === G.player || target === G.enemy) {
+        target.hp = Math.min(target.maxHp, target.hp + 8);
+        floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '+' + 8, 'heal');
+      } else {
+        target.currentHp = Math.min(target.maxHp, target.currentHp + 8);
+      }
+      addBattleLog(`${caster}恢复8点生命`, logType);
+      break;
+    case 'smite':
+      dealDamage(target, 3 + sp, player);
+      break;
+    case 'pw_shield':
+      if (target && target !== G.player && target !== G.enemy && !target.dead) {
+        target.currentAttack += 2; target.currentHp += 2; target.maxHp += 2;
+        drawCard(player, true);
+        addBattleLog(`${caster}为${target.name}施加真言术·盾，+2/+2并抽一张牌`, logType);
+      }
+      break;
+    case 'holy_nova':
+      enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
+      player.minions.forEach(m => { m.currentHp = Math.min(m.maxHp, m.currentHp + 2); });
+      player.hp = Math.min(player.maxHp, player.hp + 2);
+      addBattleLog(`${caster}神圣新星：对敌方随从造成${2 + sp}点伤害，治疗友方角色`, logType);
+      break;
+    case 'holy_fire':
+      dealDamage(target || enemy, 5 + sp, player);
+      player.hp = Math.min(player.maxHp, player.hp + 5);
+      addBattleLog(`${caster}神圣之火：造成${5 + sp}点伤害并恢复5点生命`, logType);
+      break;
+  }
+}
+
+// ===================== COMBAT =====================
+function attack(attacker, target, isEnemyAttacking) {
+  const owner = isEnemyAttacking ? G.enemy : G.player;
+  const opponent = isEnemyAttacking ? G.player : G.enemy;
+
+  // Deal damage
+  const atkDmg = attacker.currentAttack || attacker.attack || 0;
+
+  // Log attack context (damage details logged by dealDamage)
+  if (isEnemyAttacking) {
+    const attackerName = attacker.name || '敌方随从';
+    const targetName = target === G.player ? '你的英雄' : (target.name || '随从');
+    addBattleLog(`敌方 ${attackerName} 攻击 ${targetName}`, 'enemy');
+  } else {
+    const attackerName = attacker.name || '随从';
+    const targetName = target === G.enemy ? '敌方英雄' : (target.name || '随从');
+    addBattleLog(`你的 ${attackerName} 攻击 ${targetName}`, 'player');
+  }
+
+  if (target === G.player || target === G.enemy) {
+    dealDamage(target, atkDmg, owner);
+    floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '-' + atkDmg, 'damage');
+    // Thorns relic: when the enemy hits your hero, reflect 1 damage to the attacker
+    if (isEnemyAttacking && hasRelic('thorns') && !attacker.dead) {
+      dealDamage(attacker, 1, G.player);
+    }
+  } else {
+    // Minion vs minion
+    const targetDmg = target.currentAttack || 0;
+
+    // dealDamage handles divine shield and 0 damage correctly
+    dealDamage(target, atkDmg, owner);
+
+    // Counterattack - only if target can fight back
+    if (!attacker.dead && targetDmg > 0) {
+      dealDamage(attacker, targetDmg, opponent);
+    }
+    
+    // Freeze on hit (water elemental)
+    if (attacker.freezeOnHit && !target.dead) {
+      if (target === G.player || target === G.enemy) {
+        // can't freeze hero in this simplified version
+      } else {
+        target.frozen = true;
+        target.canAttack = false;
+      }
+    }
+    
+    // Thorns relic: when the enemy hits your minion, reflect 1 damage to the attacker
+    if (isEnemyAttacking && hasRelic('thorns') && !attacker.dead) {
+      dealDamage(attacker, 1, G.player);
+    }
+  }
+  
+  // Remove dead minions
+  cleanupDeadMinions();
+  renderBattle();
+  
+  if (G.player.hp <= 0) onBattleLost();
+  if (G.enemy.hp <= 0) onBattleWon();
+}
+
+// Lifesteal: a minion with lifesteal heals its owner by the damage it deals
+function applyLifesteal(source, dmg) {
+  if (!source || !source.lifesteal || !(dmg > 0)) return;
+  const healer = source.isPlayer ? G.player : G.enemy;
+  const before = healer.hp;
+  healer.hp = Math.min(healer.maxHp, healer.hp + dmg);
+  const healed = healer.hp - before;
+  if (healed > 0) {
+    floatText(healer === G.player ? 'player-portrait' : 'enemy-portrait', '+' + healed, 'heal');
+    addBattleLog(`${source.name || '随从'} 吸血，恢复${healed}点生命`, source.isPlayer ? 'player' : 'enemy');
+  }
+}
+
+// Boss enrage: special effect once when a boss drops to half HP
+function triggerBossEnrage() {
+  const b = G.enemy;
+  if (!b || !b.isBoss || b.enraged || !b.enrage || b.dead) return;
+  b.enraged = true;
+  addBattleLog(`⚡ ${b.name} 被激怒了！`, 'enemy');
+  if (b.enrage.summons) {
+    b.enrage.summons.forEach(s => {
+      if (b.minions.length < 7) {
+        b.minions.push(createMinion({ id: 'enrage_' + uid(), name: s.name, cost: 0, type: 'minion', attack: s.attack, hp: s.hp, art: s.art, taunt: !!s.taunt }, false));
+      }
+    });
+    addBattleLog(`${b.name} 召唤了援军！`, 'enemy');
+  }
+  if (b.enrage.buff) {
+    b.minions.forEach(m => { if (!m.dead) { m.currentAttack += b.enrage.buff; m.currentHp += b.enrage.buff; m.maxHp += b.enrage.buff; } });
+    addBattleLog(`${b.name} 使随从获得+${b.enrage.buff}/+${b.enrage.buff}`, 'enemy');
+  }
+  renderBattle();
+}
+
+function dealDamage(target, amount, source) {
+  if (target.dead || amount <= 0) return;
+  const targetName = target === G.player ? '你的英雄' : target === G.enemy ? '敌方英雄' : (target.name || '随从');
+  const sourceName = source ? (source === G.player ? '你' : source === G.enemy ? '敌方' : (source.name || source)) : '疲劳';
+  if (target === G.player || target === G.enemy) {
+    let remaining = amount;
+    let armorAbsorbed = 0;
+    if (target.armor > 0) {
+      armorAbsorbed = Math.min(target.armor, remaining);
+      target.armor -= armorAbsorbed;
+      remaining -= armorAbsorbed;
+    }
+    target.hp -= remaining;
+    target.hp = Math.max(0, target.hp);
+    if (G.battleStats) {
+      const ps = (source === G.player || (source && source.isPlayer === true));
+      const es = (source === G.enemy || (source && source.isPlayer === false));
+      if (target === G.enemy && ps) G.battleStats.dmgDealt += remaining;
+      if (target === G.player && es) G.battleStats.dmgTaken += remaining;
+    }
+    if (target === G.player) {
+      const el = document.getElementById('player-portrait');
+      el.classList.add('flash-damage');
+      setTimeout(() => el.classList.remove('flash-damage'), 300);
+    } else {
+      const el = document.getElementById('enemy-portrait');
+      el.classList.add('flash-damage');
+      setTimeout(() => el.classList.remove('flash-damage'), 300);
+    }
+    let logMsg = `${sourceName} → ${targetName}：${amount}点伤害`;
+    if (armorAbsorbed > 0) logMsg += `（护盾抵消${armorAbsorbed}）`;
+    logMsg += `（剩余${target.hp}）`;
+    addBattleLog(logMsg, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
+    // Boss enrage: triggers once when the boss drops to half HP
+    if (target === G.enemy && G.enemy.isBoss && !G.enemy.enraged && !G.enemy.dead && G.enemy.hp <= G.enemy.maxHp * 0.5) {
+      triggerBossEnrage();
+    }
+    // Lifesteal: source minion with lifesteal heals its owner by damage dealt
+    applyLifesteal(source, remaining);
+  } else {
+    if (target.divineShield) {
+      target.divineShield = false;
+      addBattleLog(`${sourceName} → ${targetName}：圣盾抵消伤害`, source === G.player ? 'player' : 'system');
+      return;
+    }
+    target.currentHp -= amount;
+    if (G.battleStats) {
+      const ps = (source === G.player || (source && source.isPlayer === true));
+      const es = (source === G.enemy || (source && source.isPlayer === false));
+      if (target.isPlayer && es) G.battleStats.dmgTaken += amount;
+      if (!target.isPlayer && ps) G.battleStats.dmgDealt += amount;
+    }
+    // Poisonous: a poisonous source destroys any minion it damages (divine shield blocks it)
+    if (source && source.poisonous && !target.dead) {
+      target.currentHp = 0;
+      addBattleLog(`${sourceName} 的剧毒效果触发！`, source.isPlayer ? 'player' : 'enemy');
+    }
+    addBattleLog(`${sourceName} → ${targetName}：${amount}点伤害（剩余${target.currentHp}）`, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
+    if (target.currentHp <= 0) {
+      target.dead = true;
+      if (G.battleStats && !target.isPlayer && (source === G.player || (source && source.isPlayer === true))) G.battleStats.minionsKilled++;
+      addBattleLog(`${targetName}被消灭`, 'system');
+      checkDeathrattle(target, target.isPlayer ? G.player : G.enemy, target.isPlayer ? G.enemy : G.player);
+    }
+    // Lifesteal: source minion with lifesteal heals its owner by damage dealt
+    applyLifesteal(source, amount);
+  }
+}
+
+function checkDeathrattle(minion, owner, opponent) {
+  if (!minion.deathrattle) return;
+  switch (minion.deathrattle) {
+    case 'deal_face_1':
+      dealDamage(opponent, 1, owner);
+      break;
+    case 'summon_2_2':
+      if (owner.minions.length < 7) {
+        const m = createMinion({ name: '幽灵', art: '👻', attack: 2, hp: 2, cost: 2, type: 'minion' }, owner === G.player);
+        owner.minions.push(m);
+      }
+      break;
+    case 'summon_4_4':
+      if (owner.minions.length < 7) {
+        const m = createMinion({ name: '亡灵', art: '💀', attack: 4, hp: 4, cost: 4, type: 'minion' }, owner === G.player);
+        owner.minions.push(m);
+      }
+      break;
+    case 'summon_0_2_taunt':
+      if (owner.minions.length < 7) {
+        const m = createMinion({ name: '镜像', art: '🪞', attack: 0, hp: 2, cost: 1, type: 'minion', taunt: true }, owner === G.player);
+        owner.minions.push(m);
+      }
+      break;
+    case 'buff_friendly_2_2':
+      const friends = owner.minions.filter(m => !m.dead);
+      if (friends.length > 0) {
+        const f = friends[Math.floor(Math.random() * friends.length)];
+        f.currentAttack += 2; f.currentHp += 2; f.maxHp += 2;
+      }
+      break;
+    case 'draw_1_owner':
+      drawCard(owner, true);
+      break;
+    case 'mind_control_random':
+      if (opponent.minions.length > 0) {
+        const m = opponent.minions[Math.floor(Math.random() * opponent.minions.length)];
+        m.isPlayer = !m.isPlayer;
+        opponent.minions = opponent.minions.filter(x => x.uid !== m.uid);
+        if (owner === G.player) applyRelicToMinion(m);
+        owner.minions.push(m);
+      }
+      break;
+  }
+}
+
+function cleanupDeadMinions() {
+  G.player.minions = G.player.minions.filter(m => !m.dead);
+  G.enemy.minions = G.enemy.minions.filter(m => !m.dead);
+}
+

@@ -2,7 +2,7 @@
 
 一款受《炉石传说》×《杀戮尖塔》启发的**单文件网页卡牌肉鸽**游戏。选择职业，穿越三幕随机地图，收集卡牌与遗物，击败首领，构筑属于你的专属牌组。
 
-![纯前端 · 零依赖](https://img.shields.io/badge/纯前端-零依赖-brightgreen) ![单文件](https://img.shields.io/badge/单文件-HTML/CSS/JS-blue) ![GitHub 许可证](https://img.shields.io/badge/许可证-MIT-orange)
+![纯前端 · 零依赖](https://img.shields.io/badge/纯前端-零依赖-brightgreen) ![模块化](https://img.shields.io/badge/模块化-HTML+JS×11-blue) ![GitHub 许可证](https://img.shields.io/badge/许可证-MIT-orange)
 
 ## 🎮 玩法简介
 
@@ -72,6 +72,7 @@ card-roguelike/
 - **S3.5 AI 出牌分层 + 发现机制**：敌方 AI 按类型分层出牌（激进优先打脸法术、控制优先解场、法术优先法术）；新增「神秘书架」事件与 `offerDiscover` 发现组件（3 选 1 卡牌）
 - **S3.6 Boss 激怒 + 商店发现**：3 位首领半血触发专属激怒（召唤援军/随从增益）；商店新增「发现卡包」（40 金币 3 选 1 稀有/史诗）
 - **S3.7 牧师职业 + 战斗统计**：新增第 5 职业「牧师」（治疗流，签名遗物神圣之泉）；战斗 HUD 新增「统计」面板（伤害/卡牌/法术/击杀实时统计）
+- **S3.8 模块化重构**：单文件拆分为 `js/` 下 11 个模块（data/state/battle/render 等），仍支持双击直接运行，便于维护
 - **S4 发布**：本 README、MIT 许可证
 
 ## 📄 许可证
