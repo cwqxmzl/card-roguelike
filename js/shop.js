@@ -4,7 +4,7 @@
 
 // ===================== SHOP =====================
 function openShop() {
-  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: 40, discoverSold: false };
+  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: 40, discoverSold: false, rerollCount: 0, removeCost: 60, removeSold: false };
   
   // Generate shop cards (5)
   const pool = CARD_POOL.filter(c => {
@@ -196,7 +196,134 @@ function renderShop() {
   healDiv.appendChild(healBtn);
   relicSection.appendChild(healDiv);
 
-  container.replaceChildren(cardSection, relicSection);
+  // Services section
+  const svcSection = document.createElement('div');
+  svcSection.className = 'shop-section';
+  const svcTitle = document.createElement('div');
+  svcTitle.className = 'shop-section-title';
+  svcTitle.textContent = '服务';
+  svcSection.appendChild(svcTitle);
+
+  // Reroll shop
+  const rerollCost = 10 + G.shopInventory.rerollCount * 5;
+  const rerollDiv = document.createElement('div');
+  rerollDiv.className = 'shop-item';
+  rerollDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:10px;';
+  const rIcon = document.createElement('div');
+  rIcon.style.fontSize = '36px'; rIcon.textContent = '🔄';
+  rerollDiv.appendChild(rIcon);
+  const rName = document.createElement('div');
+  rName.style.cssText = 'font-size:13px;color:var(--gold);'; rName.textContent = '刷新商店';
+  rerollDiv.appendChild(rName);
+  const rDesc = document.createElement('div');
+  rDesc.style.cssText = 'font-size:11px;color:#888;text-align:center;max-width:120px;';
+  rDesc.textContent = '重新生成卡牌和遗物（费用递增）';
+  rerollDiv.appendChild(rDesc);
+  const rPrice = document.createElement('div');
+  rPrice.className = 'shop-price'; rPrice.textContent = `💰 ${rerollCost}`;
+  rerollDiv.appendChild(rPrice);
+  const rBtn = document.createElement('button');
+  rBtn.className = 'shop-buy-btn'; rBtn.textContent = '刷新';
+  rBtn.disabled = G.gold < rerollCost;
+  rBtn.onclick = () => rerollShop();
+  rerollDiv.appendChild(rBtn);
+  svcSection.appendChild(rerollDiv);
+
+  // Card removal service
+  const removeDiv = document.createElement('div');
+  removeDiv.className = 'shop-item';
+  removeDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:5px;margin-top:10px;';
+  const rmIcon = document.createElement('div');
+  rmIcon.style.fontSize = '36px'; rmIcon.textContent = '🗑️';
+  removeDiv.appendChild(rmIcon);
+  const rmName = document.createElement('div');
+  rmName.style.cssText = 'font-size:13px;color:#ff9999;'; rmName.textContent = '移除卡牌';
+  removeDiv.appendChild(rmName);
+  const rmDesc = document.createElement('div');
+  rmDesc.style.cssText = 'font-size:11px;color:#888;text-align:center;max-width:120px;';
+  rmDesc.textContent = '从牌组中永久移除一张牌';
+  removeDiv.appendChild(rmDesc);
+  const rmPrice = document.createElement('div');
+  rmPrice.className = 'shop-price'; rmPrice.textContent = `💰 ${G.shopInventory.removeCost}`;
+  removeDiv.appendChild(rmPrice);
+  const rmBtn = document.createElement('button');
+  rmBtn.className = 'shop-buy-btn'; rmBtn.textContent = '移除';
+  rmBtn.disabled = G.shopInventory.removeSold || G.gold < G.shopInventory.removeCost;
+  rmBtn.onclick = () => shopRemoveCard();
+  if (G.shopInventory.removeSold) { rmBtn.textContent = '已用'; rmBtn.disabled = true; }
+  removeDiv.appendChild(rmBtn);
+  svcSection.appendChild(removeDiv);
+
+  container.replaceChildren(cardSection, relicSection, svcSection);
+}
+
+function rerollShop() {
+  const cost = 10 + G.shopInventory.rerollCount * 5;
+  if (G.gold < cost) return;
+  G.gold -= cost;
+  G.shopInventory.rerollCount++;
+  const pool = CARD_POOL.filter(c => {
+    if (G.act === 0) return c.rarity === 'common' || c.rarity === 'rare';
+    return c.rarity !== 'legendary' || Math.random() < 0.1;
+  });
+  G.shopInventory.cards = [];
+  for (let i = 0; i < 5; i++) {
+    const card = pool[Math.floor(Math.random() * pool.length)];
+    G.shopInventory.cards.push({
+      ...card, uid: uid(),
+      price: card.rarity === 'common' ? 15 : card.rarity === 'rare' ? 30 : card.rarity === 'epic' ? 50 : 80,
+      sold: false,
+    });
+  }
+  const availableRelics = RELICS.filter(r => !G.relics.find(gr => gr.id === r.id));
+  G.shopInventory.relics = [];
+  for (let i = 0; i < Math.min(3, availableRelics.length); i++) {
+    const idx = Math.floor(Math.random() * availableRelics.length);
+    const relic = availableRelics.splice(idx, 1)[0];
+    G.shopInventory.relics.push({ ...relic, price: 40 + Math.floor(Math.random() * 30), sold: false });
+  }
+  renderShop();
+  renderMap();
+}
+
+function shopRemoveCard() {
+  if (G.shopInventory.removeSold || G.gold < G.shopInventory.removeCost) return;
+  hideOverlay('overlay-shop');
+  const container = document.getElementById('delete-cards');
+  const frag = document.createDocumentFragment();
+  G.player.deck.forEach((card, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.cursor = 'pointer';
+    const cardEl = renderCardStatic(card);
+    cardEl.style.transform = 'scale(0.85)';
+    wrapper.appendChild(cardEl);
+    const label = document.createElement('div');
+    label.style.cssText = 'text-align:center;margin-top:5px;color:#ff6666;font-size:12px;';
+    label.textContent = `移除（💰${G.shopInventory.removeCost}）`;
+    wrapper.appendChild(label);
+    wrapper.onmouseover = () => { wrapper.style.transform = 'translateY(-10px)'; };
+    wrapper.onmouseout = () => { wrapper.style.transform = ''; };
+    wrapper.onclick = () => {
+      G.gold -= G.shopInventory.removeCost;
+      G.shopInventory.removeSold = true;
+      G.player.deck.splice(i, 1);
+      log(`商店移除了 ${card.name}`);
+      hideOverlay('overlay-delete');
+      showOverlay('overlay-shop');
+      renderShop();
+      renderMap();
+    };
+    frag.appendChild(wrapper);
+  });
+  container.replaceChildren(frag);
+  const cancelBtn = document.querySelector('#overlay-delete .overlay-btn');
+  if (cancelBtn) cancelBtn.onclick = cancelShopRemove;
+  showOverlay('overlay-delete');
+}
+
+function cancelShopRemove() {
+  hideOverlay('overlay-delete');
+  showOverlay('overlay-shop');
 }
 
 function closeShop() {

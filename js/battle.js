@@ -17,7 +17,7 @@ function startBattle(type) {
     ...enemyData,
     hp: enemyData.hp, maxHp: enemyData.hp,
     armor: 0,
-    hand: [], drawPile: [], minions: [],
+    hand: [], drawPile: [], discardPile: [], minions: [],
     maxMana: 0, mana: 0, overload: 0,
     weapon: null,
     spellPower: 0,
@@ -86,7 +86,7 @@ function startBattle(type) {
     G.player.hand.push({ ...getCardData('the_coin'), uid: uid() });
   }
   
-  G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null };
+  G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null, firstCardPlayed: false };
   G.battleStats = { dmgDealt: 0, dmgTaken: 0, cardsPlayed: 0, spellsCast: 0, minionsKilled: 0 };
   
   // Start player turn
@@ -112,6 +112,7 @@ function startPlayerTurn() {
   G.player.overload = 0;
   G.player.heroPower.used = false;
   G.battle.heroCanAttack = !!G.player.weapon;
+  G.battle.firstCardPlayed = false;
 
   // Draw card (extra draw relic)
   drawCard(G.player, true);
@@ -505,6 +506,7 @@ function playCard(card, index) {
   // Spend mana and remove from hand
   const effCost = getCardCost(card);
   G.player.mana -= effCost;
+  G.battle.firstCardPlayed = true;
   if (G.battleStats) G.battleStats.cardsPlayed++;
   if (card.type === 'spell' && G.battleStats) G.battleStats.spellsCast++;
   // Overload: this card taxes your next turn's mana
@@ -556,6 +558,12 @@ function createMinion(card, isPlayer) {
   if (isPlayer && hasRelic('strength')) { attack += 1; }
   // Relic: beast master (+1/+1 for beasts)
   if (isPlayer && hasRelic('beast_master') && card.race === 'beast') { attack += 1; hp += 1; }
+  // Relic: battlecry boost (+1/+1 for battlecry minions)
+  if (isPlayer && hasRelic('battlecry_boost') && (card.battlecry || (card.text && card.text.includes('战吼')))) { attack += 1; hp += 1; }
+  // Relic: taunt bulk (+0/+2 for taunt minions)
+  if (isPlayer && hasRelic('taunt_bulk') && card.taunt) { hp += 2; }
+  // Relic: divine shield attack (+1 attack for divine shield minions)
+  if (isPlayer && hasRelic('divine_shield_attack') && card.divineShield) { attack += 1; }
   // Relic: divine protection (divine shield on summon)
   const hasDivine = (isPlayer && hasRelic('divine_protection')) || card.divineShield || false;
 
@@ -686,6 +694,9 @@ function applyRelicToMinion(m) {
   if (hasRelic('plus_1_1')) { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
   if (hasRelic('strength')) { m.currentAttack += 1; }
   if (hasRelic('beast_master') && m.race === 'beast') { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
+  if (hasRelic('battlecry_boost') && (m.battlecry || (m.text && m.text.includes('战吼')))) { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
+  if (hasRelic('taunt_bulk') && m.taunt) { m.maxHp += 2; m.currentHp += 2; }
+  if (hasRelic('divine_shield_attack') && m.divineShield) { m.currentAttack += 1; }
 }
 
 function executeSpell(effect, player, enemy, card, target) {
@@ -1073,7 +1084,11 @@ function checkDeathrattle(minion, owner, opponent) {
 }
 
 function cleanupDeadMinions() {
+  const deadPlayerCount = G.player.minions.filter(m => m.dead).length;
   G.player.minions = G.player.minions.filter(m => !m.dead);
   G.enemy.minions = G.enemy.minions.filter(m => !m.dead);
+  if (deadPlayerCount > 0 && hasRelic('deathrattle_draw') && G.battle && !G.battle.ended) {
+    for (let i = 0; i < deadPlayerCount; i++) drawCard(G.player, true);
+  }
 }
 

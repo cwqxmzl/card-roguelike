@@ -188,6 +188,12 @@ const RELICS = [
   { id: 'spell_power', name: '奥术之眼', icon: '👁️', desc: '法术伤害+1', effect: 'spell_power' },
   { id: 'double_gold', name: '贪婪之戒', icon: '💍', desc: '金币获取翻倍', effect: 'double_gold' },
   { id: 'fire_aura', name: '灼热光环', icon: '🔥', desc: '每回合结束时对敌方英雄造成1点伤害', effect: 'fire_aura' },
+  { id: 'battlecry_boost', name: '战吼勋章', icon: '📯', desc: '你的战吼随从获得+1/+1', effect: 'battlecry_boost' },
+  { id: 'taunt_bulk', name: '嘲讽壁垒', icon: '🏰', desc: '你的嘲讽随从获得+0/+2', effect: 'taunt_bulk' },
+  { id: 'divine_shield_attack', name: '圣盾之力', icon: '⚔️', desc: '你的圣盾随从+1攻击力', effect: 'divine_shield_attack' },
+  { id: 'deathrattle_draw', name: '亡语之书', icon: '📖', desc: '你的随从死亡时，抽1张牌', effect: 'deathrattle_draw' },
+  { id: 'first_play_discount', name: '先手优势', icon: '⚡', desc: '每回合第一张牌费用-1（不低于0）', effect: 'first_play_discount' },
+  { id: 'minion_cost_1', name: '随从大师', icon: '🐉', desc: '你的随从牌费用-1（不低于1）', effect: 'minion_cost_1' },
 ];
 
 // ===================== META PROGRESSION (局外肉鸽) =====================
@@ -595,6 +601,52 @@ const EVENTS = [
       { text: '离开书房', cond: g => true, action: g => { log('你轻轻合上门离去'); } },
     ]
   },
+  {
+    title: '符文祭坛', act: 2,
+    text: '一座被藤蔓缠绕的石制祭坛矗立在空地中央，祭坛表面刻满古老的符文，隐约散发着血红色的微光。',
+    choices: [
+      { text: '献祭生命（失去10点生命，获得一件随机遗物）', cond: g => g.player.hp > 10, action: g => { g.player.hp -= 10; grantRelic(g); log('祭坛吸收了你的鲜血，一件遗物从光芒中浮现！'); } },
+      { text: '献祭金币（花费40金币，升级一张随机牌）', cond: g => g.gold >= 40 && g.player.deck.some(c => !c.upgraded), action: g => {
+        g.gold -= 40;
+        const upgradable = g.player.deck.filter(c => !c.upgraded);
+        if (upgradable.length) { const card = upgradable[Math.floor(Math.random()*upgradable.length)]; upgradeCard(card); log(`祭坛的力量注入了 ${card.name}！`); }
+      } },
+      { text: '离开祭坛', cond: g => true, action: g => { log('你不敢触碰这古老的力量，悄然离去'); } },
+    ]
+  },
+  {
+    title: '暗影商人', act: 2,
+    text: '一个披着黑色斗篷的商人从阴影中走出，他的眼睛闪烁着诡异的紫光。"我这里有你想要的东西……不过，代价可不一般。"',
+    choices: [
+      { text: '以血换卡（失去8点生命，发现一张史诗卡）', cond: g => g.player.hp > 8, action: g => {
+        g.player.hp -= 8;
+        g.pendingDiscover = true;
+        g.pendingDiscoverPool = CARD_POOL.filter(c => c.rarity === 'epic' || c.rarity === 'legendary');
+        g.pendingDiscoverTitle = '以血换卡';
+        log('商人割开你的手掌，三张卡牌在血雾中浮现……');
+      } },
+      { text: '购买遗物（花费70金币，获得一件随机遗物）', cond: g => g.gold >= 70, action: g => { g.gold -= 70; grantRelic(g); log('商人递给你一件散发着微光的遗物'); } },
+      { text: '离开', cond: g => true, action: g => { log('你摇摇头，商人消失在阴影中'); } },
+    ]
+  },
+  {
+    title: '神秘熔炉', act: 3,
+    text: '一座巨大的熔炉散发着炽热的橙红色光芒，炉中燃烧着永不熄灭的魔法之火。旁边的铁砧上放着一把古老的锤子。',
+    choices: [
+      { text: '双重强化（花费50金币，升级两张随机牌）', cond: g => g.gold >= 50 && g.player.deck.filter(c => !c.upgraded).length >= 2, action: g => {
+        g.gold -= 50;
+        const upgradable = g.player.deck.filter(c => !c.upgraded);
+        for (let i = 0; i < 2 && upgradable.length > 0; i++) {
+          const idx = Math.floor(Math.random() * upgradable.length);
+          const card = upgradable.splice(idx, 1)[0];
+          upgradeCard(card);
+        }
+        log('熔炉的火焰淬炼了你的两张卡牌！');
+      } },
+      { text: '生命熔铸（花费30金币，最大生命值+5）', cond: g => g.gold >= 30, action: g => { g.gold -= 30; g.player.maxHp += 5; g.player.hp += 5; log('熔炉的火焰重塑了你的体魄，最大生命值+5！'); } },
+      { text: '离开熔炉', cond: g => true, action: g => { log('你感受着熔炉的余温，继续前行'); } },
+    ]
+  },
 ];
 
 // Helper: get card data by id
@@ -612,6 +664,8 @@ function getCardCost(card) {
   if (cost <= 0) return 0;
   if (card.type === 'spell' && hasRelic('spell_cost_1')) cost -= 1;
   if (hasRelic('cost_reduction')) cost -= 1;
+  if (card.type === 'minion' && hasRelic('minion_cost_1')) cost -= 1;
+  if (hasRelic('first_play_discount') && G.battle && !G.battle.firstCardPlayed) cost -= 1;
   return Math.max(0, cost);
 }
 

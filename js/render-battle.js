@@ -437,6 +437,7 @@ function castSpellOnTarget(target) {
 
   const card = st.card;
   G.player.mana -= getCardCost(card);
+  G.battle.firstCardPlayed = true;
   G.player.hand.splice(st.index, 1);
   if (G.battleStats) { G.battleStats.cardsPlayed++; G.battleStats.spellsCast++; }
   addBattleLog(`你施放 ${card.name}`, 'player');

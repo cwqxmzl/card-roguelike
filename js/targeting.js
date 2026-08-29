@@ -53,6 +53,7 @@ function executeBattlecryOnTarget(target) {
 
   const card = bt.card;
   G.player.mana -= getCardCost(card);
+  G.battle.firstCardPlayed = true;
   G.player.hand.splice(bt.index, 1);
   if (G.battleStats) G.battleStats.cardsPlayed++;
 

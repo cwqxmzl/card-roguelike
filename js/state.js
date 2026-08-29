@@ -22,7 +22,7 @@ function initGame(classId) {
       portrait: cls.portrait,
     },
     enemy: null,
-    battle: { turn: 1, isPlayerTurn: true, log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: null, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null },
+    battle: { turn: 1, isPlayerTurn: true, log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: null, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null, firstCardPlayed: false },
     gold: 0,
     relics: [],
     pendingUpgrade: false,
