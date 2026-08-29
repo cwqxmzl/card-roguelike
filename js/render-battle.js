@@ -10,7 +10,9 @@ function renderBattle() {
   document.getElementById('enemy-portrait').textContent = G.enemy.portrait;
   document.getElementById('enemy-name').textContent = G.enemy.name;
   document.getElementById('enemy-hp-text').textContent = `${G.enemy.hp}/${G.enemy.maxHp}`;
-  document.getElementById('enemy-hp-fill').style.width = (G.enemy.hp / G.enemy.maxHp * 100) + '%';
+  const enemyHpFill = document.getElementById('enemy-hp-fill');
+  enemyHpFill.style.width = (G.enemy.hp / G.enemy.maxHp * 100) + '%';
+  enemyHpFill.classList.toggle('low-hp', G.enemy.hp / G.enemy.maxHp < 0.3);
   document.getElementById('enemy-armor').textContent = G.enemy.armor > 0 ? `🛡️ ${G.enemy.armor}` : '';
   const intentEl = document.getElementById('enemy-intent');
   if (intentEl) intentEl.textContent = getEnemyIntentText();
@@ -29,9 +31,20 @@ function renderBattle() {
   }
   
   // Player info
-  document.getElementById('player-portrait').textContent = G.player.portrait || '🧙';
+  const playerPortraitEl = document.getElementById('player-portrait');
+  if (G.player.portraitImg) {
+    playerPortraitEl.style.backgroundImage = `url('${G.player.portraitImg}')`;
+    playerPortraitEl.style.backgroundSize = 'cover';
+    playerPortraitEl.style.backgroundPosition = 'center';
+    playerPortraitEl.textContent = '';
+  } else {
+    playerPortraitEl.style.backgroundImage = '';
+    playerPortraitEl.textContent = G.player.portrait || '🧙';
+  }
   document.getElementById('player-hp-text').textContent = `${G.player.hp}/${G.player.maxHp}`;
-  document.getElementById('player-hp-fill').style.width = (G.player.hp / G.player.maxHp * 100) + '%';
+  const playerHpFill = document.getElementById('player-hp-fill');
+  playerHpFill.style.width = (G.player.hp / G.player.maxHp * 100) + '%';
+  playerHpFill.classList.toggle('low-hp', G.player.hp / G.player.maxHp < 0.3);
   document.getElementById('player-armor').textContent = G.player.armor > 0 ? `🛡️ ${G.player.armor}` : '';
   document.getElementById('player-weapon').textContent = G.player.weapon ? `🗡️${G.player.weapon.attack} | ${G.player.weapon.currentDurability}` : '';
   
@@ -244,7 +257,7 @@ function renderMinion(m, isPlayer) {
 
 function renderCard(card, index) {
   const div = document.createElement('div');
-  div.className = `card in-hand card-${card.type}`;
+  div.className = `card in-hand card-${card.type} rarity-${card.rarity || 'common'}`;
   const playable = G.battle.isPlayerTurn && getCardCost(card) <= G.player.mana;
   if (playable) div.classList.add('playable');
   else div.classList.add('unplayable');

@@ -170,7 +170,10 @@ body {
 
   justify-content: center; align-items: center;
 
-  background: radial-gradient(ellipse at 50% 30%, #2a1050 0%, #0a0a12 60%);
+  background:
+    linear-gradient(rgba(10,5,18,0.72), rgba(10,5,18,0.88)),
+    url('assets/title-bg.jpg') center/cover no-repeat,
+    radial-gradient(ellipse at 50% 30%, #2a1050 0%, #0a0a12 60%);
 
 }
 
@@ -1424,3 +1427,354 @@ body {
 
 }
 
+
+
+/* ============================================================
+   VISUAL ENHANCEMENT OVERLAY — 暗黑奇幻卡牌美化
+   追加层，不覆盖原有规则，仅增强视觉表现
+   ============================================================ */
+
+/* --- 背景氛围增强 --- */
+#screen-battle {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(90,40,140,0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(40,20,80,0.3) 0%, transparent 50%),
+    linear-gradient(180deg, #120820 0%, #0a0512 50%, #0d0618 100%);
+}
+#screen-menu {
+  background:
+    radial-gradient(ellipse at 50% 25%, rgba(120,60,180,0.3) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 75%, rgba(60,30,100,0.2) 0%, transparent 50%),
+    linear-gradient(180deg, #150a28 0%, #0a0512 100%);
+}
+#screen-map {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(50,30,90,0.2) 0%, transparent 60%),
+    linear-gradient(180deg, #100820 0%, #0a0512 100%);
+}
+
+/* 战场中央微光 */
+.battle-field::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%; height: 40%;
+  background: radial-gradient(ellipse, rgba(120,80,200,0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* --- 卡牌稀有度光效 --- */
+.card.rarity-common { border-color: #666; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+.card.rarity-rare {
+  border-color: #4a90d9;
+  box-shadow: 0 0 12px rgba(74,144,217,0.4), 0 2px 8px rgba(0,0,0,0.5);
+}
+.card.rarity-epic {
+  border-color: #9b59b6;
+  box-shadow: 0 0 14px rgba(155,89,182,0.5), 0 2px 8px rgba(0,0,0,0.5);
+}
+.card.rarity-legendary {
+  border-color: var(--gold);
+  box-shadow: 0 0 18px rgba(212,175,55,0.6), 0 2px 10px rgba(0,0,0,0.5);
+  animation: legendaryGlow 2s ease-in-out infinite;
+}
+@keyframes legendaryGlow {
+  0%,100% { box-shadow: 0 0 14px rgba(212,175,55,0.5), 0 2px 8px rgba(0,0,0,0.5); }
+  50% { box-shadow: 0 0 24px rgba(212,175,55,0.8), 0 2px 12px rgba(0,0,0,0.5); }
+}
+
+/* 卡牌悬停增强 */
+.card.playable:hover {
+  transform: translateY(-12px) scale(1.06);
+  z-index: 100;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7), 0 0 20px rgba(212,175,55,0.4);
+}
+.card.unplayable { filter: grayscale(0.5) brightness(0.7); }
+.card.unplayable:hover { transform: translateY(-4px); filter: grayscale(0.3) brightness(0.85); }
+
+/* 卡牌艺术区增强 */
+.card-art {
+  background: linear-gradient(135deg, rgba(40,20,70,0.6), rgba(20,10,40,0.8));
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+
+/* 卡牌费用球增强 */
+.card-cost {
+  background: radial-gradient(circle at 35% 35%, #5aa0ff, #2060c0);
+  box-shadow: 0 0 8px rgba(80,160,255,0.6), inset 0 1px 2px rgba(255,255,255,0.3);
+  border: 2px solid #80c0ff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* --- 随从增强 --- */
+.minion {
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  background: linear-gradient(160deg, rgba(35,20,60,0.9), rgba(15,8,30,0.95));
+  border: 2px solid var(--border);
+}
+.minion:hover { transform: translateY(-4px) scale(1.05); z-index: 50; }
+.minion.can-attack {
+  border-color: #40c060;
+  box-shadow: 0 0 12px rgba(64,192,96,0.5);
+  animation: canAttackPulse 1.5s ease-in-out infinite;
+}
+@keyframes canAttackPulse {
+  0%,100% { box-shadow: 0 0 8px rgba(64,192,96,0.4); }
+  50% { box-shadow: 0 0 16px rgba(64,192,96,0.7); }
+}
+.minion.minion-target {
+  border-color: #ff4040 !important;
+  box-shadow: 0 0 18px rgba(255,64,64,0.7) !important;
+  animation: targetPulse 0.8s ease-in-out infinite;
+}
+@keyframes targetPulse {
+  0%,100% { box-shadow: 0 0 10px rgba(255,64,64,0.5); }
+  50% { box-shadow: 0 0 22px rgba(255,64,64,0.9); }
+}
+.minion.taunt {
+  border-color: #b8860b;
+  box-shadow: 0 0 10px rgba(184,134,11,0.4), inset 0 0 12px rgba(184,134,11,0.15);
+}
+
+/* 随从召唤动画 */
+.minion.summon-anim {
+  animation: minionSummon 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes minionSummon {
+  0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+  60% { transform: scale(1.1) translateY(-4px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* --- 血条增强 --- */
+.hp-bar {
+  border: 2px solid #553030;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5), inset 0 1px 3px rgba(0,0,0,0.4);
+  background: linear-gradient(180deg, #1a0808, #0d0404);
+}
+.hp-fill {
+  background: linear-gradient(180deg, #ff5050 0%, #d02020 50%, #a01010 100%);
+  box-shadow: 0 0 8px rgba(255,60,60,0.4);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hp-fill.low-hp {
+  background: linear-gradient(180deg, #ff8040, #d04010);
+  animation: lowHpPulse 1s ease-in-out infinite;
+}
+@keyframes lowHpPulse {
+  0%,100% { box-shadow: 0 0 6px rgba(255,100,40,0.4); }
+  50% { box-shadow: 0 0 14px rgba(255,100,40,0.8); }
+}
+
+/* --- 法力水晶增强 --- */
+.mana-crystal {
+  background: radial-gradient(circle at 35% 30%, #60a0ff, #2050b0);
+  border: 2px solid #80b0ff;
+  box-shadow: 0 0 6px rgba(80,150,255,0.5), inset 0 1px 2px rgba(255,255,255,0.3);
+  transition: all 0.3s;
+}
+.mana-crystal.empty {
+  background: radial-gradient(circle at 35% 30%, #333, #1a1a2a);
+  border-color: #444;
+  box-shadow: none;
+  opacity: 0.5;
+}
+
+/* --- 头像框增强 --- */
+.player-portrait, .enemy-portrait {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 2px 4px rgba(255,255,255,0.1);
+  transition: all 0.2s;
+}
+.player-portrait { border-color: #4a90d9; }
+.player-portrait.can-attack {
+  border-color: #40c060;
+  box-shadow: 0 0 14px rgba(64,192,96,0.6);
+  animation: canAttackPulse 1.5s ease-in-out infinite;
+}
+.enemy-portrait.minion-target {
+  border-color: #ff4040 !important;
+  box-shadow: 0 0 18px rgba(255,64,64,0.7) !important;
+  animation: targetPulse 0.8s ease-in-out infinite;
+}
+
+/* --- 结束回合按钮增强 --- */
+.end-turn-btn {
+  background: linear-gradient(180deg, #e05030, #b02810);
+  border: 2px solid var(--gold);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 8px rgba(224,80,48,0.3);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  letter-spacing: 3px;
+  transition: all 0.2s;
+}
+.end-turn-btn:hover:not(:disabled) {
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6), 0 0 18px rgba(224,80,48,0.6);
+}
+.end-turn-btn:not(:disabled):not(.enemy-turn) {
+  animation: endTurnPulse 2s ease-in-out infinite;
+}
+@keyframes endTurnPulse {
+  0%,100% { box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 8px rgba(224,80,48,0.3); }
+  50% { box-shadow: 0 4px 12px rgba(0,0,0,0.5), 0 0 18px rgba(224,80,48,0.6); }
+}
+
+/* --- 浮层增强 --- */
+.overlay {
+  background: rgba(5,2,12,0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.overlay > div:not(.overlay-title):not(.overlay-close) {
+  background: linear-gradient(160deg, rgba(30,15,55,0.95), rgba(15,8,30,0.98));
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 30px rgba(120,60,180,0.15);
+}
+
+/* --- 标题增强 --- */
+.menu-title {
+  background: linear-gradient(180deg, #fff0c0 0%, var(--gold-light) 30%, var(--gold) 60%, #8a6020 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 20px rgba(212,175,55,0.4));
+  letter-spacing: 10px;
+}
+
+/* --- 商店/事件物品增强 --- */
+.shop-item, .tavern-option, .reward-type-card, .event-choice-btn {
+  transition: all 0.2s ease;
+  background: linear-gradient(160deg, rgba(35,20,60,0.8), rgba(15,8,30,0.9));
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 8px;
+}
+.shop-item:hover, .tavern-option:hover, .reward-type-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 16px rgba(212,175,55,0.3);
+}
+.shop-buy-btn {
+  background: linear-gradient(180deg, #3a7a3a, #205020);
+  border: 1px solid #50a050;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  transition: all 0.15s;
+}
+.shop-buy-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #4a9a4a, #306030);
+  box-shadow: 0 0 10px rgba(80,160,80,0.5);
+  transform: scale(1.05);
+}
+
+/* --- 地图节点增强 --- */
+.map-node {
+  transition: all 0.2s ease;
+  background: linear-gradient(160deg, rgba(35,20,60,0.9), rgba(15,8,30,0.95));
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.map-node.available {
+  border-color: var(--gold);
+  box-shadow: 0 0 14px rgba(212,175,55,0.5);
+  animation: nodeAvailable 2s ease-in-out infinite;
+}
+@keyframes nodeAvailable {
+  0%,100% { box-shadow: 0 0 10px rgba(212,175,55,0.4); }
+  50% { box-shadow: 0 0 20px rgba(212,175,55,0.7); }
+}
+.map-node:hover { transform: scale(1.12); }
+
+/* --- 浮动文字增强 --- */
+.float-text {
+  font-weight: bold;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.8), 0 0 10px currentColor;
+  animation: floatUp 1s ease-out forwards;
+}
+@keyframes floatUp {
+  0% { transform: translateX(-50%) translateY(0) scale(0.8); opacity: 0; }
+  20% { transform: translateX(-50%) translateY(-10px) scale(1.2); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-50px) scale(1); opacity: 0; }
+}
+
+/* --- 伤害闪烁 --- */
+.flash-damage { animation: damageFlash 0.3s ease-out; }
+@keyframes damageFlash {
+  0% { filter: brightness(3) saturate(2); }
+  100% { filter: brightness(1) saturate(1); }
+}
+.flash-heal { animation: healGlow 0.5s ease-out; }
+@keyframes healGlow {
+  0% { filter: brightness(1.5) drop-shadow(0 0 8px #40ff80); }
+  100% { filter: brightness(1); }
+}
+
+/* --- 战斗日志增强 --- */
+.battle-log {
+  background: rgba(10,5,20,0.9);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+}
+.battle-log-entry { border-radius: 4px; padding: 3px 6px; }
+
+/* --- 英雄技能按钮增强 --- */
+.hero-power {
+  background: linear-gradient(160deg, rgba(60,30,100,0.9), rgba(30,15,60,0.95));
+  border: 2px solid var(--purple);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  transition: all 0.2s;
+}
+.hero-power:hover:not(.disabled):not(.used) {
+  transform: scale(1.08);
+  box-shadow: 0 0 14px rgba(120,60,180,0.6);
+}
+
+/* --- 牌堆/弃牌堆增强 --- */
+.deck-pile {
+  background: linear-gradient(160deg, rgba(40,25,70,0.9), rgba(20,10,40,0.95));
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+  transition: all 0.2s;
+}
+.deck-pile:hover { transform: translateY(-4px); border-color: var(--gold); }
+
+/* --- 滚动条美化 --- */
+.scrollable::-webkit-scrollbar { width: 6px; }
+.scrollable::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 3px; }
+.scrollable::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.4); border-radius: 3px; }
+.scrollable::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.6); }
+
+/* --- 战斗统计面板增强 --- */
+#battle-stats-panel {
+  background: rgba(10,5,20,0.95);
+  border: 1px solid rgba(212,175,55,0.3);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+}
+
+/* --- 响应式：移动端优化 --- */
+@media (max-width: 600px) {
+  .menu-title { font-size: 40px; letter-spacing: 6px; }
+  .card.playable:hover { transform: translateY(-8px) scale(1.04); }
+  .end-turn-btn { padding: 8px 16px; font-size: 14px; }
+}
+
+
+
+/* --- 头像图片模式 --- */
+.player-portrait, .enemy-portrait {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+}
+.class-card-portrait {
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  overflow: hidden;
+}

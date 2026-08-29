@@ -20,6 +20,7 @@ function initGame(classId) {
       heroPower: { used: false, cost: cls.heroPower.cost, type: cls.heroPower.type, name: cls.heroPower.name },
       spellPower: 0,
       portrait: cls.portrait,
+      portraitImg: cls.portraitImg,
     },
     enemy: null,
     battle: { turn: 1, isPlayerTurn: true, log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: null, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null, firstCardPlayed: false },
@@ -74,7 +75,7 @@ function renderClassSelect() {
     card.className = 'class-card';
     card.style.borderColor = cls.color + '44';
     card.innerHTML = `
-      <div class="class-card-portrait" style="color:${cls.color}">${cls.portrait}</div>
+      <div class="class-card-portrait" style="${cls.portraitImg ? `background-image:url('${cls.portraitImg}');background-size:cover;background-position:center;` : `color:${cls.color}`}">${cls.portraitImg ? '' : cls.portrait}</div>
       <div class="class-card-name" style="color:${cls.color}">${cls.name}</div>
       <div class="class-card-power">技能: ${cls.heroPower.name} (${cls.heroPower.cost}费)</div>
       <div class="class-card-desc">${cls.heroPower.description}</div>
