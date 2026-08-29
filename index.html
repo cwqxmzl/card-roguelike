@@ -1173,7 +1173,7 @@ const PASSIVE_TREASURES = [
   { id: 'spell_cost_1', name: '法术聚焦', description: '你的法术牌费用-1（不低于1）', icon: '🔮', effect: 'spell_cost_1' },
   { id: 'extra_draw', name: '洞察之眼', description: '每场战斗开始多抽1张牌', icon: '👁️', effect: 'extra_draw' },
   { id: 'regen', name: '生命回复', description: '回合结束时恢复1点生命', icon: '💚', effect: 'regen' },
-  { id: 'thorns', name: '荆棘反伤', description: '你的随从被攻击时对攻击者造成1点伤害', icon: '🌵', effect: 'thorns' },
+  { id: 'thorns', name: '荆棘反伤', description: '受到伤害时对攻击者造成1点伤害', icon: '🌵', effect: 'thorns' },
   { id: 'fire_aura', name: '灼热光环', description: '回合结束时对敌方造成1点伤害', icon: '🔥', effect: 'fire_aura' },
   { id: 'double_gold', name: '幸运金币', description: '战斗胜利金币翻倍', icon: '🪙', effect: 'double_gold' },
   { id: 'armor_start', name: '坚甲护盾', description: '每场战斗开始获得3点护甲', icon: '🛡️', effect: 'armor_start' },
@@ -1267,7 +1267,7 @@ const NODE_TYPES = {
 
 const EVENTS = [
   {
-    title: '神秘商人',
+    title: '神秘商人', act: 1,
     text: '一位披着斗篷的商人向你展示一瓶发光的药水。"50金币，这瓶药水能让你在冒险中恢复全部生命。" 他微笑道。',
     choices: [
       { text: '购买药水（花费50金币）', cond: g => g.gold >= 50, action: g => { g.gold -= 50; g.player.maxHp += 5; g.player.hp = g.player.maxHp; log('你喝下药水，全身焕然一新！最大生命值+5'); } },
@@ -1276,7 +1276,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '受伤的旅人',
+    title: '受伤的旅人', act: 1,
     text: '路旁躺着一位受伤的旅人，他似乎快死了。你可以帮助他，或者搜刮他身上仅剩的财物。',
     choices: [
       { text: '为他治疗（失去5点生命）', cond: g => g.player.hp > 5, action: g => { g.player.hp -= 5; g.gold += 40; log('旅人感激涕零，赠予你40金币'); } },
@@ -1285,7 +1285,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '远古祭坛',
+    title: '远古祭坛', act: 3,
     text: '你发现了一座发光的远古祭坛。祭坛上刻着古老的符文，似乎可以通过献祭获得力量。',
     choices: [
       { text: '献祭生命（失去8点生命，获得遗物）', cond: g => g.player.hp > 8, action: g => { g.player.hp -= 8; grantRelic(g); log('祭坛发出强光，你获得了一件遗物！'); } },
@@ -1294,7 +1294,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '魔法泉眼',
+    title: '魔法泉眼', act: 1,
     text: '一股清澈的魔法泉水从地下涌出。饮用它可以恢复生命，但你也可以将其收集起来留待后用。',
     choices: [
       { text: '饮用泉水（恢复15点生命）', cond: g => true, action: g => { const heal = Math.min(15, g.player.maxHp - g.player.hp); g.player.hp += heal; log(`你恢复了${heal}点生命`); } },
@@ -1303,7 +1303,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '流浪的铁匠',
+    title: '流浪的铁匠', act: 2,
     text: '一位流浪的铁匠提出可以强化你的武器（升级一张武器牌），或者你也可以花金币购买他的护甲。',
     choices: [
       { text: '强化武器（升级一张随机武器牌）', cond: g => g.player.deck.some(c => c.type === 'weapon'), action: g => { const weapons = g.player.deck.filter(c => c.type === 'weapon'); if (weapons.length) { const w = weapons[Math.floor(Math.random()*weapons.length)]; w.upgraded = true; w.attack = (w.attack||0)+1; w.durability = (w.durability||0)+1; log(`${w.name}被强化了！`); } } },
@@ -1312,7 +1312,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '诅咒宝箱',
+    title: '诅咒宝箱', act: 2,
     text: '你发现了一个散发着不祥气息的宝箱。直觉告诉你打开它会有代价，但里面可能有珍贵的东西...',
     choices: [
       { text: '打开宝箱（失去6点生命，获得一张稀有卡牌）', cond: g => g.player.hp > 6, action: g => {
@@ -1333,7 +1333,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '许愿池',
+    title: '许愿池', act: 2,
     text: '清澈的池水映出你的面容。传说向池中投入金币，愿望就会实现...',
     choices: [
       { text: '许愿力量（花费25金币，随机升级一张牌）', cond: g => g.gold >= 25, action: g => {
@@ -1363,7 +1363,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '黑暗交易',
+    title: '黑暗交易', act: 2,
     text: '一个戴着兜衫的神秘人低声说："我可以给你力量，但你必须付出代价..."',
     choices: [
       { text: '交换生命（失去10生命，获得一个遗物）', cond: g => g.player.hp > 10, action: g => {
@@ -1384,7 +1384,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '迷路的冒险者',
+    title: '迷路的冒险者', act: 1,
     text: '一位迷路的冒险者向你求助。作为回报，他可以分享地图信息或给你一些补给。',
     choices: [
       { text: '分享补给（获得15金币和1张牌）', cond: g => true, action: g => {
@@ -1407,7 +1407,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '时空裂隙',
+    title: '时空裂隙', act: 3,
     text: '空间在你面前扭曲，一个闪光的裂隙悬浮在空中。你能感受到其中蕴含的强大能量，但靠近它也充满危险。',
     choices: [
       { text: '进入裂隙（随机正负面效果）', cond: g => g.player.hp > 5, action: g => {
@@ -1435,7 +1435,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '遗忘的卷轴',
+    title: '遗忘的卷轴', act: 3,
     text: '一卷落满灰尘的卷轴半埋在泥土中。上面的文字已模糊，但能感受到残留的魔法能量。',
     choices: [
       { text: '阅读卷轴（随机获得1张史诗牌，但失去5生命）', cond: g => g.player.hp > 5, action: g => {
@@ -1459,7 +1459,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '角斗场',
+    title: '角斗场', act: 2,
     text: '一座废弃的角斗场中回荡着远古的战吼。中央的火盆邀请你接受挑战。',
     choices: [
       { text: '接受挑战（战斗：1/1随从，胜则获2张牌+30金）', cond: g => g.player.hp > 8, action: g => {
@@ -1479,7 +1479,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '炼金术士的帐篷',
+    title: '炼金术士的帐篷', act: 2,
     text: '一位炼金术士正在帐篷里忙碌。桌上摆满了五颜六色的药剂。"想要力量？那就帮我试一瓶吧！"',
     choices: [
       { text: '喝蓝色药剂（可能恢复或受伤）', cond: g => true, action: g => {
@@ -1509,7 +1509,8 @@ const EVENTS = [
       { text: '买下所有药剂（花费40金币，获得2张牌+升级1张）', cond: g => g.gold >= 40, action: g => {
         g.gold -= 40;
         for (let i = 0; i < 2; i++) {
-          const card = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic')[Math.floor(Math.random() * 3)];
+          const rarePool = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
+          const card = rarePool[Math.floor(Math.random() * rarePool.length)];
           if (card) g.player.deck.push({ ...card, uid: uid() });
         }
         const upgradable = g.player.deck.filter(c => !c.upgraded);
@@ -1523,7 +1524,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '命运十字',
+    title: '命运十字', act: 3,
     text: '小径在此分岔为三条路。一块古老的石碑刻着："选择命运，承担后果。"',
     choices: [
       { text: '财富之路（+50金币但-6生命）', cond: g => g.player.hp > 6, action: g => {
@@ -1551,7 +1552,7 @@ const EVENTS = [
     ]
   },
   {
-    title: '精灵泉源',
+    title: '精灵泉源', act: 1,
     text: '一座精灵泉水隐藏在密林深处。泉水散发着柔和的光芒，据说拥有净化与增幅的双重力量。',
     choices: [
       { text: '净化（删除1张牌，恢复15生命）', cond: g => g.player.deck.length > 1, action: g => {
@@ -1569,6 +1570,55 @@ const EVENTS = [
         for (let i = 0; i < 2; i++) g.player.deck.push({ ...getCardData('the_coin'), uid: uid() });
         log('你收集了精灵泉水，获得2张幸运币');
       } },
+    ]
+  },
+  {
+    title: '古树之约', act: 1,
+    text: '一棵参天古树的树皮上浮现出一张苍老的面孔："旅人，留下你的贡品，我将以森林之力回馈于你。"',
+    choices: [
+      { text: '献上10生命换取生命精华（最大生命+6）', cond: g => g.player.hp > 10, action: g => { g.player.hp -= 10; g.player.maxHp += 6; g.player.hp += 6; log('古树赐予你生命精华，最大生命+6'); } },
+      { text: '献上20金币换取随机卡牌', cond: g => g.gold >= 20, action: g => { g.gold -= 20; const card = CARD_POOL[Math.floor(Math.random() * CARD_POOL.length)]; g.player.deck.push({ ...card, uid: uid() }); log(`古树赠予你 ${card.name}`); } },
+      { text: '恭敬离开', cond: g => true, action: g => { log('古树微微晃动枝叶，似在道别'); } },
+    ]
+  },
+  {
+    title: '梦魇回廊', act: 2,
+    text: '一条扭曲的回廊在你眼前展开。两侧的镜子映出不同的自己——一个伤痕累累，一个满载珍宝。',
+    choices: [
+      { text: '直面梦魇（六成几率强化一张牌，否则受5伤）', cond: g => true, action: g => {
+        if (Math.random() < 0.6) {
+          const upgradable = g.player.deck.filter(c => !c.upgraded);
+          if (upgradable.length > 0) {
+            const c = upgradable[Math.floor(Math.random() * upgradable.length)];
+            upgradeCard(c);
+            log(`你在梦魇中战胜了自己，${c.name} 被强化！`);
+          } else {
+            const heal = Math.min(10, g.player.maxHp - g.player.hp);
+            g.player.hp += heal;
+            log('你直面恐惧，内心变得强大（恢复10点生命）');
+          }
+        } else {
+          g.player.hp -= 5;
+          log('梦魇撕裂了你的意志，受到5点伤害');
+        }
+      } },
+      { text: '打破镜子（获得25金币，但失去4生命）', cond: g => g.player.hp > 4, action: g => { g.player.hp -= 4; g.gold += 25; log('镜子碎片化为25金币'); } },
+      { text: '离开回廊', cond: g => true, action: g => { log('你转身离去'); } },
+    ]
+  },
+  {
+    title: '虚空低语', act: 3,
+    text: '虚空深处的低语在耳边回荡："抉择吧，凡人——以凡俗之物换取虚空之力，或拥抱永夜的馈赠。"',
+    choices: [
+      { text: '献上30金币换取强大卡牌', cond: g => g.gold >= 30, action: g => {
+        g.gold -= 30;
+        const pool = CARD_POOL.filter(c => c.rarity === 'epic' || c.rarity === 'legendary');
+        const card = pool[Math.floor(Math.random() * pool.length)];
+        g.player.deck.push({ ...card, uid: uid() });
+        log(`虚空赐予你 ${card.name}`);
+      } },
+      { text: '接受虚空之力（最大生命-3，获得一个遗物）', cond: g => g.player.hp > 3, action: g => { g.player.maxHp -= 3; if (g.player.hp > g.player.maxHp) g.player.hp = g.player.maxHp; grantRelic(g); log('虚空之力渗入你的身体，你获得了一件遗物'); } },
+      { text: '拒绝低语', cond: g => true, action: g => { log('你捂住耳朵，快步离开'); } },
     ]
   },
 ];
@@ -3930,9 +3980,13 @@ function getClassCardPool() {
   return cls.cardPool.map(id => CARD_MAP[id]).filter(c => c);
 }
 
+// Neutral cards that can appear in every class's card packs (new keyword cards stay obtainable)
+const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad','death_stalker','overload_lightning','overload_missiles','overload_wolf'];
+
 function showCardPackReward() {
   const cls = CLASSES[G.selectedClass || 'mage'];
-  const pool = cls ? cls.cardPool.map(id => CARD_MAP[id]).filter(c => c) : CARD_POOL;
+  const classPool = cls ? cls.cardPool.map(id => CARD_MAP[id]).filter(c => c) : CARD_POOL;
+  const pool = classPool.concat(NEUTRAL_POOL.map(id => CARD_MAP[id]).filter(c => c));
   const filtered = pool.filter(c => {
     if (G.act === 0) return c.rarity === 'common' || c.rarity === 'rare';
     if (G.act === 1) return c.rarity !== 'legendary';
@@ -4285,7 +4339,10 @@ function closeShop() {
 
 // ===================== EVENTS =====================
 function openEvent() {
-  const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+  // Prefer events tagged for the current act; fall back to all if none fit
+  const actPool = EVENTS.filter(ev => ev.act === undefined || ev.act === (G.act || 0) + 1);
+  const pool = actPool.length > 0 ? actPool : EVENTS;
+  const event = pool[Math.floor(Math.random() * pool.length)];
   document.getElementById('event-title').textContent = event.title;
   document.getElementById('event-text').textContent = event.text;
   const choicesDiv = document.getElementById('event-choices');
