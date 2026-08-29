@@ -1161,7 +1161,7 @@ const CLASSES = {
 
 // ===================== PASSIVE TREASURES (RELICS) =====================
 const PASSIVE_TREASURES = [
-  { id: 'plus_1_1', name: '强化水晶', description: '你的随从获得+1/+1', icon: '💎', effect: 'strength' },
+  { id: 'plus_1_1', name: '强化水晶', description: '你的随从获得+1/+1', icon: '💎', effect: 'plus_1_1' },
   { id: 'spell_cost_1', name: '法术聚焦', description: '你的法术牌费用-1（不低于1）', icon: '🔮', effect: 'spell_cost_1' },
   { id: 'extra_draw', name: '洞察之眼', description: '每回合开始多抽一张牌', icon: '👁️', effect: 'extra_draw' },
   { id: 'regen', name: '生命回复', description: '回合结束时恢复1点生命', icon: '💚', effect: 'regen' },
@@ -1214,7 +1214,7 @@ const RELICS = [
   { id: 'thorns', name: '荆棘之心', icon: '🌵', desc: '受到伤害时对攻击者造成1点伤害', effect: 'thorns' },
   { id: 'heal_turn', name: '再生之鳞', icon: '🟢', desc: '每回合恢复1点生命', effect: 'regen' },
   { id: 'extra_mana', name: '法力宝石', icon: '💎', desc: '每场战斗第1回合获得1个额外法力', effect: 'extra_mana_start' },
-  { id: 'strength', name: '力量符文', icon: '💪', desc: '所有随从获得+1攻击力', effect: 'attack_buff' },
+  { id: 'strength', name: '力量符文', icon: '💪', desc: '所有随从获得+1攻击力', effect: 'strength' },
   { id: 'vitality', name: '生命之心', icon: '❤️', desc: '最大生命值+10', effect: 'max_hp' },
   { id: 'coin_start', name: '幸运金币', icon: '🪙', desc: '每场战斗获得1枚幸运币(0费+1法力)', effect: 'coin_start' },
   { id: 'spell_power', name: '奥术之眼', icon: '👁️', desc: '法术伤害+1', effect: 'spell_power' },
@@ -1942,9 +1942,16 @@ function startBattle(type) {
   }
   
   // Build enemy deck
+  const dEnemyAtk = (G.difficulty && DIFFICULTY_SETTINGS[G.difficulty]) ? (DIFFICULTY_SETTINGS[G.difficulty].enemyAtkMult || 1) : 1;
   enemyData.deck.forEach(id => {
     const data = getCardData(id);
-    if (data) G.enemy.drawPile.push({ ...data, uid: uid() });
+    if (data) {
+      // Apply difficulty attack multiplier to enemy minions/weapons (getCardData returns a fresh copy)
+      if (dEnemyAtk !== 1 && (data.type === 'minion' || data.type === 'weapon')) {
+        data.attack = Math.max(1, Math.round((data.attack || 0) * dEnemyAtk));
+      }
+      G.enemy.drawPile.push({ ...data, uid: uid() });
+    }
   });
   shuffle(G.enemy.drawPile);
   
@@ -2083,7 +2090,7 @@ function endTurn() {
   setTimeout(() => {
     try { startEnemyTurn(); }
     catch(e) { /* error handled */ forceStartPlayerTurn(); }
-  }, 300);
+  }, animDelay(300));
 }
 
 function startEnemyTurn() {
@@ -2113,7 +2120,7 @@ function startEnemyTurn() {
   setTimeout(() => {
     try { enemyAITurn(); }
     catch(e) { /* error handled */ forceFinishEnemyTurn(); }
-  }, 700);
+  }, animDelay(700));
 }
 
 function enemyAITurn() {
@@ -2154,7 +2161,7 @@ function enemyAITurn() {
       setTimeout(() => {
         try { tryPlayEnemyCard(); }
         catch(e) { /* error handled */ proceedToAttacks(); }
-      }, 600);
+      }, animDelay(600));
     } else {
       proceedToAttacks();
     }
@@ -2168,7 +2175,7 @@ function enemyAITurn() {
     setTimeout(() => {
       try { enemyAttacks(); }
       catch(e) { /* error handled */ forceFinishEnemyTurn(); }
-    }, 500);
+    }, animDelay(500));
   }
 }
 
@@ -2210,7 +2217,7 @@ function enemyAttacks() {
     }
     const m = minions[idx];
     idx++;
-    if (!m || m.dead || !m.canAttack || m.attacksLeft <= 0) { setTimeout(() => { try { attackNext(); } catch(e) { /* error handled */ forceFinishEnemyTurn(); } }, 50); return; }
+    if (!m || m.dead || !m.canAttack || m.attacksLeft <= 0) { setTimeout(() => { try { attackNext(); } catch(e) { /* error handled */ forceFinishEnemyTurn(); } }, animDelay(50)); return; }
 
     // Choose target
     const taunts = G.player.minions.filter(pm => pm.taunt && !pm.dead);
@@ -2236,7 +2243,7 @@ function enemyAttacks() {
     setTimeout(() => {
       try { attackNext(); }
       catch(e) { /* error handled */ forceFinishEnemyTurn(); }
-    }, 600);
+    }, animDelay(600));
   }
   attackNext();
 }
@@ -2288,7 +2295,7 @@ function finishEnemyTurn() {
   setTimeout(() => {
     try { startPlayerTurn(); }
     catch(e) { /* error handled */ forceStartPlayerTurn(); }
-  }, 300);
+  }, animDelay(300));
 }
 
 // Safety fallbacks
@@ -2348,6 +2355,12 @@ function playCard(card, index) {
     return;
   }
 
+  // Board full: refuse to summon before spending mana (keeps hand order intact)
+  if (card.type === 'minion' && G.player.minions.length >= 7) {
+    addBattleLog('战场已满，无法召唤更多随从', 'system');
+    return;
+  }
+
   // Spend mana and remove from hand
   const effCost = getCardCost(card);
   G.player.mana -= effCost;
@@ -2355,7 +2368,6 @@ function playCard(card, index) {
   playSfx('play');
 
   if (card.type === 'minion') {
-    if (G.player.minions.length >= 7) { G.player.hand.push(card); G.player.mana += effCost; return; }
     const minion = createMinion(card, true);
     G.player.minions.push(minion);
     addBattleLog(`你打出 ${card.name}`, 'player');
@@ -2390,8 +2402,10 @@ function playCard(card, index) {
 function createMinion(card, isPlayer) {
   let attack = card.attack || 0;
   let hp = card.hp || 0;
-  // Relic: strength (+1/+1)
-  if (isPlayer && hasRelic('strength')) { attack += 1; hp += 1; }
+  // Relic: 强化水晶 (+1/+1)
+  if (isPlayer && hasRelic('plus_1_1')) { attack += 1; hp += 1; }
+  // Relic: 力量符文 (+1 攻击力)
+  if (isPlayer && hasRelic('strength')) { attack += 1; }
   // Relic: beast master (+1/+1 for beasts)
   if (isPlayer && hasRelic('beast_master') && card.race === 'beast') { attack += 1; hp += 1; }
   // Relic: divine protection (divine shield on summon)
@@ -2517,7 +2531,8 @@ function getSpellPower(player) {
 }
 
 function applyRelicToMinion(m) {
-  if (hasRelic('strength')) { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
+  if (hasRelic('plus_1_1')) { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
+  if (hasRelic('strength')) { m.currentAttack += 1; }
   if (hasRelic('beast_master') && m.race === 'beast') { m.currentAttack += 1; m.maxHp += 1; m.currentHp += 1; }
 }
 
@@ -3968,57 +3983,6 @@ function onBattleLost() {
   }, 800);
 }
 
-function showRewardScreen(count, title) {
-  const cards = [];
-  const pool = CARD_POOL.filter(c => {
-    if (G.act === 0) return c.rarity === 'common' || c.rarity === 'rare';
-    if (G.act === 1) return c.rarity !== 'legendary';
-    return true;
-  });
-  
-  for (let i = 0; i < count; i++) {
-    let card;
-    if (Math.random() < 0.15 && G.act > 0) {
-      const rares = pool.filter(c => c.rarity === 'epic' || c.rarity === 'legendary');
-      card = rares.length > 0 ? rares[Math.floor(Math.random() * rares.length)] : pool[Math.floor(Math.random() * pool.length)];
-    } else {
-      card = pool[Math.floor(Math.random() * pool.length)];
-    }
-    cards.push({ ...card, uid: uid() });
-  }
-  
-  document.getElementById('reward-title').textContent = title;
-  const container = document.getElementById('reward-cards');
-  const frag = document.createDocumentFragment();
-  cards.forEach((card, i) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'reward-card-wrapper';
-    wrapper.appendChild(renderCardStatic(card));
-    const btn = document.createElement('div');
-    btn.style.textAlign = 'center';
-    btn.style.marginTop = '8px';
-    btn.style.color = 'var(--gold)';
-    btn.style.fontSize = '13px';
-    btn.textContent = '选择';
-    wrapper.appendChild(btn);
-    wrapper.onclick = () => {
-      G.player.deck.push(card);
-      addBattleLog(`获得了 ${card.name}`, 'system');
-      hideOverlay('overlay-reward');
-      if (G.currentNode && G.currentNode.type !== 'boss') {
-      }
-      if (G.pendingUpgrade) {
-        G.pendingUpgrade = false;
-        showUpgradeScreen();
-      } else {
-        completeNode();
-      }
-    };
-    frag.appendChild(wrapper);
-  });
-  container.replaceChildren(frag);
-  showOverlay('overlay-reward');
-}
 
 function renderCardStatic(card) {
   const div = document.createElement('div');
@@ -4665,6 +4629,11 @@ function saveSettings() {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(SETTINGS)); } catch(e) {}
 }
 
+// Animation pacing: when "战斗动画" is off, reduce battle pacing delays to 0
+function animDelay(ms) {
+  return SETTINGS.animations ? ms : 0;
+}
+
 function showSettings() {
   loadSettings();
   document.getElementById('setting-music').classList.toggle('on', SETTINGS.music);
@@ -4801,6 +4770,7 @@ function saveGame() {
       },
       gold: G.gold,
       relics: G.relics,
+      difficulty: G.difficulty,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch(e) { /* error handled */ }
@@ -4843,6 +4813,7 @@ function continueRun() {
     battle: null,
     gold: state.gold,
     relics: state.relics || [],
+    difficulty: state.difficulty,
     pendingUpgrade: false,
     shopInventory: null,
     eventLog: null,
@@ -4972,6 +4943,11 @@ function playMusic() {
     osc.start(time);
     osc.stop(time + duration);
     musicNodes.push(osc);
+    // Release finished oscillators from the tracking array (prevents unbounded growth)
+    osc.onended = () => {
+      const i = musicNodes.indexOf(osc);
+      if (i >= 0) musicNodes.splice(i, 1);
+    };
   }
 
   function playChord(freqs, time, duration) {
