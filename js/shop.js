@@ -102,14 +102,16 @@ function renderShop() {
   dBtn.disabled = G.shopInventory.discoverSold || G.gold < G.shopInventory.discoverCost;
   dBtn.onclick = () => {
     if (G.shopInventory.discoverSold || G.gold < G.shopInventory.discoverCost) return;
+    hideOverlay('overlay-shop');
     offerDiscover(CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic'), '发现一张卡牌', (card) => {
       if (card) {
         G.gold -= G.shopInventory.discoverCost;
         G.shopInventory.discoverSold = true;
         G.player.deck.push({ ...card, uid: uid() });
-        renderShop();
-        renderMap();
       }
+      showOverlay('overlay-shop');
+      renderShop();
+      renderMap();
     });
   };
   if (G.shopInventory.discoverSold) { dBtn.textContent = '已购'; dBtn.disabled = true; }
