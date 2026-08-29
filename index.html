@@ -407,11 +407,8 @@ body {
   transition: all 0.15s; max-height: 28px; writing-mode: vertical-rl; text-orientation: upright;
 }
 .battle-log-toggle:hover { background: rgba(25,25,55,0.95); border-color: var(--gold); }
-.battle-log-toggle .log-badge {
-  background: #c0303a; color: #fff; border-radius: 10px; padding: 0 5px;
-  font-size: 10px; min-width: 14px; text-align: center;
-}
-.battle-log-toggle .log-badge.hidden { display: none; }
+
+
 .battle-log {
   position: absolute; top: 50%; right: 36px; transform: translateY(-50%); width: 240px; max-height: 200px;
   overflow-y: auto; font-size: 12px; color: #ccc; padding: 6px;
@@ -651,7 +648,7 @@ body {
     width: 160px; max-height: 45vh; font-size: 10px; padding: 4px; right: 28px;
   }
   .battle-log-toggle { font-size: 9px; padding: 3px 5px; right: 3px; max-height: 24px; }
-  .battle-log-toggle .log-badge { font-size: 9px; padding: 0 4px; }
+  
 
   /* Turn info - move down to avoid log toggle overlap */
   #battle-turn-info { font-size: 11px; padding-right: 70px; }
@@ -839,7 +836,7 @@ body {
     </div>
 
     <div class="hand-area" id="hand-area"></div>
-    <div class="battle-log-toggle" id="battle-log-toggle" onclick="toggleBattleLog()"><span id="log-toggle-text">📜 收起日志</span><span class="log-badge hidden" id="log-badge">0</span></div>
+    <div class="battle-log-toggle" id="battle-log-toggle" onclick="toggleBattleLog()"><span id="log-toggle-text">📜 收起日志</span></div>
     <div class="battle-log scrollable" id="battle-log"></div>
   </div>
 

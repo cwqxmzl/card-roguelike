@@ -4,13 +4,11 @@
 
 // ===================== BATTLE LOG =====================
 let logOpen = true;
-let logUnread = 0;
 
 function addBattleLog(msg, type) {
   if (!G.battle || !G.battle.log) return;
   G.battle.log.push({ msg, type: type || 'system' });
   if (G.battle.log.length > 60) G.battle.log.shift();
-  if (!logOpen) { logUnread++; updateLogBadge(); }
   renderBattleLog();
 }
 
@@ -21,23 +19,10 @@ function toggleBattleLog() {
   if (logOpen) {
     log.classList.remove('closed');
     text.textContent = '📜 收起日志';
-    logUnread = 0;
-    updateLogBadge();
     log.scrollTop = log.scrollHeight;
   } else {
     log.classList.add('closed');
     text.textContent = '📜 战斗日志';
-  }
-}
-
-function updateLogBadge() {
-  const badge = document.getElementById('log-badge');
-  if (!badge) return;
-  if (!logOpen && logUnread > 0) {
-    badge.textContent = logUnread;
-    badge.classList.remove('hidden');
-  } else {
-    badge.classList.add('hidden');
   }
 }
 
@@ -53,7 +38,6 @@ function renderBattleLog() {
   });
   el.replaceChildren(frag);
   if (logOpen) el.scrollTop = el.scrollHeight;
-  updateLogBadge();
 }
 
 function floatText(elementId, text, type) {

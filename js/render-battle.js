@@ -316,8 +316,10 @@ function renderCard(card, index) {
   div.oncontextmenu = (e) => { e.preventDefault(); showCardDetail(card); return false; };
 
   // Desktop hover tooltip (uses the existing #card-tooltip element)
+  // Disabled on touch devices: synthetic mouseenter on mobile would leave the tooltip stuck, blocking the hand.
+  const isTouchDevice = 'ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0;
   const tooltipEl = document.getElementById('card-tooltip');
-  if (tooltipEl) {
+  if (tooltipEl && !isTouchDevice) {
     div.addEventListener('mouseenter', () => {
       if (G.battle.targetingMode) return;
       tooltipEl.innerHTML = buildCardTooltipHtml(card);
