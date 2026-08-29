@@ -162,13 +162,13 @@ const CLASSES = {
 
 // ===================== PASSIVE TREASURES (RELICS) =====================
 const PASSIVE_TREASURES = [
-  { id: 'plus_1_1', name: '强化水晶', description: '你的随从获得+1/+1', icon: '💎', effect: 'plus_1_1' },
+  { id: 'plus_1_1', name: '强化水晶', description: '你的所有随从获得+1/+1', icon: '💎', effect: 'plus_1_1' },
   { id: 'spell_cost_1', name: '法术聚焦', description: '你的法术牌费用-1（不低于1）', icon: '🔮', effect: 'spell_cost_1' },
   { id: 'extra_draw', name: '洞察之眼', description: '每场战斗开始多抽1张牌', icon: '👁️', effect: 'extra_draw' },
-  { id: 'regen', name: '生命回复', description: '回合结束时恢复1点生命', icon: '💚', effect: 'regen' },
-  { id: 'thorns', name: '荆棘反伤', description: '受到伤害时对攻击者造成1点伤害', icon: '🌵', effect: 'thorns' },
+  { id: 'regen', name: '再生之力', description: '每回合结束时恢复1点生命', icon: '💚', effect: 'regen' },
+  { id: 'thorns', name: '荆棘之甲', description: '受到伤害时对攻击者造成1点伤害', icon: '🌵', effect: 'thorns' },
   { id: 'fire_aura', name: '灼热光环', description: '回合结束时对敌方造成1点伤害', icon: '🔥', effect: 'fire_aura' },
-  { id: 'double_gold', name: '幸运金币', description: '战斗胜利金币翻倍', icon: '🪙', effect: 'double_gold' },
+  { id: 'double_gold', name: '贪婪之戒', description: '战斗胜利获得的金币翻倍', icon: '💍', effect: 'double_gold' },
   { id: 'armor_start', name: '坚甲护盾', description: '每场战斗开始获得3点护甲', icon: '🛡️', effect: 'armor_start' },
   { id: 'spell_power_1', name: '法术强化', description: '法术伤害+1', icon: '✨', effect: 'spell_power' },
   { id: 'extra_mana_start', name: '法力宝石', description: '第一回合获得1个额外法力', icon: '🔷', effect: 'extra_mana_start' },
@@ -253,7 +253,7 @@ const STARTING_BONUSES = [
   { id: 'mana', name: '法力核心', icon: '🔷', desc: '第一回合+1法力' },
 ];
 
-const ACT_NAMES = ['第一幕 · 黑暗森林', '第二幕 · 暗影深渊', '第三幕 · 虚空裂境'];
+const ACT_NAMES = ['第一幕 · 幽暗密林', '第二幕 · 暗影深渊', '第三幕 · 虚空裂境'];
 const ACT_SUB = ['黑暗森林', '暗影深渊', '虚空裂境'];
 const NODE_TYPES = {
   battle: { icon: '⚔️', label: '战斗', color: '#c0392b' },
@@ -279,8 +279,8 @@ const EVENTS = [
     title: '受伤的旅人', act: 1,
     text: '路旁躺着一位受伤的旅人，他似乎快死了。你可以帮助他，或者搜刮他身上仅剩的财物。',
     choices: [
-      { text: '为他治疗（失去5点生命）', cond: g => g.player.hp > 5, action: g => { g.player.hp -= 5; g.gold += 40; log('旅人感激涕零，赠予你40金币'); } },
-      { text: '搜刮他的财物', cond: g => true, action: g => { g.gold += 25; log('你从旅人身上搜到25金币，但内心不安'); } },
+      { text: '为他疗伤（消耗5点生命）', cond: g => g.player.hp > 5, action: g => { g.player.hp -= 5; g.gold += 40; log('旅人紧紧握住你的手，塞给你40金币作为答谢'); } },
+      { text: '搜刮他的财物', cond: g => true, action: g => { g.gold += 25; log('你从旅人身上翻出25金币，心中隐隐不安'); } },
       { text: '继续赶路', cond: g => true, action: g => { log('你不予理会，继续前行'); } },
     ]
   },
@@ -288,8 +288,8 @@ const EVENTS = [
     title: '远古祭坛', act: 3,
     text: '你发现了一座发光的远古祭坛。祭坛上刻着古老的符文，似乎可以通过献祭获得力量。',
     choices: [
-      { text: '献祭生命（失去8点生命，获得遗物）', cond: g => g.player.hp > 8, action: g => { g.player.hp -= 8; grantRelic(g); log('祭坛发出强光，你获得了一件遗物！'); } },
-      { text: '献祭金币（花费40金币，升级一张牌）', cond: g => g.gold >= 40, action: g => { g.gold -= 40; g.pendingUpgrade = true; log('祭坛接受了你的金币，选择一张卡牌升级'); } },
+      { text: '以血为祭（消耗8点生命，获得遗物）', cond: g => g.player.hp > 8, action: g => { g.player.hp -= 8; grantRelic(g); log('祭坛符文亮起刺目红光，一件遗物从虚空中浮现！'); } },
+      { text: '献上金币（消耗40金币，升级一张牌）', cond: g => g.gold >= 40, action: g => { g.gold -= 40; g.pendingUpgrade = true; log('金币沉入祭坛，符文闪烁，选择一张卡牌接受祝福'); } },
       { text: '离开祭坛', cond: g => true, action: g => { log('你尊重古老的力量，转身离开'); } },
     ]
   },
@@ -297,8 +297,8 @@ const EVENTS = [
     title: '魔法泉眼', act: 1,
     text: '一股清澈的魔法泉水从地下涌出。饮用它可以恢复生命，但你也可以将其收集起来留待后用。',
     choices: [
-      { text: '饮用泉水（恢复15点生命）', cond: g => true, action: g => { const heal = Math.min(15, g.player.maxHp - g.player.hp); g.player.hp += heal; log(`你恢复了${heal}点生命`); } },
-      { text: '收集泉水（获得2枚幸运币到牌组）', cond: g => true, action: g => { g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); log('你收集了泉水，获得2张幸运币'); } },
+      { text: '饮用泉水（恢复15点生命）', cond: g => true, action: g => { const heal = Math.min(15, g.player.maxHp - g.player.hp); g.player.hp += heal; log(`清凉的泉水流入体内，你恢复了${heal}点生命`); } },
+      { text: '收集泉水（牌组加入2枚幸运币）', cond: g => true, action: g => { g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); log('你将泉水灌入瓶中，获得2张幸运币'); } },
       { text: '两者都要（失去10金币）', cond: g => g.gold >= 10, action: g => { g.gold -= 10; const heal = Math.min(10, g.player.maxHp - g.player.hp); g.player.hp += heal; g.player.deck.push({ ...getCardData('the_coin'), uid: uid() }); log(`你恢复了${heal}点生命并获得1张幸运币`); } },
     ]
   },
@@ -307,7 +307,7 @@ const EVENTS = [
     text: '一位流浪的铁匠提出可以强化你的武器（升级一张武器牌），或者你也可以花金币购买他的护甲。',
     choices: [
       { text: '强化武器（升级一张随机武器牌）', cond: g => g.player.deck.some(c => c.type === 'weapon'), action: g => { const weapons = g.player.deck.filter(c => c.type === 'weapon'); if (weapons.length) { const w = weapons[Math.floor(Math.random()*weapons.length)]; w.upgraded = true; w.attack = (w.attack||0)+1; w.durability = (w.durability||0)+1; log(`${w.name}被强化了！`); } } },
-      { text: '购买护甲（花费25金币，获得3点护甲）', cond: g => g.gold >= 25, action: g => { g.gold -= 25; g.player.armor += 3; log('你穿上了护甲，获得3点护甲值'); } },
+      { text: '购买护甲（消耗25金币，获得3点护甲）', cond: g => g.gold >= 25, action: g => { g.gold -= 25; g.player.armor += 3; log('铁匠为你披上一件坚固的护甲，获得3点护甲'); } },
       { text: '告别铁匠', cond: g => true, action: g => { log('你向铁匠道别'); } },
     ]
   },
@@ -315,14 +315,14 @@ const EVENTS = [
     title: '诅咒宝箱', act: 2,
     text: '你发现了一个散发着不祥气息的宝箱。直觉告诉你打开它会有代价，但里面可能有珍贵的东西...',
     choices: [
-      { text: '打开宝箱（失去6点生命，获得一张稀有卡牌）', cond: g => g.player.hp > 6, action: g => {
+      { text: '强行开启（消耗6点生命，获得一张稀有卡牌）', cond: g => g.player.hp > 6, action: g => {
         g.player.hp -= 6;
         const pool = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
         const card = pool[Math.floor(Math.random() * pool.length)];
         g.player.deck.push({ ...card, uid: uid() });
         log(`宝箱中被诅咒的 ${card.name} 加入了你的牌组`);
       } },
-      { text: '拆除诅咒（花费30金币）', cond: g => g.gold >= 30, action: g => {
+      { text: '解除诅咒（消耗30金币）', cond: g => g.gold >= 30, action: g => {
         g.gold -= 30;
         const pool = CARD_POOL.filter(c => c.rarity === 'rare' || c.rarity === 'epic');
         const card = pool[Math.floor(Math.random() * pool.length)];
@@ -336,7 +336,7 @@ const EVENTS = [
     title: '许愿池', act: 2,
     text: '清澈的池水映出你的面容。传说向池中投入金币，愿望就会实现...',
     choices: [
-      { text: '许愿力量（花费25金币，随机升级一张牌）', cond: g => g.gold >= 25, action: g => {
+      { text: '许愿力量（消耗25金币，随机升级一张牌）', cond: g => g.gold >= 25, action: g => {
         g.gold -= 25;
         const upgradable = g.player.deck.filter(c => !c.upgraded);
         if (upgradable.length > 0) {
@@ -348,12 +348,12 @@ const EVENTS = [
           log(`${card.name} 被许愿池祝福！`);
         } else { log('没有可升级的卡牌，金币沉入池底...'); }
       } },
-      { text: '许愿财富（花费10金币，获得随机宝物）', cond: g => g.gold >= 10, action: g => {
+      { text: '许愿财富（消耗10金币，获得随机宝物）', cond: g => g.gold >= 10, action: g => {
         g.gold -= 10;
         g.gold += Math.floor(Math.random() * 40) + 15;
         log('池水泛起金光，你获得了金币！');
       } },
-      { text: '许愿健康（花费15金币，恢复20点生命）', cond: g => g.gold >= 15, action: g => {
+      { text: '许愿健康（消耗15金币，恢复20点生命）', cond: g => g.gold >= 15, action: g => {
         g.gold -= 15;
         const heal = Math.min(20, g.player.maxHp - g.player.hp);
         g.player.hp += heal;

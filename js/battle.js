@@ -108,7 +108,7 @@ function startPlayerTurn() {
   }
   G.player.mana = G.player.maxMana - G.player.overload;
   if (G.player.overload > 0) { addBattleLog(`你的法力被过载削减${G.player.overload}点`, 'system'); }
-  addBattleLog(`—— 你的回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'system');
+  addBattleLog(`—— 第 ${Math.ceil(G.battle.turn / 2)} 回合 · 你的回合 ——`, 'system');
   G.player.overload = 0;
   G.player.heroPower.used = false;
   G.battle.heroCanAttack = !!G.player.weapon;

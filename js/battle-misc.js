@@ -162,7 +162,7 @@ function onBattleWon() {
   if (G.battle.safetyTimer) { clearTimeout(G.battle.safetyTimer); G.battle.safetyTimer = null; }
   if (G.battle.attackSafetyTimer) { clearTimeout(G.battle.attackSafetyTimer); G.battle.attackSafetyTimer = null; }
   setEndTurnButtonState('enemy');
-  addBattleLog('胜利！', 'system');
+  addBattleLog('战斗胜利！敌人已被击败', 'system');
 
   const type = G.battle.enemyType;
   let goldReward;
@@ -186,7 +186,7 @@ function onBattleWon() {
       showRewardTypeSelection(`击败 ${G.enemy.name}！`);
     }, 800);
   } else {
-    setTimeout(() => showRewardTypeSelection('胜利！选择奖励'), 800);
+    setTimeout(() => showRewardTypeSelection('战斗胜利！选择你的奖励'), 800);
   }
 }
 
