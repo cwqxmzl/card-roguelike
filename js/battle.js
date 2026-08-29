@@ -170,12 +170,14 @@ function endTurn() {
   // Relic: regen (end of turn)
   if (hasRelic('regen')) {
     G.player.hp = Math.min(G.player.maxHp, G.player.hp + 1);
+    playSfx('heal');
   }
 
   // Relic: light_well (priest signature, end of turn)
   if (hasRelic('light_well')) {
     G.player.hp = Math.min(G.player.maxHp, G.player.hp + 2);
     floatText('player-portrait', '+2', 'heal');
+    playSfx('heal');
   }
 
   renderBattle();
@@ -1028,6 +1030,7 @@ function dealDamage(target, amount, source) {
     addBattleLog(`${sourceName} → ${targetName}：${amount}点伤害（剩余${target.currentHp}）`, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
     if (target.currentHp <= 0) {
       target.dead = true;
+      playSfx('death');
       if (G.battleStats && !target.isPlayer && (source === G.player || (source && source.isPlayer === true))) G.battleStats.minionsKilled++;
       addBattleLog(`${targetName}被消灭`, 'system');
       checkDeathrattle(target, target.isPlayer ? G.player : G.enemy, target.isPlayer ? G.enemy : G.player);
