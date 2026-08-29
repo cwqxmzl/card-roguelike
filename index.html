@@ -796,6 +796,16 @@ body {
       <div style="text-align:right;font-size:13px;color:#aaa;">
         <div id="battle-turn-info">第 1 回合 - 你的回合</div>
         <div id="enemy-intent"></div>
+        <div style="margin-top:5px;">
+          <button id="stats-toggle" style="font-size:11px;padding:3px 10px;border:1px solid #555;border-radius:6px;background:rgba(0,0,0,.4);color:#ccc;cursor:pointer;" onclick="toggleBattleStats()">📊 统计</button>
+        </div>
+        <div id="battle-stats-panel" style="display:none;margin-top:6px;text-align:left;background:rgba(0,0,0,.55);border:1px solid #444;border-radius:8px;padding:8px 12px;font-size:12px;line-height:1.9;color:#ddd;min-width:180px;">
+          <div>⚔️ 造成伤害：<b id="stat-dmg-dealt">0</b></div>
+          <div>💥 受到伤害：<b id="stat-dmg-taken">0</b></div>
+          <div>🃏 打出卡牌：<b id="stat-cards">0</b></div>
+          <div>✨ 施放法术：<b id="stat-spells">0</b></div>
+          <div>💀 击杀随从：<b id="stat-kills">0</b></div>
+        </div>
       </div>
     </div>
 
@@ -1138,6 +1148,14 @@ const CARD_POOL = [
   { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 5, hp: 7, rarity: 'legendary', art: '🏰', text: '嘲讽·战吼：获得3点护甲', taunt: true, battlecry: 'gain_armor_3' },
   { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'legendary', art: '🦅', text: '冲锋·风怒', charge: true, windfury: true },
   { id: 'lightbringer', name: '光明使者', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🕊️', text: '战吼：使所有友方随从+1/+1', battlecry: 'buff_all_1_1' },
+  // --- Priest ---
+  { id: 'holy_smite', name: '圣光惩击', cost: 1, type: 'spell', rarity: 'common', art: '✨', text: '对任意目标造成3点伤害', effect: 'smite' },
+  { id: 'power_word_shield', name: '真言术·盾', cost: 1, type: 'spell', rarity: 'common', art: '🛡️', text: '使一个友方随从+2/+2，抽一张牌', effect: 'pw_shield' },
+  { id: 'northshire', name: '北郡牧师', cost: 1, type: 'minion', attack: 1, hp: 3, rarity: 'common', art: '⛪', text: '战吼：抽一张牌', battlecry: 'draw_1' },
+  { id: 'soul_purify', name: '灵魂净化', cost: 2, type: 'spell', rarity: 'common', art: '🌑', text: '对所有敌方随从造成2点伤害', effect: 'consecration' },
+  { id: 'holy_nova', name: '神圣新星', cost: 4, type: 'spell', rarity: 'rare', art: '🌟', text: '对所有敌人造成2点伤害，恢复所有友方角色2点生命', effect: 'holy_nova' },
+  { id: 'holy_fire', name: '神圣之火', cost: 5, type: 'spell', rarity: 'rare', art: '🔥', text: '对任意目标造成5点伤害，恢复你5点生命', effect: 'holy_fire' },
+  { id: 'light_pope', name: '光明大祭司', cost: 7, type: 'minion', attack: 6, hp: 7, rarity: 'legendary', art: '🕯️', text: '战吼：恢复4点生命', battlecry: 'heal_4' },
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -1170,6 +1188,13 @@ const CLASSES = {
     cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas','lightbringer'],
     signature: 'divine_protection',
   },
+  priest: {
+    name: '牧师', portrait: '🙏', color: '#9370DB', hp: 32,
+    heroPower: { name: '次级治疗', cost: 2, type: 'priest', description: '恢复任意目标2点生命' },
+    starterDeck: ['guardsman','stone_golem','northshire','northshire','healer','holy_smite','soul_purify','power_word_shield','circle_healing','card_drawer'],
+    cardPool: ['holy_smite','power_word_shield','northshire','soul_purify','holy_nova','holy_fire','circle_healing','healer','light_pope','holy_light','guardsman','stone_golem','card_drawer','sylvanas','lightbringer'],
+    signature: 'light_well',
+  },
 };
 
 // ===================== PASSIVE TREASURES (RELICS) =====================
@@ -1188,6 +1213,7 @@ const PASSIVE_TREASURES = [
   { id: 'divine_protection', name: '圣光护体', description: '你的随从出场时获得圣盾', icon: '😇', effect: 'divine_protection' },
   { id: 'double_battlecry', name: '战吼回响', description: '战吼效果触发两次', icon: '🔄', effect: 'double_battlecry' },
   { id: 'cost_reduction', name: '廉价令牌', description: '所有手牌费用-1（不低于1）', icon: '🏷️', effect: 'cost_reduction' },
+  { id: 'light_well', name: '神圣之泉', description: '回合结束时，你恢复2点生命', icon: '☀️', effect: 'light_well' },
 ];
 
 // ===================== ACTIVE TREASURE CARDS =====================
@@ -2072,6 +2098,7 @@ function startBattle(type) {
   }
   
   G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null };
+  G.battleStats = { dmgDealt: 0, dmgTaken: 0, cardsPlayed: 0, spellsCast: 0, minionsKilled: 0 };
   
   // Start player turn
   startPlayerTurn();
@@ -2153,6 +2180,12 @@ function endTurn() {
   // Relic: regen (end of turn)
   if (hasRelic('regen')) {
     G.player.hp = Math.min(G.player.maxHp, G.player.hp + 1);
+  }
+
+  // Relic: light_well (priest signature, end of turn)
+  if (hasRelic('light_well')) {
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 2);
+    floatText('player-portrait', '+2', 'heal');
   }
 
   renderBattle();
@@ -2483,6 +2516,8 @@ function playCard(card, index) {
   // Spend mana and remove from hand
   const effCost = getCardCost(card);
   G.player.mana -= effCost;
+  if (G.battleStats) G.battleStats.cardsPlayed++;
+  if (card.type === 'spell' && G.battleStats) G.battleStats.spellsCast++;
   // Overload: this card taxes your next turn's mana
   if (card.overload) {
     G.player.overload += card.overload;
@@ -2629,6 +2664,11 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
     case 'gain_armor_3':
       owner.armor += 3;
       addBattleLog(`${owner === G.player ? '你' : '敌方'}获得3点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'heal_4':
+      owner.hp = Math.min(owner.maxHp, owner.hp + 4);
+      floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+4', 'heal');
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}恢复4点生命`, owner === G.player ? 'player' : 'enemy');
       break;
     case 'buff_all_1_1':
       owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
@@ -2808,6 +2848,27 @@ function executeSpell(effect, player, enemy, card, target) {
       }
       addBattleLog(`${caster}恢复8点生命`, logType);
       break;
+    case 'smite':
+      dealDamage(target, 3 + sp, player);
+      break;
+    case 'pw_shield':
+      if (target && target !== G.player && target !== G.enemy && !target.dead) {
+        target.currentAttack += 2; target.currentHp += 2; target.maxHp += 2;
+        drawCard(player, true);
+        addBattleLog(`${caster}为${target.name}施加真言术·盾，+2/+2并抽一张牌`, logType);
+      }
+      break;
+    case 'holy_nova':
+      enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
+      player.minions.forEach(m => { m.currentHp = Math.min(m.maxHp, m.currentHp + 2); });
+      player.hp = Math.min(player.maxHp, player.hp + 2);
+      addBattleLog(`${caster}神圣新星：对敌方随从造成${2 + sp}点伤害，治疗友方角色`, logType);
+      break;
+    case 'holy_fire':
+      dealDamage(target || enemy, 5 + sp, player);
+      player.hp = Math.min(player.maxHp, player.hp + 5);
+      addBattleLog(`${caster}神圣之火：造成${5 + sp}点伤害并恢复5点生命`, logType);
+      break;
   }
 }
 
@@ -2921,6 +2982,12 @@ function dealDamage(target, amount, source) {
     }
     target.hp -= remaining;
     target.hp = Math.max(0, target.hp);
+    if (G.battleStats) {
+      const ps = (source === G.player || (source && source.isPlayer === true));
+      const es = (source === G.enemy || (source && source.isPlayer === false));
+      if (target === G.enemy && ps) G.battleStats.dmgDealt += remaining;
+      if (target === G.player && es) G.battleStats.dmgTaken += remaining;
+    }
     if (target === G.player) {
       const el = document.getElementById('player-portrait');
       el.classList.add('flash-damage');
@@ -2947,6 +3014,12 @@ function dealDamage(target, amount, source) {
       return;
     }
     target.currentHp -= amount;
+    if (G.battleStats) {
+      const ps = (source === G.player || (source && source.isPlayer === true));
+      const es = (source === G.enemy || (source && source.isPlayer === false));
+      if (target.isPlayer && es) G.battleStats.dmgTaken += amount;
+      if (!target.isPlayer && ps) G.battleStats.dmgDealt += amount;
+    }
     // Poisonous: a poisonous source destroys any minion it damages (divine shield blocks it)
     if (source && source.poisonous && !target.dead) {
       target.currentHp = 0;
@@ -2955,6 +3028,7 @@ function dealDamage(target, amount, source) {
     addBattleLog(`${sourceName} → ${targetName}：${amount}点伤害（剩余${target.currentHp}）`, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
     if (target.currentHp <= 0) {
       target.dead = true;
+      if (G.battleStats && !target.isPlayer && (source === G.player || (source && source.isPlayer === true))) G.battleStats.minionsKilled++;
       addBattleLog(`${targetName}被消灭`, 'system');
       checkDeathrattle(target, target.isPlayer ? G.player : G.enemy, target.isPlayer ? G.enemy : G.player);
     }
@@ -3070,6 +3144,18 @@ function playEnemyWeapon(card) {
   if (card.battlecry === 'deal_1_face') dealDamage(G.player, 1, G.enemy);
   addBattleLog(`敌方装备了 ${card.name}`, 'enemy');
   renderBattle();
+}
+
+function toggleBattleStats() {
+  const panel = document.getElementById('battle-stats-panel');
+  if (!panel) return;
+  if (panel.style.display === 'none') renderBattleStats();
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+function renderBattleStats() {
+  const s = G.battleStats || {};
+  const map = { 'stat-dmg-dealt': s.dmgDealt || 0, 'stat-dmg-taken': s.dmgTaken || 0, 'stat-cards': s.cardsPlayed || 0, 'stat-spells': s.spellsCast || 0, 'stat-kills': s.minionsKilled || 0 };
+  Object.entries(map).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.textContent = v; });
 }
 
 function getEnemyIntentText() {
@@ -3561,7 +3647,7 @@ function renderCard(card, index) {
 
 function needsTarget(card) {
   if (card.type !== 'spell') return false;
-  const targetedEffects = ['deal_3_face', 'deal_6_face', 'deal_10_face', 'heal_5', 'assassinate', 'polymorph', 'mind_control', 'deal_5_draw_1', 'heal_8'];
+  const targetedEffects = ['deal_3_face', 'deal_6_face', 'deal_10_face', 'heal_5', 'assassinate', 'polymorph', 'mind_control', 'deal_5_draw_1', 'heal_8', 'smite', 'pw_shield', 'holy_fire'];
   return targetedEffects.includes(card.effect);
 }
 
@@ -3573,9 +3659,14 @@ function getSpellTargetType(card) {
       return 'enemy';
     case 'deal_10_face':
       return 'any';
+    case 'smite':
+    case 'holy_fire':
+      return 'any';
     case 'heal_5':
     case 'heal_8':
       return 'friendly';
+    case 'pw_shield':
+      return 'friendly_minion';
     case 'assassinate':
     case 'polymorph':
     case 'mind_control':
@@ -3621,15 +3712,15 @@ function isSpellTargetValid(target) {
     if (tt === 'friendly') return target === G.player;
     if (tt === 'any') return true;
     if (tt === 'enemy_minion') return false;
+    if (tt === 'friendly_minion') return false;
   } else {
     // It's a minion
     if (target.dead) return false;
     const isPlayerMinion = G.player.minions.includes(target);
     const isEnemyMinion = G.enemy.minions.includes(target);
-    if (tt === 'enemy') return isEnemyMinion;
-    if (tt === 'friendly') return isPlayerMinion;
+    if (tt === 'enemy' || tt === 'enemy_minion') return isEnemyMinion;
+    if (tt === 'friendly' || tt === 'friendly_minion') return isPlayerMinion;
     if (tt === 'any') return isPlayerMinion || isEnemyMinion;
-    if (tt === 'enemy_minion') return isEnemyMinion;
   }
   return false;
 }
@@ -3642,6 +3733,7 @@ function castSpellOnTarget(target) {
   const card = st.card;
   G.player.mana -= getCardCost(card);
   G.player.hand.splice(st.index, 1);
+  if (G.battleStats) { G.battleStats.cardsPlayed++; G.battleStats.spellsCast++; }
   addBattleLog(`你施放 ${card.name}`, 'player');
 
   executeSpell(card.effect, G.player, G.enemy, card, target);
@@ -3707,6 +3799,7 @@ function executeBattlecryOnTarget(target) {
   const card = bt.card;
   G.player.mana -= getCardCost(card);
   G.player.hand.splice(bt.index, 1);
+  if (G.battleStats) G.battleStats.cardsPlayed++;
 
   if (G.player.minions.length >= 7) {
     G.player.hand.push(card);
