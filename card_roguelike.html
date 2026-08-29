@@ -1104,6 +1104,9 @@ const CARD_POOL = [
   { id: 'windfury_harpy', name: '风怒鹰身人', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '🦅', text: '风怒（可攻击两次）', windfury: true },
   { id: 'cultist', name: '邪教徒', cost: 3, type: 'minion', attack: 2, hp: 2, rarity: 'rare', art: '🪬', text: '亡语：使一个友方随从+2/+2', deathrattle: 'buff_friendly_2_2' },
   { id: 'spellblade', name: '法术之刃', cost: 2, type: 'minion', attack: 1, hp: 3, rarity: 'rare', art: '🌀', text: '法术伤害+1', spellDamage: 1 },
+  { id: 'overload_lightning', name: '超载闪电', cost: 2, type: 'spell', rarity: 'common', art: '⚡', text: '造成3点伤害，过载1', effect: 'deal_3_face', overload: 1 },
+  { id: 'overload_missiles', name: '过载飞弹', cost: 1, type: 'spell', rarity: 'common', art: '✨', text: '随机对敌人造成3点伤害，过载1', effect: 'arcane_missiles', overload: 1 },
+  { id: 'overload_wolf', name: '过载狼骑', cost: 3, type: 'minion', attack: 4, hp: 3, rarity: 'rare', art: '🐺', text: '过载1', overload: 1, race: 'beast' },
   { id: 'vampire_lord', name: '吸血鬼领主', cost: 3, type: 'minion', attack: 3, hp: 3, rarity: 'rare', art: '🧛', text: '吸血', lifesteal: true },
   { id: 'mirror_entity', name: '镜像实体', cost: 1, type: 'minion', attack: 0, hp: 2, rarity: 'rare', art: '🪞', text: '嘲讽·亡语：召唤一个0/2嘲讽', taunt: true, deathrattle: 'summon_0_2_taunt' },
   { id: 'plague_toad', name: '瘟疫蟾蜍', cost: 3, type: 'minion', attack: 2, hp: 3, rarity: 'rare', art: '🐸', text: '剧毒', poisonous: true, race: 'beast' },
@@ -1168,7 +1171,7 @@ const CLASSES = {
 const PASSIVE_TREASURES = [
   { id: 'plus_1_1', name: '强化水晶', description: '你的随从获得+1/+1', icon: '💎', effect: 'plus_1_1' },
   { id: 'spell_cost_1', name: '法术聚焦', description: '你的法术牌费用-1（不低于1）', icon: '🔮', effect: 'spell_cost_1' },
-  { id: 'extra_draw', name: '洞察之眼', description: '每回合开始多抽一张牌', icon: '👁️', effect: 'extra_draw' },
+  { id: 'extra_draw', name: '洞察之眼', description: '每场战斗开始多抽1张牌', icon: '👁️', effect: 'extra_draw' },
   { id: 'regen', name: '生命回复', description: '回合结束时恢复1点生命', icon: '💚', effect: 'regen' },
   { id: 'thorns', name: '荆棘反伤', description: '你的随从被攻击时对攻击者造成1点伤害', icon: '🌵', effect: 'thorns' },
   { id: 'fire_aura', name: '灼热光环', description: '回合结束时对敌方造成1点伤害', icon: '🔥', effect: 'fire_aura' },
@@ -1734,7 +1737,7 @@ function applyStartingBonus(bonusId) {
       break;
     }
     case 'armor': G.relics.push({ id: 'bonus_armor', name: '护甲卷轴', icon: '📜', effect: 'armor_start', description: '每场战斗开始+3护甲' }); log('开局祝福：护甲卷轴'); break;
-    case 'draw': G.relics.push({ id: 'bonus_draw', name: '洞察之眼', icon: '👁️', effect: 'extra_draw', description: '每回合多抽1张' }); log('开局祝福：洞察之眼'); break;
+    case 'draw': G.relics.push({ id: 'bonus_draw', name: '洞察之眼', icon: '👁️', effect: 'extra_draw', description: '每场战斗开始多抽1张牌' }); log('开局祝福：洞察之眼'); break;
     case 'mana': G.relics.push({ id: 'bonus_mana', name: '法力核心', icon: '🔷', effect: 'extra_mana_start', description: '第一回合+1法力' }); log('开局祝福：法力核心'); break;
   }
   hideOverlay('overlay-initial-reward');
@@ -1931,7 +1934,7 @@ function startBattle(type) {
     hp: enemyData.hp, maxHp: enemyData.hp,
     armor: 0,
     hand: [], drawPile: [], minions: [],
-    maxMana: 0, mana: 0,
+    maxMana: 0, mana: 0, overload: 0,
     weapon: null,
     spellPower: 0,
     intent: null,
@@ -2018,7 +2021,8 @@ function startPlayerTurn() {
   if (G.battle.turn > 1) {
     G.player.maxMana = Math.min(10, G.player.maxMana + 1);
   }
-  G.player.mana = G.player.maxMana + G.player.overload;
+  G.player.mana = G.player.maxMana - G.player.overload;
+  if (G.player.overload > 0) { addBattleLog(`你的法力被过载削减${G.player.overload}点`, 'system'); }
   addBattleLog(`—— 你的回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'system');
   G.player.overload = 0;
   G.player.heroPower.used = false;
@@ -2106,7 +2110,8 @@ function startEnemyTurn() {
   G.battle.turn++;
   addBattleLog(`—— 敌方回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'enemy');
   G.enemy.maxMana = Math.min(10, G.enemy.maxMana + 1);
-  G.enemy.mana = G.enemy.maxMana;
+  G.enemy.mana = G.enemy.maxMana - (G.enemy.overload || 0);
+  G.enemy.overload = 0;
 
   drawCard(G.enemy, false);
   addBattleLog(`敌方抽牌（手牌${G.enemy.hand.length}张）`, 'enemy');
@@ -2185,6 +2190,19 @@ function enemyAITurn() {
   }
 }
 
+// Enemy AI behavior profile: aggressive goes face, control clears minions,
+// spell is balanced, boss is aggressive-but-clear. Falls back to balanced.
+function enemyAIProfile() {
+  const t = G && G.enemy && G.enemy.ai;
+  switch (t) {
+    case 'aggressive': return { minionChance: 0.12, preferHighAtk: false };
+    case 'control':    return { minionChance: 0.65, preferHighAtk: true };
+    case 'spell':      return { minionChance: 0.35, preferHighAtk: true };
+    case 'boss':       return { minionChance: 0.5,  preferHighAtk: true };
+    default:           return { minionChance: 0.3,  preferHighAtk: false };
+  }
+}
+
 function enemyAttacks() {
   if (G.battle.ended) return;
   G.battle.turnPhase = 'enemy_attack';
@@ -2208,7 +2226,7 @@ function enemyAttacks() {
         let wTarget;
         if (taunts2.length > 0) {
           wTarget = taunts2[Math.floor(Math.random() * taunts2.length)];
-        } else if (G.player.minions.length > 0 && Math.random() < 0.4) {
+        } else if (G.player.minions.length > 0 && Math.random() < enemyAIProfile().minionChance) {
           wTarget = G.player.minions[Math.floor(Math.random() * G.player.minions.length)];
         } else {
           wTarget = G.player;
@@ -2225,17 +2243,18 @@ function enemyAttacks() {
     idx++;
     if (!m || m.dead || !m.canAttack || m.attacksLeft <= 0) { setTimeout(() => { try { attackNext(); } catch(e) { console.error('[battle]', e); /* error handled */ forceFinishEnemyTurn(); } }, animDelay(50)); return; }
 
-    // Choose target
+    // Choose target (AI-dependent: aggressive goes face, control clears minions)
     const taunts = G.player.minions.filter(pm => pm.taunt && !pm.dead);
+    const aiProfile = enemyAIProfile();
     let target;
     if (taunts.length > 0) {
       target = taunts[Math.floor(Math.random() * taunts.length)];
+    } else if (G.player.minions.length > 0 && Math.random() < aiProfile.minionChance) {
+      const candidates = [...G.player.minions];
+      if (aiProfile.preferHighAtk) candidates.sort((a, b) => (b.currentAttack || 0) - (a.currentAttack || 0));
+      target = candidates[Math.floor(Math.random() * Math.min(3, candidates.length))];
     } else {
-      if (G.player.minions.length > 0 && Math.random() < 0.3) {
-        target = G.player.minions[Math.floor(Math.random() * G.player.minions.length)];
-      } else {
-        target = G.player;
-      }
+      target = G.player;
     }
 
     attack(m, target, true);
@@ -2370,6 +2389,11 @@ function playCard(card, index) {
   // Spend mana and remove from hand
   const effCost = getCardCost(card);
   G.player.mana -= effCost;
+  // Overload: this card taxes your next turn's mana
+  if (card.overload) {
+    G.player.overload += card.overload;
+    addBattleLog(`${card.name} 造成过载${card.overload}`, 'system');
+  }
   G.player.hand.splice(index, 1);
   playSfx('play');
 
@@ -2704,6 +2728,10 @@ function attack(attacker, target, isEnemyAttacking) {
   if (target === G.player || target === G.enemy) {
     dealDamage(target, atkDmg, owner);
     floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '-' + atkDmg, 'damage');
+    // Thorns relic: when the enemy hits your hero, reflect 1 damage to the attacker
+    if (isEnemyAttacking && hasRelic('thorns') && !attacker.dead) {
+      dealDamage(attacker, 1, G.player);
+    }
   } else {
     // Minion vs minion
     const targetDmg = target.currentAttack || 0;
@@ -2726,9 +2754,9 @@ function attack(attacker, target, isEnemyAttacking) {
       }
     }
     
-    // Thorns relic
-    if (!isEnemyAttacking && hasRelic('thorns') && !target.dead) {
-      dealDamage(target, 1, G.player);
+    // Thorns relic: when the enemy hits your minion, reflect 1 damage to the attacker
+    if (isEnemyAttacking && hasRelic('thorns') && !attacker.dead) {
+      dealDamage(attacker, 1, G.player);
     }
   }
   
@@ -2878,6 +2906,7 @@ function canEnemyUseSpell(card) {
 
 function playEnemyMinion(card) {
   G.enemy.mana -= card.cost;
+  if (card.overload) G.enemy.overload = (G.enemy.overload || 0) + card.overload;
   G.enemy.hand = G.enemy.hand.filter(c => c.uid !== card.uid);
   const minion = createMinion(card, false);
   G.enemy.minions.push(minion);
@@ -2892,6 +2921,7 @@ function playEnemyMinion(card) {
 
 function playEnemySpell(card) {
   G.enemy.mana -= card.cost;
+  if (card.overload) G.enemy.overload = (G.enemy.overload || 0) + card.overload;
   G.enemy.hand = G.enemy.hand.filter(c => c.uid !== card.uid);
   addBattleLog(`敌方施放 ${card.name}`, 'enemy');
   executeSpell(card.effect, G.enemy, G.player, card);
@@ -2904,6 +2934,7 @@ function playEnemySpell(card) {
 
 function playEnemyWeapon(card) {
   G.enemy.mana -= card.cost;
+  if (card.overload) G.enemy.overload = (G.enemy.overload || 0) + card.overload;
   G.enemy.hand = G.enemy.hand.filter(c => c.uid !== card.uid);
   G.enemy.weapon = { ...card, currentDurability: card.durability };
   if (card.battlecry === 'deal_1_face') dealDamage(G.player, 1, G.enemy);
@@ -3577,7 +3608,7 @@ function selectEnemyBattlecryTarget(card, minion) {
   }
   if (tt === 'enemy') {
     const candidates = G.player.minions.filter(m => !m.dead);
-    if (candidates.length > 0 && Math.random() < 0.5) return candidates[0];
+    if (candidates.length > 0 && Math.random() < enemyAIProfile().minionChance) return candidates[0];
     return G.player;
   }
   if (tt === 'friendly') {
@@ -3804,6 +3835,7 @@ function showCardDetail(card) {
   if (card.lifesteal) html += '<div style="font-size:12px;color:#ff6464;margin-top:4px;">🩸 吸血 — 造成伤害时恢复英雄生命</div>';
   if (card.poisonous) html += '<div style="font-size:12px;color:#66ff66;margin-top:4px;">☠ 剧毒 — 消灭任何受伤随从</div>';
   if (card.freezeOnHit) html += '<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">❄ 冰冻攻击 — 命中后冻结目标</div>';
+  if (card.overload) html += '<div style="font-size:12px;color:#9b59b6;margin-top:4px;">⚡ 过载' + card.overload + ' — 下回合开始时法力-' + card.overload + '</div>';
   if (card.frozen) html += '<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">❄ 已冻结 — 无法攻击，下回合解冻</div>';
   if (card.currentAttack !== undefined && card.currentHp !== undefined && (card.currentAttack !== card.attack || card.currentHp !== card.maxHp)) {
     html += `<div style="font-size:12px;color:#aaa;margin-top:6px;padding:4px 10px;background:rgba(0,0,0,0.2);border-radius:6px;">当前: ${card.currentAttack}/${card.currentHp}${card.currentAttack !== card.attack ? ' (攻+' + (card.currentAttack - card.attack) + ')' : ''}${card.currentHp < card.maxHp ? ' (损血' + (card.maxHp - card.currentHp) + ')' : card.currentHp > card.maxHp ? ' (增益+' + (card.currentHp - card.maxHp) + ')' : ''}</div>`;
@@ -5069,6 +5101,7 @@ function buildCardTooltipHtml(card) {
   if (card.charge) h += '<div style="font-size:11px;color:#ffd700;">⚡ 冲锋</div>';
   if (card.windfury) h += '<div style="font-size:11px;color:#ffd700;">🌀 风怒</div>';
   if (card.freezeOnHit) h += '<div style="font-size:11px;color:#7ec8e3;">❄ 冰冻攻击</div>';
+  if (card.overload) h += '<div style="font-size:11px;color:#9b59b6;">⚡ 过载' + card.overload + '</div>';
   return h;
 }
 
