@@ -205,6 +205,12 @@ const ACTIVE_TREASURES = [
   { id: 'treasure_summon', name: '召唤法典', cost: 4, type: 'spell', rarity: 'legendary', art: '📜', text: '召唤两个3/3随从', effect: 'summon_two_3_3' },
   { id: 'treasure_mind', name: '意志宝石', cost: 3, type: 'spell', rarity: 'legendary', art: '🧠', text: '获得一个敌方随从的控制权', effect: 'mind_control' },
   { id: 'treasure_heal', name: '生命之泉', cost: 1, type: 'spell', rarity: 'legendary', art: '💧', text: '恢复8点生命', effect: 'heal_8' },
+  { id: 'treasure_inferno', name: '地狱火', cost: 3, type: 'spell', rarity: 'legendary', art: '🌋', text: '对所有敌方随从造成3点伤害', effect: 'deal_3_all' },
+  { id: 'treasure_insight', name: '洞察卷轴', cost: 1, type: 'spell', rarity: 'legendary', art: '📜', text: '抽三张牌', effect: 'draw_3' },
+  { id: 'treasure_ironbark', name: '铁树皮术', cost: 2, type: 'spell', rarity: 'legendary', art: '🌳', text: '获得8点护甲', effect: 'gain_armor_8' },
+  { id: 'treasure_warcry', name: '战吼号角', cost: 3, type: 'spell', rarity: 'legendary', art: '📯', text: '使所有友方随从+2/+2', effect: 'buff_all_2_2' },
+  { id: 'treasure_frost_nova', name: '冰霜新星', cost: 2, type: 'spell', rarity: 'legendary', art: '❄️', text: '冻结所有敌方随从', effect: 'freeze_all' },
+  { id: 'treasure_bolt', name: '天界惊雷', cost: 2, type: 'spell', rarity: 'legendary', art: '⚡', text: '造成5点伤害', effect: 'deal_5' },
 ];
 
 const ENEMIES = {
@@ -215,12 +221,21 @@ const ENEMIES = {
     { name: '暗影法师', portrait: '🧙', hp: 26, deck: ['arcane_missiles','lightning_bolt','arcane_intellect','fireball','consecration','flamestrike','spellblade','freeze_elem','polymorph','card_drawer'], ai: 'spell' },
     { name: '鱼人领袖', portrait: '🐟', hp: 28, deck: ['murloc','murloc','wolf','archer','fan_of_knives','berserker','healer','charge_knight','lightning_bolt','ogre'], ai: 'aggressive' },
     { name: '黑骑士', portrait: '🛡️', hp: 30, deck: ['guardsman','stone_golem','shield_bearer','paladin_knight','war_hammer','flame_sword','healer','doom_blade','ogre','cultist'], ai: 'control' },
+    { name: '治疗德鲁伊', portrait: '🌿', hp: 30, deck: ['healer','holy_light','circle_healing','guardian_of_kings','stone_golem','guardsman','armored_knight','shield_bearer','holy_nova','soul_purify'], ai: 'control' },
+    { name: '武器战狂', portrait: '⚔️', hp: 28, deck: ['war_hammer','flame_sword','battle_axe','rusty_knife','orc_grunt','berserker','wolf','frostwolf_grunt','guardsman','lightning_bolt'], ai: 'aggressive' },
+    { name: '鱼人潮行者', portrait: '🐟', hp: 26, deck: ['murloc','murloc','scout','blood_imp','wolf','archer','charge_knight','tundra_rhino','fan_of_knives','lightning_bolt'], ai: 'aggressive' },
+    { name: '冰霜法师', portrait: '❄️', hp: 28, deck: ['freeze_elem','water_elemental','blizzard','polymorph','arcane_missiles','fireball','arcane_intellect','spellblade','mana_wraith','card_drawer'], ai: 'spell' },
+    { name: '亡语牧师', portrait: '💀', hp: 32, deck: ['blood_imp','summoner','cultist','undead_knight','loot_hoarder','sylvanas','mirror_entity','shield_bearer','assassinate','circle_healing'], ai: 'control' },
+    { name: '快攻猎人', portrait: '🏹', hp: 26, deck: ['wolf','murloc','tundra_rhino','charge_knight','blood_imp','berserker','windfury_harpy','storm_falcon','lightning_bolt','rusty_knife'], ai: 'aggressive' },
   ],
   elite: [
     { name: '石拳巨魔', portrait: '🧌', hp: 40, deck: ['ogre','war_golem','berserker','war_hammer','doom_blade','shield_bearer','stone_golem','giant','undead_knight','fireball'], ai: 'aggressive' },
     { name: '龙裔术士', portrait: '🐲', hp: 38, deck: ['dragon','pyroblast','flamestrike','mind_control','spellblade','freeze_elem','arcane_intellect','equality','water_elemental','fireball'], ai: 'spell' },
     { name: '死亡领主', portrait: '⚰️', hp: 42, deck: ['undead_knight','sylvanas','cultist','summoner','mirror_entity','assassinate','mind_control','shield_bearer','deathwing','loot_hoarder'], ai: 'control' },
     { name: '风暴召唤者', portrait: '⛈️', hp: 36, deck: ['freeze_elem','lightning_storm','blizzard','water_elemental','arcane_missiles','lightning_bolt','spellblade','flamestrike','consecration','card_drawer'], ai: 'spell' },
+    { name: '火焰领主', portrait: '🔥', hp: 44, deck: ['fireball','flamestrike','pyroblast','arcane_missiles','lightning_bolt','spellblade','mana_wraith','archmage','water_elemental','blizzard'], ai: 'spell' },
+    { name: '钢铁守卫', portrait: '🛡️', hp: 48, deck: ['shield_bearer','stone_golem','guardsman','armored_knight','guardian_king','iron_bastion','war_golem','ancient_warrior','ogre','boulderfist_ogre'], ai: 'control' },
+    { name: '虚空恐魔', portrait: '👹', hp: 42, deck: ['blood_imp','cultist','undead_knight','death_stalker','sylvanas','deathwing','mind_control','berserker','ogre','doom_blade'], ai: 'aggressive' },
   ],
   boss: [
     { name: '森林之王·古树', portrait: '🌳', hp: 50, deck: ['stone_golem','war_golem','shield_bearer','giant','undead_knight','healer','paladin_knight','summoner','ogre','flamestrike','consecration','cultist','ragnaros','guardsman'], ai: 'control', isBoss: true, act: 1, rewardRelic: true, enrage: { summons: [{ name: '古树守卫', attack: 3, hp: 3, art: '🌳', taunt: true }] } },

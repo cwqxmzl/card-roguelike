@@ -870,6 +870,29 @@ function executeSpell(effect, player, enemy, card, target) {
       player.hp = Math.min(player.maxHp, player.hp + 2);
       addBattleLog(`${caster}神圣新星：对敌方随从造成${2 + sp}点伤害，治疗友方角色`, logType);
       break;
+    case 'deal_3_all':
+      enemy.minions.forEach(m => dealDamage(m, 3 + sp, player));
+      addBattleLog(`${caster}对所有敌方随从造成${3 + sp}点伤害`, logType);
+      break;
+    case 'draw_3':
+      drawCard(player, true); drawCard(player, true); drawCard(player, true);
+      addBattleLog(`${caster}抽了三张牌`, logType);
+      break;
+    case 'gain_armor_8':
+      player.armor += 8;
+      addBattleLog(`${caster}获得8点护甲`, logType);
+      break;
+    case 'buff_all_2_2':
+      player.minions.forEach(m => { if (!m.dead) { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; } });
+      addBattleLog(`${caster}的所有随从获得+2/+2`, logType);
+      break;
+    case 'freeze_all':
+      enemy.minions.forEach(m => { if (!m.dead) { m.frozen = true; m.canAttack = false; } });
+      addBattleLog(`${caster}冻结了所有敌方随从`, logType);
+      break;
+    case 'deal_5':
+      dealDamage(target || enemy, 5 + sp, player);
+      break;
     case 'holy_fire':
       dealDamage(target || enemy, 5 + sp, player);
       player.hp = Math.min(player.maxHp, player.hp + 5);
