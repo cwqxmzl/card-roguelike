@@ -728,6 +728,9 @@ function executeSpell(effect, player, enemy, card, target) {
       }
       addBattleLog(`${caster}恢复5点生命（${target === G.player ? '你的英雄' : target === G.enemy ? '敌方英雄' : target.name}）`, logType);
       break;
+    case 'deal_1':
+      dealDamage(target || enemy, 1 + sp, player);
+      break;
     case 'deal_3_face':
       dealDamage(target || enemy, 3 + sp, player);
       break;
