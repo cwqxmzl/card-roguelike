@@ -246,15 +246,15 @@ const ENEMIES = {
 
 const RELICS = [
   { id: 'extra_card', name: '占卜宝珠', icon: '🔮', desc: '每场战斗开始多抽1张牌', effect: 'extra_draw' },
-  { id: 'thorns', name: '荆棘之心', icon: '🌵', desc: '受到伤害时对攻击者造成1点伤害', effect: 'thorns' },
+  { id: 'thorns', name: '荆棘之甲', icon: '🌵', desc: '受到伤害时对攻击者造成1点伤害', effect: 'thorns' },
   { id: 'heal_turn', name: '再生之鳞', icon: '🟢', desc: '每回合恢复1点生命', effect: 'regen' },
   { id: 'extra_mana', name: '法力宝石', icon: '💎', desc: '每场战斗第1回合获得1个额外法力', effect: 'extra_mana_start' },
   { id: 'strength', name: '力量符文', icon: '💪', desc: '所有随从获得+1攻击力', effect: 'strength' },
   { id: 'vitality', name: '生命之心', icon: '❤️', desc: '最大生命值+10', effect: 'max_hp' },
   { id: 'coin_start', name: '幸运金币', icon: '🪙', desc: '每场战斗获得1枚幸运币(0费+1法力)', effect: 'coin_start' },
   { id: 'spell_power', name: '奥术之眼', icon: '👁️', desc: '法术伤害+1', effect: 'spell_power' },
-  { id: 'double_gold', name: '贪婪之戒', icon: '💍', desc: '金币获取翻倍', effect: 'double_gold' },
-  { id: 'fire_aura', name: '灼热光环', icon: '🔥', desc: '每回合结束时对敌方英雄造成1点伤害', effect: 'fire_aura' },
+  { id: 'double_gold', name: '贪婪之戒', icon: '💍', desc: '战斗胜利获得的金币翻倍', effect: 'double_gold' },
+  { id: 'fire_aura', name: '灼热光环', icon: '🔥', desc: '回合结束时对敌方造成1点伤害', effect: 'fire_aura' },
   { id: 'battlecry_boost', name: '战吼勋章', icon: '📯', desc: '你的战吼随从获得+1/+1', effect: 'battlecry_boost' },
   { id: 'taunt_bulk', name: '嘲讽壁垒', icon: '🏰', desc: '你的嘲讽随从获得+0/+2', effect: 'taunt_bulk' },
   { id: 'divine_shield_attack', name: '圣盾之力', icon: '⚔️', desc: '你的圣盾随从+1攻击力', effect: 'divine_shield_attack' },
