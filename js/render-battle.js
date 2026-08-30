@@ -132,6 +132,43 @@ function renderBattle() {
     document.getElementById('battle-turn-info').textContent = `第 ${Math.ceil(G.battle.turn / 2)} 回合 - ${G.battle.isPlayerTurn ? '你的回合' : '敌方回合'}`;
   }
   setEndTurnButtonState(G.battle.isPlayerTurn && !G.battle.ended ? 'player' : 'enemy');
+  applyBattleAnimations();
+}
+
+
+// Apply attack/death animations after render
+function applyBattleAnimations() {
+  if (!G.battle || !G.battle.animQueue) return;
+  if (typeof SETTINGS !== 'undefined' && SETTINGS.animations === false) { G.battle.animQueue = []; return; }
+  G.battle.animQueue.forEach(anim => {
+    if (anim.type === 'attack' && anim.attackerUid) {
+      const el = document.querySelector(`.minion[data-uid="${anim.attackerUid}"]`);
+      if (el) {
+        el.classList.add(anim.direction === 'right' ? 'attack-right' : 'attack-left');
+        setTimeout(() => el.classList.remove('attack-right', 'attack-left'), 400);
+      }
+    }
+    if (anim.type === 'death' && anim.uid) {
+      const el = document.querySelector(`.minion[data-uid="${anim.uid}"]`);
+      if (el) {
+        el.classList.add('dying');
+      }
+    }
+    if (anim.type === 'summon' && anim.uid) {
+      const el = document.querySelector(`.minion[data-uid="${anim.uid}"]`);
+      if (el) {
+        el.classList.add('minion-just-summoned');
+        setTimeout(() => el.classList.remove('minion-just-summoned'), 400);
+      }
+    }
+  });
+  G.battle.animQueue = [];
+}
+
+function queueAnim(anim) {
+  if (!G.battle) return;
+  if (!G.battle.animQueue) G.battle.animQueue = [];
+  G.battle.animQueue.push(anim);
 }
 
 function renderMana() {
@@ -150,6 +187,7 @@ function renderMana() {
 function renderMinion(m, isPlayer) {
   const div = document.createElement('div');
   div.className = 'minion';
+  if (m.uid) div.setAttribute('data-uid', m.uid);
   if (m.taunt) div.classList.add('taunt');
   if (m.divineShield) div.classList.add('divine-shield');
   if (m.frozen) div.classList.add('frozen');

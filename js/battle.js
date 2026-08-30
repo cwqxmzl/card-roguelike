@@ -808,6 +808,7 @@ function executeSpell(effect, player, enemy, card, target) {
           G.enemy.minions = G.enemy.minions.filter(x => x.uid !== m.uid);
           applyRelicToMinion(m);
           G.player.minions.push(m);
+    if (m.uid) queueAnim({ type: 'summon', uid: m.uid });
         } else {
           G.player.minions = G.player.minions.filter(x => x.uid !== m.uid);
           G.enemy.minions.push(m);
@@ -928,6 +929,10 @@ function attack(attacker, target, isEnemyAttacking) {
     }
   }
   
+  // Queue attack animation
+  if (attacker.uid) {
+    queueAnim({ type: 'attack', attackerUid: attacker.uid, direction: isEnemyAttacking ? 'left' : 'right' });
+  }
   // Remove dead minions
   cleanupDeadMinions();
   renderBattle();
@@ -1030,6 +1035,7 @@ function dealDamage(target, amount, source) {
     addBattleLog(`${sourceName} → ${targetName}：${amount}点伤害（剩余${target.currentHp}）`, source === G.player ? 'player' : source === G.enemy ? 'enemy' : 'system');
     if (target.currentHp <= 0) {
       target.dead = true;
+      if (target.uid) queueAnim({ type: 'death', uid: target.uid });
       playSfx('death');
       if (G.battleStats && !target.isPlayer && (source === G.player || (source && source.isPlayer === true))) G.battleStats.minionsKilled++;
       addBattleLog(`${targetName}被消灭`, 'system');
