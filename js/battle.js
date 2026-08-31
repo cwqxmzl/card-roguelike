@@ -799,6 +799,29 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
       owner.armor += 2;
       addBattleLog(`${owner === G.player ? '你' : '敌方'}获得2点护甲`, owner === G.player ? 'player' : 'enemy');
       break;
+
+    case 'summon_3_3':
+      if (owner.minions.length < 7) {
+        owner.minions.push(createMinion({ id: 'summon_3_3_' + uid(), name: '召唤物', cost: 0, type: 'minion', attack: 3, hp: 3, art: '🗿', text: '' }, owner === G.player));
+      }
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}召唤了一个3/3召唤物`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'gain_armor_4':
+      owner.armor += 4;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得4点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'deal_2':
+      if (target) dealDamage(target, 2, owner);
+      else dealDamage(opponent, 2, owner);
+      break;
+    case 'summon_1_1_charge':
+      if (owner.minions.length < 7) {
+        const m = createMinion({ id: 'summon_1_1_' + uid(), name: '小兵', cost: 0, type: 'minion', attack: 1, hp: 1, art: '⚔️', text: '', charge: true }, owner === G.player);
+        m.canAttack = true; m.attacksLeft = 1;
+        owner.minions.push(m);
+      }
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}召唤了一个1/1冲锋小兵`, owner === G.player ? 'player' : 'enemy');
+      break;
     case 'buff_all_1_1':
       owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
       addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');
@@ -1028,6 +1051,27 @@ function executeSpell(effect, player, enemy, card, target) {
       player.hp = Math.min(player.maxHp, player.hp + 5);
       addBattleLog(`${caster}神圣之火：造成${5 + sp}点伤害并恢复5点生命`, logType);
       break;
+
+    case 'deal_2':
+      dealDamage(target || enemy, 2 + sp, player);
+      break;
+    case 'deal_4_all':
+      enemy.minions.forEach(m => dealDamage(m, 4 + sp, player));
+      dealDamage(enemy, 4 + sp, player);
+      addBattleLog(`${caster}对所有敌人造成${4 + sp}点伤害`, logType);
+      break;
+    case 'gain_armor_4':
+      player.armor += 4;
+      addBattleLog(`${caster}获得4点护甲`, logType);
+      break;
+    case 'buff_all_3_3':
+      player.minions.forEach(m => { if (!m.dead) { m.currentAttack += 3; m.currentHp += 3; m.maxHp += 3; } });
+      addBattleLog(`${caster}的所有随从获得+3/+3`, logType);
+      break;
+    case 'buff_beasts_2_2':
+      player.minions.filter(m => !m.dead && m.race === 'beast').forEach(m => { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; });
+      addBattleLog(`${caster}的野兽随从获得+2/+2`, logType);
+      break;
   }
 }
 
@@ -1250,6 +1294,22 @@ function checkDeathrattle(minion, owner, opponent) {
         m.isPlayer = !m.isPlayer;
         opponent.minions = opponent.minions.filter(x => x.uid !== m.uid);
         if (owner === G.player) applyRelicToMinion(m);
+        owner.minions.push(m);
+      }
+      break;
+
+    case 'summon_3_3':
+      if (owner.minions.length < 7) {
+        owner.minions.push(createMinion({ id: 'dr_3_3_' + uid(), name: '召唤物', art: '🗿', attack: 3, hp: 3, cost: 3, type: 'minion' }, owner === G.player));
+      }
+      break;
+    case 'draw_2_owner':
+      drawCard(owner, true); drawCard(owner, true);
+      break;
+    case 'summon_1_1_charge':
+      if (owner.minions.length < 7) {
+        const m = createMinion({ id: 'dr_1_1_' + uid(), name: '小兵', art: '⚔️', attack: 1, hp: 1, cost: 1, type: 'minion', charge: true }, owner === G.player);
+        m.canAttack = true; m.attacksLeft = 1;
         owner.minions.push(m);
       }
       break;

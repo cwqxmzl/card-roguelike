@@ -8,7 +8,10 @@ function renderBattle() {
   
   // Enemy info
   document.getElementById('enemy-portrait').textContent = G.enemy.portrait;
-  document.getElementById('enemy-name').textContent = G.enemy.name;
+  const enemyNameEl = document.getElementById('enemy-name');
+  enemyNameEl.textContent = G.enemy.name;
+  enemyNameEl.style.cursor = 'pointer';
+  enemyNameEl.onclick = () => showEnemyDetail();
   document.getElementById('enemy-hp-text').textContent = `${G.enemy.hp}/${G.enemy.maxHp}`;
   const enemyHpFill = document.getElementById('enemy-hp-fill');
   enemyHpFill.style.width = (G.enemy.hp / G.enemy.maxHp * 100) + '%';
@@ -72,10 +75,16 @@ function renderBattle() {
     playerPortrait.onclick = () => selectHeroAttacker();
   }
 
-  // Enemy portrait - as attack or spell target
+  // Enemy portrait - click to view details when not targeting
   const enemyPortrait = document.getElementById('enemy-portrait');
   enemyPortrait.classList.remove('minion-target');
-  enemyPortrait.onclick = null;
+  // 默认：非战斗操作时点击查看怪物详情
+  if (!G.battle.targetingMode && !G.battle.selectedMinion && G.battle.isPlayerTurn && !G.battle.ended) {
+    enemyPortrait.onclick = () => showEnemyDetail();
+    enemyPortrait.title = '点击查看怪物详情';
+  } else {
+    enemyPortrait.onclick = null;
+  }
   if (G.battle.targetingMode === 'target' && G.battle.selectedMinion) {
     const taunts = G.enemy.minions.filter(m => m.taunt && !m.dead);
     if (taunts.length === 0) {

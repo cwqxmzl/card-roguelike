@@ -1,4 +1,4 @@
-/* card-roguelike — battle-misc module
+﻿/* card-roguelike — battle-misc module
    Split from card_roguelike.html inline <script> for maintainability.
    Classic script loaded via <script src>; shares global scope with siblings. */
 
@@ -236,7 +236,7 @@ function getClassCardPool() {
 }
 
 // Neutral cards that can appear in every class's card packs (new keyword cards stay obtainable)
-const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad','death_stalker','overload_lightning','overload_missiles','overload_wolf','arcane_scholar','beast_king','pack_alpha','mithril_barrier','armor_smith','inspiring_leader','abyss_lord','titan_earthguard'];
+const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad','death_stalker','overload_lightning','overload_missiles','overload_wolf','neutral_kobold','neutral_guard','neutral_rogue_knife','neutral_spell_2','neutral_minion_3','neutral_minion_4','neutral_minion_5','neutral_spell_6','neutral_minion_7','neutral_spell_8','neutral_minion_9','neutral_minion_10','neutral_spell_11','neutral_minion_12','neutral_minion_13'];
 
 function showCardPackReward() {
   const cls = CLASSES[G.selectedClass || 'mage'];
@@ -372,6 +372,47 @@ function renderRewardCards(cards, title) {
   });
   container.replaceChildren(frag);
   showOverlay('overlay-reward');
+}
+
+
+// ===================== ENEMY DETAIL =====================
+function showEnemyDetail() {
+  const e = G.enemy;
+  if (!e) return;
+  const aiNames = { aggressive: '⚔️ 激进', control: '🛡️ 控制', spell: '🔮 法术', boss: '💀 首领' };
+  const personalityNames = {
+    vampiric: '🩸 吸血', frenzy: '🔥 狂怒', guardian: '🛡️ 守护',
+    commander: '⚔️ 指挥官', swarm: '🐝 群聚', reflect: '🪞 反伤'
+  };
+  // Build enemy deck summary
+  const deckInfo = e.deck ? e.deck.length + ' 张牌' : '未知';
+  const minionCount = e.minions ? e.minions.filter(m => !m.dead).length : 0;
+  let html = '<div style="text-align:center;">';
+  html += `<div style="font-size:48px;margin-bottom:8px;">${e.portrait || '👹'}</div>`;
+  html += `<div style="font-size:18px;font-weight:bold;color:#ffd700;margin-bottom:4px;">${e.name}</div>`;
+  html += `<div style="font-size:12px;color:#aaa;margin-bottom:12px;">${e.isBoss ? '💀 首领' : e.ai === 'elite' ? '🔥 精英' : '👾 普通敌人'}</div>`;
+  html += '<div style="text-align:left;background:rgba(0,0,0,0.3);border-radius:8px;padding:10px 14px;font-size:13px;line-height:1.9;color:#ddd;">';
+  html += `<div>❤️ 生命值：<b>${e.hp}/${e.maxHp}</b></div>`;
+  html += `<div>🛡️ 护甲：<b>${e.armor || 0}</b></div>`;
+  html += `<div>🧠 AI策略：<b>${aiNames[e.ai] || '未知'}</b></div>`;
+  if (e.personality) html += `<div>✨ 特性：<b style="color:#ffd700;">${personalityNames[e.personality] || e.personality}</b></div>`;
+  html += `<div>🃏 牌库：<b>${deckInfo}</b>（已抽${e.drawPile ? e.drawPile.length : 0}张/手牌${e.hand ? e.hand.length : 0}张）</div>`;
+  html += `<div>🛡️ 场上随从：<b>${minionCount}个</b></div>`;
+  if (e.weapon) html += `<div>🗡️ 武器：<b>${e.weapon.name}</b>（攻击${e.weapon.attack}/耐久${e.weapon.currentDurability}）</div>`;
+  html += `</div>`;
+  html += `<div style="font-size:11px;color:#666;margin-top:10px;">再次点击可关闭</div>`;
+  html += '</div>';
+  const inner = document.getElementById('card-detail-inner');
+  if (!inner) return;
+  inner.innerHTML = html;
+  const overlay = document.getElementById('card-detail-overlay');
+  overlay.classList.add('active');
+}
+
+// 关闭详情弹窗
+function closeCardDetail() {
+  const overlay = document.getElementById('card-detail-overlay');
+  if (overlay) overlay.classList.remove('active');
 }
 
 // ===================== SURRENDER & FAST FORWARD =====================
