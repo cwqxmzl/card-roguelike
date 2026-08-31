@@ -332,3 +332,63 @@ function viewDiscardPile() {
 function showRules() { showOverlay('overlay-rules'); }
 function closeRules() { hideOverlay('overlay-rules'); }
 
+// ===================== 独立教学关卡（第9轮） =====================
+// 主菜单"教学关卡"入口：列出全部教学关，点击独立练习，不消耗正式冒险进度
+function showTutorialDemo() {
+  const list = document.getElementById('tutorial-demo-list');
+  if (list) {
+    const frag = document.createDocumentFragment();
+    (typeof TUTORIAL_ENEMIES !== 'undefined' ? TUTORIAL_ENEMIES : []).forEach((enemy, i) => {
+      const type = i === 0 ? 'tutorial_1' : 'tutorial_2';
+      const card = document.createElement('div');
+      card.className = 'reward-type-card';
+      card.style.cssText = 'width:210px;cursor:pointer;';
+      card.innerHTML = `
+        <div class="reward-type-icon" style="font-size:30px;">${enemy.portrait}</div>
+        <div class="reward-type-title">教学关 ${i + 1}</div>
+        <div class="reward-type-desc" style="font-size:11px;line-height:1.5;">${enemy.tutorialMsg || '练习核心机制'}</div>
+      `;
+      card.onclick = () => startTutorialDemo(type);
+      frag.appendChild(card);
+    });
+    list.replaceChildren(frag);
+  }
+  showOverlay('overlay-tutorial-demo');
+}
+
+function startTutorialDemo(type) {
+  hideOverlay('overlay-tutorial-demo');
+  // 保存当前进行中的冒险（若有），结束后恢复
+  const hadRun = !!(typeof G !== 'undefined' && G && G.player && G.player.deck && !G.tutorialDemo);
+  const savedRun = hadRun ? JSON.stringify(G) : '';
+  try { sessionStorage.setItem('tutorialDemoSave', savedRun); } catch(e) {}
+  // 用默认法师初始化演示局（不写入持久化存档）
+  if (typeof initGame === 'function') initGame('mage');
+  G.tutorialDemo = true;
+  G.tutorial = false;
+  startBattle(type);
+}
+
+// 教学演示结束后恢复原冒险或回到主菜单
+function endTutorialDemo() {
+  let saved = '';
+  try { saved = sessionStorage.getItem('tutorialDemoSave') || ''; } catch(e) {}
+  if (saved) {
+    try {
+      G = JSON.parse(saved);
+      if (G.battle && G.battle.enemyType && !G.battle.ended && typeof renderBattle === 'function') {
+        showScreen('battle');
+        renderBattle();
+      } else if (typeof renderMap === 'function') {
+        showScreen('map');
+        renderMap();
+      } else {
+        showScreen('menu');
+      }
+      return;
+    } catch(e) {}
+  }
+  clearSave();
+  showScreen('menu');
+}
+

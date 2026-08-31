@@ -42,6 +42,8 @@
 
     <div class="menu-btn secondary" onclick="showRules()">游戏规则</div>
 
+    <div class="menu-btn secondary" onclick="showTutorialDemo()">🎓 教学关卡</div>
+
     <div class="menu-info">
 
       深入暗影裂境，挑战三幕冒险。<br>
@@ -389,6 +391,22 @@
     <div class="overlay-title">选择要升级的卡牌</div>
 
     <div id="upgrade-cards" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:800px;"></div>
+
+  </div>
+
+
+
+  <!-- OVERLAY: TUTORIAL DEMO (独立教学关卡) -->
+
+  <div id="overlay-tutorial-demo" class="overlay">
+
+    <div class="overlay-title">🎓 教学关卡</div>
+
+    <div style="font-size:13px;color:#aaa;margin:8px 0 14px;max-width:520px;text-align:center;">在正式冒险外独立练习核心机制，教学战斗不会消耗进度或产生奖励。点击任意关卡即可进入练习。</div>
+
+    <div id="tutorial-demo-list" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;max-width:640px;"></div>
+
+    <button class="overlay-btn" onclick="hideOverlay('overlay-tutorial-demo')" style="margin-top:14px;">返回主菜单</button>
 
   </div>
 

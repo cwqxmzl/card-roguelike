@@ -385,6 +385,14 @@ function getMetaProgress() {
   } catch(e) { return { totalRuns: 0, victories: 0, classWins: {}, shards: 0, upgrades: {} }; }
 }
 
+// 第9轮：读取某项局外强化的当前等级（供战斗/事件按等级生效）
+function metaLevel(id) {
+  try {
+    const m = getMetaProgress();
+    return m.upgrades?.[id] || 0;
+  } catch(e) { return 0; }
+}
+
 function showMetaShop() {
   const meta = getMetaProgress();
   document.getElementById('meta-shards').textContent = meta.shards || 0;

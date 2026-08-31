@@ -78,23 +78,30 @@ function startBattle(type) {
   G.player.mana = 0;
   G.player.maxMana = 0;
   const MANA_CAP = 10 + (hasRelic('max_mana_plus') ? 1 : 0);
-  G.player.spellPower = (hasRelic('spell_power') ? 1 : 0) + (hasRelic('spell_power_1') ? 1 : 0) + (hasRelic('spell_power_2') ? 2 : 0);
+  G.player.spellPower = (hasRelic('spell_power') ? 1 : 0) + (hasRelic('spell_power_1') ? 1 : 0) + (hasRelic('spell_power_2') ? 2 : 0) + (hasRelic('spell_power_3') ? 3 : 0);
   G.player.heroPower.used = false;
-  G.player.evolvePoints = 2;
+  // 第9轮：进化次数 = 基础2 + 局外强化 start_evolve 等级 + 进化之心遗物
+  G.player.evolvePoints = 2 + (typeof metaLevel === 'function' ? metaLevel('start_evolve') : 0) + (hasRelic('evolve_boost') ? 1 : 0);
 
-  // Relic: armor start
+  // Relic: armor start（meta_armor 按等级提供护甲）
   if (hasRelic('armor_start')) {
-    G.player.armor += 3;
+    const metaArmor = G.relics.find(r => r.effect === 'armor_start' && r.level);
+    G.player.armor += 3 + (metaArmor ? 2 * metaArmor.level : 0);
   }
   
-  // Relic: extra mana start
+  // Relic: extra mana start（按等级提升首回合法力）
   if (hasRelic('extra_mana_start')) {
-    G.player.maxMana = 1;
-    G.player.mana = 1;
+    const mm = G.relics.find(r => r.effect === 'extra_mana_start' && r.level);
+    G.player.maxMana = 1 + (mm ? mm.level : 0);
+    G.player.mana = G.player.maxMana;
   }
+  // 第9轮：战神之怒遗物（英雄技能免费）
+  if (hasRelic('hero_power_free')) G.player.heroPower.cost = 0;
+  // 第9轮：圣盾徽章遗物（战斗开始英雄获得圣盾）
+  if (hasRelic('start_shield')) { G.player.divineShield = true; }
   
   // Draw starting hand (3 cards + relic bonus)
-  let drawCount = 3 + (hasRelic('extra_draw') ? 1 : 0) + (hasRelic('extra_draw_2') ? 2 : 0);
+  let drawCount = 3 + (hasRelic('extra_draw') ? 1 : 0) + (hasRelic('extra_draw_2') ? 2 : 0) + (hasRelic('extra_draw_3') ? 3 : 0);
   for (let i = 0; i < drawCount; i++) {
     drawCard(G.player, false);
   }
@@ -145,7 +152,11 @@ function startPlayerTurn() {
 
   // Draw card (extra draw relic)
   drawCard(G.player, true);
-  if (hasRelic('extra_draw')) drawCard(G.player, true);
+  if (hasRelic('extra_draw')) {
+    const ed = G.relics.find(r => r.effect === 'extra_draw' && r.level);
+    const extra = ed ? ed.level : 1;
+    for (let i = 0; i < extra; i++) drawCard(G.player, true);
+  }
   if (G.player.hp <= 0) { onBattleLost(); return; }
 
   // Unfreeze player minions and reset attacks
@@ -210,6 +221,16 @@ function endTurn() {
   if (hasRelic('fire_aura_2')) {
     dealDamage(G.enemy, 3, G.player);
     addBattleLog('烈焰王冠对敌方造成3点伤害', 'player');
+  }
+  // Relic: fire_aura_3 (第9轮新增末日之焰)
+  if (hasRelic('fire_aura_3')) {
+    dealDamage(G.enemy, 4, G.player);
+    addBattleLog('末日之焰对敌方造成4点伤害', 'player');
+  }
+  // Relic: regen_3 (第9轮新增生命之环)
+  if (hasRelic('regen_3')) {
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 3);
+    playSfx('heal');
   }
 
   // Relic: light_well (priest signature, end of turn)
@@ -912,6 +933,21 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
       owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
       addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');
       break;
+    // === 第9轮修复：补齐此前缺失的战吼效果（野兽/鱼人体系） ===
+    case 'summon_2_2':
+      if (owner.minions.length < 7) {
+        owner.minions.push(createMinion({ id: 'bc_2_2_' + uid(), name: '召唤物', cost: 0, type: 'minion', attack: 2, hp: 2, art: '✨', text: '' }, owner === G.player));
+        addBattleLog(`${owner === G.player ? '你' : '敌方'}召唤了一个2/2随从`, owner === G.player ? 'player' : 'enemy');
+      }
+      break;
+    case 'buff_beasts_2_2':
+      owner.minions.filter(m => !m.dead && m.race === 'beast').forEach(m => { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; });
+      addBattleLog(`${owner === G.player ? '你的' : '敌方的'}野兽随从获得+2/+2`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'draw_2':
+      drawCard(owner, true); drawCard(owner, true);
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}抽了两张牌`, owner === G.player ? 'player' : 'enemy');
+      break;
   }
 }
 
@@ -925,6 +961,7 @@ function executeBattlecry(card, minion, owner, opponent, target) {
 
 function getSpellPower(player) {
   let sp = player.spellPower || 0;
+  if (player === G.player && hasRelic('spell_power_3')) sp += 3;
   player.minions.forEach(m => {
     if (!m.dead && m.spellDamage) sp += m.spellDamage;
   });
@@ -1213,6 +1250,68 @@ function executeSpell(effect, player, enemy, card, target) {
       player.minions.filter(m => !m.dead && m.race === 'beast').forEach(m => { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; });
       addBattleLog(`${caster}的野兽随从获得+2/+2`, logType);
       break;
+    // === 第9轮修复：补齐此前缺失的法术效果（德鲁伊/萨满/盗贼体系） ===
+    case 'gain_armor_2':
+      player.armor += 2;
+      addBattleLog(`${caster}获得2点护甲`, logType);
+      break;
+    case 'gain_armor_3':
+      player.armor += 3;
+      addBattleLog(`${caster}获得3点护甲`, logType);
+      break;
+    case 'buff_friendly_2_2':
+      {
+        const friends = player.minions.filter(m => !m.dead);
+        if (friends.length > 0) {
+          const f = friends[Math.floor(Math.random() * friends.length)];
+          f.currentAttack += 2; f.currentHp += 2; f.maxHp += 2;
+          addBattleLog(`${caster}为${f.name}施加印记，+2/+2`, logType);
+        }
+      }
+      break;
+    case 'freeze_enemy':
+      if (target && !target.dead) {
+        target.frozen = true; target.canAttack = false;
+        addBattleLog(`${caster}冻结了 ${target.name}`, logType);
+      } else if (enemy.minions.length > 0) {
+        const m = enemy.minions[0];
+        m.frozen = true; m.canAttack = false;
+        addBattleLog(`${caster}冻结了 ${m.name}`, logType);
+      }
+      break;
+    case 'buff_all_1_1':
+      player.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
+      addBattleLog(`${caster}的所有随从获得+1/+1`, logType);
+      break;
+    case 'summon_1_1_charge':
+      if (player.minions.length < 7) {
+        const w = createMinion({ id: 'wolf_token_' + uid(), name: '幽灵狼', cost: 2, attack: 1, hp: 1, rarity: 'common', art: '🐺', text: '冲锋', charge: true }, player === G.player);
+        w.canAttack = true; w.attacksLeft = 1;
+        player.minions.push(w);
+        addBattleLog(`${caster}召唤了一只1/1冲锋幽灵狼`, logType);
+      }
+      break;
+    case 'draw_1':
+      drawCard(player, true);
+      addBattleLog(`${caster}抽了一张牌`, logType);
+      break;
+    // === 第9轮新增效果补齐（新职业卡用到的通用数值） ===
+    case 'deal_3':
+      dealDamage(target || enemy, 3 + sp, player);
+      break;
+    case 'deal_4':
+      dealDamage(target || enemy, 4 + sp, player);
+      break;
+    case 'heal_4':
+      if (!target) target = player;
+      if (target === G.player || target === G.enemy) {
+        target.hp = Math.min(target.maxHp, target.hp + 4);
+        floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '+4', 'heal');
+      } else {
+        target.currentHp = Math.min(target.maxHp, target.currentHp + 4);
+      }
+      addBattleLog(`${caster}恢复4点生命`, logType);
+      break;
   }
 }
 
@@ -1262,6 +1361,10 @@ function attack(attacker, target, isEnemyAttacking) {
     if (isEnemyAttacking && hasRelic('thorns_2') && !attacker.dead) {
       dealDamage(attacker, 2, G.player);
     }
+    // Thorns_3 relic (第9轮新增荆棘圣域): reflect 3
+    if (isEnemyAttacking && hasRelic('thorns_3') && !attacker.dead) {
+      dealDamage(attacker, 3, G.player);
+    }
   } else {
     // Minion vs minion
     const targetDmg = target.currentAttack || 0;
@@ -1293,6 +1396,10 @@ function attack(attacker, target, isEnemyAttacking) {
     // Thorns_2 relic: reflect 2
     if (isEnemyAttacking && hasRelic('thorns_2') && !attacker.dead) {
       dealDamage(attacker, 2, G.player);
+    }
+    // Thorns_3 relic (第9轮新增荆棘圣域): reflect 3
+    if (isEnemyAttacking && hasRelic('thorns_3') && !attacker.dead) {
+      dealDamage(attacker, 3, G.player);
     }
   }
   

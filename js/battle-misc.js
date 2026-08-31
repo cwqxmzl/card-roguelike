@@ -172,6 +172,15 @@ function onBattleWon() {
   setEndTurnButtonState('enemy');
   addBattleLog('战斗胜利！敌人已被击败', 'system');
 
+  // 第9轮：独立教学演示——不结算奖励/金币/进度，直接返回
+  if (G.tutorialDemo) {
+    setTimeout(() => {
+      addBattleLog('教学练习完成！正在返回主菜单...', 'system');
+      endTutorialDemo();
+    }, 900);
+    return;
+  }
+
   const type = G.battle.enemyType;
   let goldReward;
   if (type === 'boss') goldReward = 50;
@@ -188,6 +197,13 @@ function onBattleWon() {
   G.gold += goldReward;
   addBattleLog(`获得${goldReward}金币`, 'system');
   playMusic('menu');
+
+  // 第9轮：战意恢复（局外强化 heal_per_battle：每级战后恢复2点生命）
+  if (typeof metaLevel === 'function' && metaLevel('heal_per_battle') > 0 && !G.tutorial) {
+    const healAmt = 2 * metaLevel('heal_per_battle');
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + healAmt);
+    addBattleLog(`战意恢复：恢复了${healAmt}点生命`, 'player');
+  }
 
   // Tutorial progression: complete both tutorial battles -> mark done
   if (type === 'tutorial_1' || type === 'tutorial_2') {
@@ -207,6 +223,8 @@ function onBattleWon() {
   // Boss: always get a passive treasure + reward choice
 
   if (type === 'boss') {
+    G.battle.bossBonusChoices = (typeof metaLevel === 'function') ? metaLevel('boss_reward') : 0;
+    if (hasRelic('boss_gold')) { G.gold += 30; addBattleLog('首领之印：额外获得30金币', 'player'); }
     setTimeout(() => {
       grantRelic(G);
       showRewardTypeSelection(`击败 ${G.enemy.name}！`);
@@ -274,7 +292,8 @@ function showCardPackReward() {
     return true;
   });
   const cards = [];
-  for (let i = 0; i < 3; i++) {
+  const bonus = (G.battle && G.battle.bossBonusChoices) || 0;
+  for (let i = 0; i < 3 + bonus; i++) {
     let card;
     const rareLv = (getMetaProgress().upgrades && getMetaProgress().upgrades.start_rare) || 0;
     if (Math.random() < (0.2 + rareLv * 0.15) && G.act > 0) {
@@ -491,6 +510,14 @@ function onBattleLost() {
   setEndTurnButtonState('enemy');
   addBattleLog('你被击败了...', 'system');
   playMusic('menu');
+  // 第9轮：独立教学演示——不结算碎晶/结束界面，直接返回
+  if (G.tutorialDemo) {
+    setTimeout(() => {
+      addBattleLog('教学练习结束，正在返回主菜单...', 'system');
+      endTutorialDemo();
+    }, 900);
+    return;
+  }
   clearSave();
   saveMetaProgress('defeat');
 

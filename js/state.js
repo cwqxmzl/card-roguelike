@@ -54,13 +54,23 @@ function initGame(classId) {
   // Apply meta upgrades
   const meta = getMetaProgress();
   const upgrades = meta.upgrades || {};
-  if (upgrades.max_hp) { G.player.maxHp += 5 * upgrades.max_hp; G.player.hp = G.player.maxHp; }
-  if (upgrades.start_gold) G.gold += 15 * upgrades.start_gold;
-  if (upgrades.start_armor) G.relics.push({ id: 'meta_armor', name: '护甲精通', icon: '🛡️', effect: 'armor_start', description: `每场战斗开始+${2 * upgrades.start_armor}护甲` });
-  if (upgrades.first_draw) G.relics.push({ id: 'meta_first_draw', name: '先手优势', icon: '🃏', effect: 'extra_draw', description: '第一回合多抽1张' });
-  if (upgrades.first_mana) G.relics.push({ id: 'meta_first_mana', name: '法力涌动', icon: '🔷', effect: 'extra_mana_start', description: '第一回合+1法力' });
-  if (upgrades.hero_power_discount) G.player.heroPower.cost = Math.max(0, G.player.heroPower.cost - 1);
-  if (upgrades.start_relic) grantRelic(G);
+  if (upgrades.max_hp) { G.player.maxHp += 4 * upgrades.max_hp; G.player.hp = G.player.maxHp; }
+  if (upgrades.start_gold) G.gold += 12 * upgrades.start_gold;
+  if (upgrades.start_armor) G.relics.push({ id: 'meta_armor', name: '护甲精通', icon: '🛡️', effect: 'armor_start', level: upgrades.start_armor, description: `每场战斗开始+${2 * upgrades.start_armor}护甲` });
+  if (upgrades.first_draw) G.relics.push({ id: 'meta_first_draw', name: '先手优势', icon: '🃏', effect: 'extra_draw', level: upgrades.first_draw, description: `第一回合多抽${upgrades.first_draw}张牌` });
+  if (upgrades.first_mana) G.relics.push({ id: 'meta_first_mana', name: '法力涌动', icon: '🔷', effect: 'extra_mana_start', level: upgrades.first_mana, description: `第一回合+${upgrades.first_mana}法力` });
+  if (upgrades.hero_power_discount) G.player.heroPower.cost = Math.max(1, G.player.heroPower.cost - upgrades.hero_power_discount);
+  // 第9轮：初始遗物改为按等级提升获得概率（每级20%）
+  if (upgrades.start_relic) {
+    const relicChance = Math.min(1, 0.2 * upgrades.start_relic);
+    for (let i = 0; i < upgrades.start_relic; i++) {
+      if (Math.random() < relicChance) grantRelic(G);
+    }
+  }
+  // 第9轮：手牌扩容（最大手牌+等级，上限15）
+  if (upgrades.max_hand) {
+    GAME_CONFIG.battle.maxHandSize = Math.min(15, GAME_CONFIG.battle.maxHandSize + upgrades.max_hand);
+  }
 
   // Meta upgrade: card_upgrade - upgrade 2 random starting cards per level
   if (upgrades.card_upgrade) {

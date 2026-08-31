@@ -307,6 +307,11 @@ function shopRemoveCard() {
     wrapper.onmouseout = () => { wrapper.style.transform = ''; };
     wrapper.onclick = () => {
       G.gold -= G.shopInventory.removeCost;
+      if (typeof metaLevel === 'function' && metaLevel('card_refund') > 0) {
+        const refund = 2 * metaLevel('card_refund');
+        G.gold += refund;
+        log(`卡牌回收返还了 ${refund} 金币`);
+      }
       G.shopInventory.removeSold = true;
       G.player.deck.splice(i, 1);
       log(`商店移除了 ${card.name}`);
