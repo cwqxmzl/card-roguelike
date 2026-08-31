@@ -179,6 +179,7 @@ function onBattleWon() {
   else goldReward = 15;
 
   if (hasRelic('double_gold')) goldReward *= 2;
+  if (hasRelic('gold_each_battle')) goldReward += 3;
   // Apply difficulty gold multiplier
   if (G.difficulty) {
     const d = DIFFICULTY_SETTINGS[G.difficulty];
@@ -186,6 +187,7 @@ function onBattleWon() {
   }
   G.gold += goldReward;
   addBattleLog(`获得${goldReward}金币`, 'system');
+  playMusic('menu');
 
   // Boss: always get a passive treasure + reward choice
   if (type === 'boss') {
@@ -471,6 +473,7 @@ function onBattleLost() {
   if (G.battle.attackSafetyTimer) { clearTimeout(G.battle.attackSafetyTimer); G.battle.attackSafetyTimer = null; }
   setEndTurnButtonState('enemy');
   addBattleLog('你被击败了...', 'system');
+  playMusic('menu');
   clearSave();
   saveMetaProgress('defeat');
 

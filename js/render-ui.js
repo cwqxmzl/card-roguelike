@@ -14,7 +14,12 @@ function hideOverlay(id) { document.getElementById(id).classList.remove('active'
 // ===================== MAP RENDERING =====================
 function renderMap() {
   const diffName = G.difficulty ? DIFFICULTY_SETTINGS[G.difficulty]?.name || '' : '';
-  document.getElementById('map-act-title').textContent = ACT_NAMES[G.act] + (diffName ? ` · ${diffName}` : '');
+  let actName = ACT_NAMES[G.act];
+  if (G.act >= ACT_NAMES.length) {
+    const loop = G.act - ACT_NAMES.length + 1;
+    actName = `无尽轮回 · 第${loop}回`;
+  }
+  document.getElementById('map-act-title').textContent = actName + (diffName ? ` · ${diffName}` : '');
   document.getElementById('map-hp').textContent = `${G.player.hp}/${G.player.maxHp}`;
   document.getElementById('map-gold').textContent = G.gold;
   document.getElementById('map-deck').textContent = G.player.deck.length;
@@ -168,8 +173,10 @@ function completeNode() {
   
   // Check if act completed (boss defeated)
   if (node.type === 'boss') {
+    const mode = G.mode || 'endless';
     G.act++;
-    if (G.act >= 3) {
+    const victoryAt = mode === 'sprint' ? 1 : 3;
+    if (mode !== 'endless' && G.act >= victoryAt) {
       clearSave();
       saveMetaProgress('victory');
       const meta = getMetaProgress();
@@ -177,6 +184,7 @@ function completeNode() {
       playSfx('victory');
       showOverlay('overlay-victory');
     } else {
+      // 无限模式：持续生成更强的地图
       generateMap(G.act);
       showScreen('map');
       renderMap();

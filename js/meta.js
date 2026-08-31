@@ -53,6 +53,14 @@ function skipTutorial() {
 
 // ===================== DIFFICULTY SYSTEM =====================
 let currentDifficulty = 'normal';
+let currentMode = 'standard';
+
+function selectMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.difficulty-btn[data-mode]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+}
 
 const DIFFICULTY_SETTINGS = {
   easy:   { name: '简单', enemyHpMult: 0.8, enemyAtkMult: 0.8, goldMult: 1.2, startGold: 30, hpMult: 1.1, shardMult: 0.7 },
@@ -75,6 +83,12 @@ function applyDifficulty() {
   G.player.maxHp = Math.floor(G.player.maxHp * d.hpMult);
   G.player.hp = G.player.maxHp;
   G.gold = Math.max(0, G.gold + d.startGold);
+  // 极速模式：单幕浓缩资源
+  if (currentMode === 'sprint') {
+    G.player.maxHp = Math.floor(G.player.maxHp * 1.2);
+    G.player.hp = G.player.maxHp;
+    G.gold += 25;
+  }
 }
 
 // ===================== SETTINGS SYSTEM =====================
@@ -260,6 +274,7 @@ function saveGame() {
   try {
     const state = {
       act: G.act,
+      mode: G.mode,
       selectedClass: G.selectedClass,
       map: G.map,
       player: {
@@ -298,6 +313,7 @@ function continueRun() {
   if (!state) return;
   G = {
     act: state.act,
+    mode: state.mode || 'endless',
     selectedClass: state.selectedClass,
     map: state.map,
     currentNode: null,
@@ -415,19 +431,70 @@ function buyMetaUpgrade(upgradeId) {
 let audioCtx = null;
 let musicNodes = [];
 let musicPlaying = false;
+let bgmSource = null;
+let currentBgmTrack = null;
+const bgmBufferCache = {};
+const BGM_TRACKS = {
+  menu: 'assets/audio/bgm-menu.wav',
+  battle: 'assets/audio/bgm-battle.wav',
+  boss: 'assets/audio/bgm-boss.wav',
+};
 
 function initAudio() {
   if (audioCtx) return;
   try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { /* error handled */ }
 }
 
-function playMusic() {
+// 播放背景音乐（支持曲目：menu/battle/boss；加载失败自动回退合成音）
+function playMusic(track) {
   initAudio();
   if (!audioCtx) return;
-  if (musicPlaying) return;
+  const want = track || 'menu';
+  if (musicPlaying && currentBgmTrack === want) return;
+  stopMusic();
   musicPlaying = true;
-  document.getElementById('music-toggle').textContent = '🎵';
+  currentBgmTrack = want;
+  const toggleBtn = document.getElementById('music-toggle');
+  if (toggleBtn) toggleBtn.textContent = '🎵';
 
+  // 有缓存直接用
+  if (bgmBufferCache[want]) { startBgmSource(bgmBufferCache[want]); return; }
+
+  const file = BGM_TRACKS[want];
+  if (!file) { legacyPlayMusic(); return; }
+
+  // 本地文件（file://）fetch 可能受限，但 GitHub Pages 正常；失败回退合成
+  fetch(file)
+    .then(r => { if (!r.ok) throw new Error('http'); return r.arrayBuffer(); })
+    .then(buf => audioCtx.decodeAudioData(buf))
+    .then(audioBuf => {
+      if (!musicPlaying || currentBgmTrack !== want) return;
+      bgmBufferCache[want] = audioBuf;
+      startBgmSource(audioBuf);
+    })
+    .catch(() => {
+      if (musicPlaying && currentBgmTrack === want) legacyPlayMusic();
+    });
+}
+
+function startBgmSource(buffer) {
+  if (!audioCtx || !musicPlaying || !buffer) return;
+  try {
+    const src = audioCtx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0.4;
+    src.connect(gain);
+    gain.connect(audioCtx.destination);
+    src.start();
+    bgmSource = src;
+  } catch(e) { /* ignore */ }
+}
+
+// 振荡器合成兜底（与旧版相同，作为本地 file:// 打开时的回退）
+function legacyPlayMusic() {
+  if (!musicPlaying || !audioCtx) return;
   const baseNotes = [220, 246.94, 277.18, 329.63];
   const melody = [440, 493.88, 523.25, 587.33, 659.25, 523.25, 440, 392];
   let melodyIdx = 0;
@@ -445,7 +512,6 @@ function playMusic() {
     osc.start(time);
     osc.stop(time + duration);
     musicNodes.push(osc);
-    // Release finished oscillators from the tracking array (prevents unbounded growth)
     osc.onended = () => {
       const i = musicNodes.indexOf(osc);
       if (i >= 0) musicNodes.splice(i, 1);
@@ -473,9 +539,12 @@ function playMusic() {
 
 function stopMusic() {
   musicPlaying = false;
+  currentBgmTrack = null;
+  if (bgmSource) { try { bgmSource.stop(); } catch(e) {} bgmSource = null; }
   musicNodes.forEach(n => { try { n.stop(); } catch(e) {} });
   musicNodes = [];
-  document.getElementById('music-toggle').textContent = '🔇';
+  const toggleBtn = document.getElementById('music-toggle');
+  if (toggleBtn) toggleBtn.textContent = '🔇';
 }
 
 function toggleMusic() {

@@ -1871,3 +1871,59 @@ html.fast-forward *::after {
   border-radius: 50%;
   overflow: hidden;
 }
+
+
+/* ==================== 手机横屏适配（拓宽空间） ==================== */
+@media (orientation: landscape) and (max-height: 560px) {
+  body { font-size: 13px; }
+
+  /* 战斗界面：横向紧凑布局 */
+  #screen-battle { overflow: hidden; }
+  .battle-top { padding: 4px 10px; }
+  .enemy-area { padding: 3px; }
+  .enemy-portrait { width: 44px; height: 44px; font-size: 20px; }
+  .enemy-name { font-size: 11px; }
+  .hp-bar { width: 76px; height: 15px; }
+  .hp-text { font-size: 10px; }
+  .enemy-info-badge { padding: 1px 5px; font-size: 9px; }
+  .battle-ctrl-btn { padding: 3px 7px; font-size: 10px; }
+
+  /* 战场：随从区横向排布，压低高度 */
+  .battle-field { padding: 3px 6px; }
+  .field-row { min-height: 62px; gap: 4px; padding: 1px; }
+  .enemy-minion-area, .player-minion-area { min-height: 62px; gap: 3px; }
+  .battle-center { padding: 2px; }
+  .end-turn-btn { padding: 5px 14px; font-size: 12px; }
+
+  /* 玩家区：横向一行 */
+  .player-area { padding: 3px 10px; gap: 8px; }
+  .player-portrait { width: 44px; height: 44px; font-size: 20px; }
+  .mana-bar { gap: 2px; }
+  .mana-gem { width: 16px; height: 16px; font-size: 10px; }
+
+  /* 手牌区：更大面积，卡牌略小 */
+  .hand-area { min-height: 118px; padding: 0 6px 3px; gap: 3px; }
+  .hand-area .card { transform: scale(0.82); transform-origin: bottom center; }
+  .hand-area .card:hover { transform: scale(0.82) translateY(-18px); }
+
+  /* 战斗日志按钮位置调整 */
+  .battle-log-toggle { right: 4px; }
+
+  /* 地图：更紧凑的横排 */
+  .map-header { padding: 5px 10px; }
+  .map-title { font-size: 14px; }
+  .map-container { padding: 10px 8px; }
+  .map-row { gap: 8px; margin-bottom: 12px; }
+  .map-node { width: 38px; height: 38px; font-size: 17px; }
+
+  /* 菜单：适配横屏高度 */
+  .menu-title { font-size: 24px; margin-top: 4px; }
+  .menu-btn { width: 180px; padding: 8px 20px; font-size: 14px; min-height: 40px; }
+
+  /* 商店/奖励/事件弹层：横屏居中 */
+  .overlay-content { max-height: 92vh; overflow-y: auto; }
+  .shop-grid, .reward-cards { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+
+  /* 通用 overlay 全屏适配 */
+  .modal-body { max-height: 88vh; overflow-y: auto; }
+}

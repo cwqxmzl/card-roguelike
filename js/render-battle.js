@@ -255,8 +255,8 @@ function renderMinion(m, isPlayer) {
   // Target indicator (for minion attacks)
   if (G.battle.targetingMode === 'target' && G.battle.selectedMinion) {
     if (!isPlayer) {
-      const taunts = G.enemy.minions.filter(mm => mm.taunt && !mm.dead);
-      if (taunts.length === 0 || m.taunt) {
+      const taunts = G.enemy.minions.filter(mm => mm.taunt && !mm.dead && !mm.stealth);
+      if ((taunts.length === 0 && !m.stealth) || m.taunt) {
         div.classList.add('minion-target');
         div.onclick = () => attackTarget(m);
       }

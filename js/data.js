@@ -299,6 +299,66 @@ const CARD_POOL = [
   // ---- 魔力增幅系（影之诗 Spellboost） ----
   { id: 'boost_fireball', name: '增幅火球', cost: 6, type: 'spell', rarity: 'epic', art: '🔥', text: '造成6点伤害。魔力增幅：每使用一张法术，费用-1', effect: 'deal_6_face', spellboost: 4 },
   { id: 'boost_blizzard', name: '增幅暴风雪', cost: 8, type: 'spell', rarity: 'epic', art: '❄️', text: '对所有敌方随从造成3点伤害并冻结。魔力增幅：每使用一张法术，费用-1', effect: 'blizzard', spellboost: 5 },
+
+  // ===================== ROGUE (盗贼) =====================
+  { id: 'backstab', name: '背刺', cost: 1, type: 'spell', rarity: 'common', art: '🔪', text: '造成3点伤害', effect: 'deal_3_face' },
+  { id: 'sin_strike', name: '影袭', cost: 2, type: 'spell', rarity: 'common', art: '🌑', text: '造成3点伤害', effect: 'deal_3_face' },
+  { id: 'eviscerate', name: '刺骨', cost: 3, type: 'spell', rarity: 'rare', art: '🗡️', text: '造成5点伤害', effect: 'deal_5' },
+  { id: 'fan_knives', name: '刀扇', cost: 3, type: 'spell', rarity: 'common', art: '🌀', text: '对所有敌人造成1点伤害并抽1张牌', effect: 'fan_of_knives' },
+  { id: 'sap', name: '闷棍', cost: 3, type: 'spell', rarity: 'rare', art: '🪄', text: '消灭一个敌方随从', effect: 'assassinate' },
+  { id: 'poison_blade', name: '淬毒之刃', cost: 2, type: 'weapon', attack: 2, durability: 2, rarity: 'common', art: '⚔️', text: '武器' },
+  { id: 'stealth_knife', name: '潜行匕首', cost: 1, type: 'weapon', attack: 1, durability: 3, rarity: 'common', art: '🗡️', text: '武器' },
+  { id: 'sprint', name: '疾跑', cost: 4, type: 'spell', rarity: 'common', art: '💨', text: '抽3张牌', effect: 'draw_3' },
+  { id: 'combo_strike', name: '连击之刃', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '⚡', text: '战吼：造成2点伤害', battlecry: 'deal_2' },
+  { id: 'shadow_step', name: '暗影步', cost: 1, type: 'spell', rarity: 'epic', art: '🌫️', text: '回响·获得1点法力水晶', effect: 'gain_mana_1', echo: true },
+  { id: 'bribery', name: '收买', cost: 4, type: 'spell', rarity: 'epic', art: '💰', text: '获得一个敌方随从的控制权', effect: 'mind_control' },
+  { id: 'master_poisoner', name: '淬毒大师', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'epic', art: '🧪', text: '剧毒', poisonous: true },
+  { id: 'rogue_legend', name: '影之君主', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '👑', text: '冲锋·潜行', charge: true, stealth: true },
+  // ===================== DRUID (德鲁伊) =====================
+  { id: 'claw', name: '爪击', cost: 1, type: 'spell', rarity: 'common', art: '🐾', text: '造成3点伤害', effect: 'deal_3_face' },
+  { id: 'bite', name: '撕咬', cost: 2, type: 'spell', rarity: 'common', art: '🦷', text: '获得4点护甲', effect: 'gain_armor_4' },
+  { id: 'wild_growth', name: '野性成长', cost: 2, type: 'spell', rarity: 'rare', art: '🌱', text: '获得1点法力水晶', effect: 'gain_mana_1' },
+  { id: 'ironbark', name: '铁树皮', cost: 4, type: 'spell', rarity: 'rare', art: '🌳', text: '获得8点护甲', effect: 'gain_armor_8' },
+  { id: 'mark_wild', name: '野性印记', cost: 3, type: 'spell', rarity: 'rare', art: '🖐️', text: '所有友方随从+2/+2', effect: 'buff_friendly_2_2' },
+  { id: 'moonfire', name: '月火术', cost: 1, type: 'spell', rarity: 'common', art: '🌙', text: '造成1点伤害', effect: 'deal_1' },
+  { id: 'nourish', name: '滋养', cost: 4, type: 'spell', rarity: 'rare', art: '💧', text: '抽3张牌', effect: 'draw_3' },
+  { id: 'treant_call', name: '召唤树人', cost: 5, type: 'spell', rarity: 'epic', art: '🌲', text: '召唤两个2/2树人', effect: 'summon_two_2_2' },
+  { id: 'pack_alpha', name: '狼群首领', cost: 4, type: 'minion', attack: 4, hp: 4, rarity: 'rare', art: '🐺', text: '野兽·战吼：召唤一个2/2幼狼', battlecry: 'summon_2_2', race: 'beast' },
+  { id: 'ancient_guard', name: '古树守卫', cost: 5, type: 'minion', attack: 3, hp: 8, rarity: 'rare', art: '🛡️', text: '嘲讽', taunt: true },
+  { id: 'forest_king', name: '森林之王', cost: 7, type: 'minion', attack: 6, hp: 8, rarity: 'legendary', art: '👑', text: '嘲讽·野兽', taunt: true, race: 'beast' },
+  { id: 'starfall', name: '星火术', cost: 6, type: 'spell', rarity: 'rare', art: '☄️', text: '造成6点伤害', effect: 'deal_6_face' },
+  // ===================== SHAMAN (萨满) =====================
+  { id: 'frost_shock', name: '冰霜震击', cost: 1, type: 'spell', rarity: 'common', art: '❄️', text: '造成2点伤害并冻结', effect: 'freeze_enemy' },
+  { id: 'totem_power', name: '图腾之力', cost: 2, type: 'spell', rarity: 'common', art: '🌀', text: '所有随从+1/+1', effect: 'buff_all_1_1' },
+  { id: 'rock_hammer', name: '岩锤', cost: 2, type: 'weapon', attack: 2, durability: 2, rarity: 'common', art: '🔨', text: '武器' },
+  { id: 'flame_blast', name: '烈焰冲击', cost: 2, type: 'spell', rarity: 'common', art: '🔥', text: '造成3点伤害', effect: 'deal_3_face' },
+  { id: 'spirit_wolf', name: '幽灵狼', cost: 3, type: 'spell', rarity: 'rare', art: '🐺', text: '召唤一个1/1冲锋幽灵狼', effect: 'summon_1_1_charge' },
+  { id: 'lightning_storm', name: '闪电风暴', cost: 3, type: 'spell', rarity: 'rare', art: '⛈️', text: '对所有敌人造成2点伤害', effect: 'lightning_storm' },
+  { id: 'windfury_totem', name: '风怒图腾', cost: 2, type: 'minion', attack: 0, hp: 3, rarity: 'common', art: '🌬️', text: '风怒', windfury: true },
+  { id: 'earth_shield', name: '大地之盾', cost: 2, type: 'spell', rarity: 'common', art: '🪨', text: '获得3点护甲', effect: 'gain_armor_3' },
+  { id: 'lava_burst', name: '熔岩爆裂', cost: 4, type: 'spell', rarity: 'rare', art: '🌋', text: '造成5点伤害', effect: 'deal_5' },
+  { id: 'storm_giant', name: '风暴巨人', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'epic', art: '🗿', text: '风怒', windfury: true },
+  { id: 'totem_army', name: '图腾军团', cost: 5, type: 'spell', rarity: 'epic', art: '🪔', text: '召唤两个0/2嘲讽图腾', effect: 'summon_two_0_2' },
+  { id: 'elem_surge', name: '元素涌动', cost: 3, type: 'spell', rarity: 'epic', art: '✨', text: '造成3点伤害并抽1张牌', effect: 'deal_3_draw_1' },
+
+  // ===================== 体系卡牌：元素/机械/龙/鱼人/恶魔/野兽 =====================
+  { id: 'elem_spark', name: '火花元素', cost: 1, type: 'minion', attack: 1, hp: 2, rarity: 'common', art: '✨', text: '元素', race: 'elemental' },
+  { id: 'elem_wave', name: '焰浪元素', cost: 3, type: 'minion', attack: 3, hp: 4, rarity: 'common', art: '🌊', text: '元素·战吼：抽1张牌', battlecry: 'draw_1', race: 'elemental' },
+  { id: 'elem_ice', name: '冰晶元素', cost: 4, type: 'minion', attack: 3, hp: 5, rarity: 'rare', art: '❄️', text: '元素·嘲讽', taunt: true, race: 'elemental' },
+  { id: 'mech_drone', name: '侦查无人机', cost: 2, type: 'minion', attack: 2, hp: 2, rarity: 'common', art: '🚁', text: '机械', race: 'mech' },
+  { id: 'mech_repair', name: '修理机器人', cost: 3, type: 'minion', attack: 2, hp: 3, rarity: 'common', art: '🔧', text: '机械·战吼：恢复3点生命', battlecry: 'heal_3', race: 'mech' },
+  { id: 'mech_giant', name: '巨型机甲', cost: 6, type: 'minion', attack: 6, hp: 6, rarity: 'rare', art: '🤖', text: '机械·嘲讽', taunt: true, race: 'mech' },
+  { id: 'dragon_whelp', name: '幼龙', cost: 1, type: 'minion', attack: 1, hp: 1, rarity: 'common', art: '🐲', text: '龙', race: 'dragon' },
+  { id: 'dragon_elder', name: '龙族长者', cost: 5, type: 'minion', attack: 4, hp: 5, rarity: 'rare', art: '🐉', text: '龙·战吼：若手牌有龙则+1/+1', battlecry: 'dragon_buff', race: 'dragon' },
+  { id: 'dragon_queen', name: '龙母', cost: 7, type: 'minion', attack: 5, hp: 8, rarity: 'epic', art: '🐲', text: '龙·嘲讽', taunt: true, race: 'dragon' },
+  { id: 'murloc_scout', name: '鱼人斥候', cost: 1, type: 'minion', attack: 1, hp: 1, rarity: 'common', art: '🐟', text: '鱼人·冲锋', charge: true, race: 'murloc' },
+  { id: 'murloc_tide', name: '鱼人潮汐', cost: 3, type: 'minion', attack: 3, hp: 2, rarity: 'rare', art: '🌊', text: '鱼人·战吼：所有鱼人+1/+1', battlecry: 'buff_murlocs_1_1', race: 'murloc' },
+  { id: 'murloc_king', name: '鱼人王', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'epic', art: '👑', text: '鱼人·战吼：抽2张牌', battlecry: 'draw_2', race: 'murloc' },
+  { id: 'demon_imp', name: '恶魔小鬼', cost: 1, type: 'minion', attack: 1, hp: 1, rarity: 'common', art: '👿', text: '恶魔', race: 'demon' },
+  { id: 'demon_lord', name: '深渊领主', cost: 5, type: 'minion', attack: 5, hp: 5, rarity: 'rare', art: '😈', text: '恶魔·战吼：造成2点伤害', battlecry: 'deal_2', race: 'demon' },
+  { id: 'fel_giant', name: '邪能巨人', cost: 8, type: 'minion', attack: 8, hp: 8, rarity: 'epic', art: '👹', text: '恶魔·嘲讽', taunt: true, race: 'demon' },
+  { id: 'beast_howler', name: '嚎叫兽', cost: 3, type: 'minion', attack: 3, hp: 3, rarity: 'common', art: '🐻', text: '野兽·战吼：所有野兽+1/+1', battlecry: 'buff_beasts_1_1', race: 'beast' },
+  { id: 'beast_scavenger', name: '清道夫', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '🐺', text: '野兽·亡语：抽1张牌', deathrattle: 'draw_1_owner', race: 'beast' },
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -345,7 +405,28 @@ const CLASSES = {
     cardPool: ['blood_imp','death_stalker','undead_knight','cultist','sylvanas','deathwing','mind_control','faceless','lightning_bolt','fan_of_knives','berserker','ogre','wolf','murloc','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader','war_drain','war_imp','war_demon','war_hellfire','war_drain_life','war_imp_king','war_corruption','war_shadow_bolt','war_doomguard','war_pit_lord','war_lifedrain','war_demonlord','war_fel_dog','war_soul_drain','war_void_walker','reb_undead','reb_ghost','reb_phoenix','evo_summoner','chain_fire'],
     signature: 'regen',
   },
-};
+  rogue: {
+    name: '盗贼', portrait: '🗡️', portraitImg: 'assets/portrait-rogue.jpg', color: '#20B2AA', hp: 28,
+    heroPower: { name: '致命药膏', cost: 2, type: 'rogue', description: '装备一把1/2匕首' },
+    starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','backstab','sin_strike','eviscerate','fan_knives','sap'],
+    cardPool: ['backstab','sin_strike','eviscerate','fan_knives','sap','poison_blade','stealth_knife','sprint','combo_strike','shadow_step','bribery','master_poisoner','rogue_legend','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_knight','echo_dagger','chain_fire'],
+    signature: 'double_battlecry',
+  },
+  druid: {
+    name: '德鲁伊', portrait: '🌿', portraitImg: 'assets/portrait-druid.jpg', color: '#4CAF50', hp: 32,
+    heroPower: { name: '野性印记', cost: 2, type: 'druid', description: '获得2点护甲' },
+    starterDeck: ['guardsman','stone_golem','wolf','archer','healer','claw','bite','wild_growth','ironbark','mark_wild'],
+    cardPool: ['claw','bite','wild_growth','ironbark','mark_wild','moonfire','nourish','treant_call','pack_alpha','ancient_guard','forest_king','starfall','wolf','tundra_rhino','beast_king','pack_alpha','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_beast_tamer','reb_serpent','chain_fire'],
+    signature: 'beast_master',
+  },
+  shaman: {
+    name: '萨满', portrait: '🌩️', portraitImg: 'assets/portrait-shaman.jpg', color: '#5DADE2', hp: 30,
+    heroPower: { name: '图腾召唤', cost: 2, type: 'shaman', description: '召唤一个1/1冲锋幽灵狼' },
+    starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf'],
+    cardPool: ['frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf','lightning_storm','windfury_totem','earth_shield','lava_burst','storm_giant','totem_army','elem_surge','lightning_bolt','freeze_elem','water_elemental','overload_lightning','overload_missiles','overload_wolf','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_frost','chain_fire','reb_phoenix'],
+    signature: 'spell_power_1',
+  },
+}
 
 // ===================== PASSIVE TREASURES (RELICS) =====================
 const PASSIVE_TREASURES = [
@@ -430,6 +511,22 @@ const RELICS = [
   { id: 'deathrattle_draw', name: '亡语之书', icon: '📖', desc: '你的随从死亡时，抽1张牌', effect: 'deathrattle_draw' },
   { id: 'first_play_discount', name: '先手优势', icon: '⚡', desc: '每回合第一张牌费用-1（不低于0）', effect: 'first_play_discount' },
   { id: 'minion_cost_1', name: '随从大师', icon: '🐉', desc: '你的随从牌费用-1（不低于1）', effect: 'minion_cost_1' },
+  { id: 'crit_strike', name: '暴击之刃', icon: '💥', desc: '你的随从攻击时有30%概率造成双倍伤害', effect: 'crit_strike' },
+  { id: 'lifesteal', name: '吸血獠牙', icon: '🩸', desc: '你的随从造成伤害时，恢复等量生命', effect: 'lifesteal' },
+  { id: 'echo_relic', name: '回响之笛', icon: '🎶', desc: '每回合第一张牌打出后回到手牌', effect: 'echo_relic' },
+  { id: 'overload_discount', name: '过载掌握', icon: '⚡', desc: '你的过载随从费用-1（不低于0）', effect: 'overload_discount' },
+  { id: 'beast_cost', name: '野兽亲和', icon: '🐾', desc: '你的野兽随从费用-1（不低于0）', effect: 'beast_cost' },
+  { id: 'start_draw_2', name: '智慧典籍', icon: '📚', desc: '每场战斗开始多抽2张牌', effect: 'extra_draw_2' },
+  { id: 'gold_each_battle', name: '黄金护符', icon: '💰', desc: '每场战斗胜利获得3金币', effect: 'gold_each_battle' },
+  { id: 'max_mana_plus', name: '法力之心', icon: '🔷', desc: '最大法力上限+1（上限11）', effect: 'max_mana_plus' },
+  { id: 'thorns_2', name: '荆棘王座', icon: '🌵', desc: '受到伤害时对攻击者造成2点伤害', effect: 'thorns_2' },
+  { id: 'regen_2', name: '再生圣物', icon: '🟢', desc: '每回合结束恢复2点生命', effect: 'regen_2' },
+  { id: 'spell_power_2', name: '大法师之眼', icon: '🔮', desc: '法术伤害+2', effect: 'spell_power_2' },
+  { id: 'fire_aura_2', name: '烈焰王冠', icon: '👑', desc: '回合结束时对敌方造成3点伤害', effect: 'fire_aura_2' },
+  { id: 'armor_turn', name: '岩甲之心', icon: '🪨', desc: '每回合开始获得1点护甲', effect: 'armor_turn' },
+  { id: 'charge_boost', name: '迅捷之翼', icon: '🪽', desc: '你的冲锋随从获得+1/+1', effect: 'charge_boost' },
+  { id: 'heal_on_kill', name: '杀戮治疗', icon: '⚔️', desc: '击杀敌方随从时恢复2点生命', effect: 'heal_on_kill' },
+  { id: 'shop_discount', name: '商人印章', icon: '🏷️', desc: '商店卡牌价格-20%', effect: 'shop_discount' },
 ];
 
 // ===================== META PROGRESSION (局外肉鸽) =====================
@@ -901,6 +998,8 @@ function getCardCost(card) {
   if (card.type === 'spell' && hasRelic('spell_cost_1')) cost -= 1;
   if (hasRelic('cost_reduction')) cost -= 1;
   if (card.type === 'minion' && hasRelic('minion_cost_1')) cost -= 1;
+  if (card.overload && hasRelic('overload_discount')) cost -= 1;
+  if (card.race === 'beast' && hasRelic('beast_cost')) cost -= 1;
   if (hasRelic('first_play_discount') && G.battle && !G.battle.firstCardPlayed) cost -= 1;
   // 魔力增幅（影之诗）：每使用一张法术，此牌费用-1
   if (card.spellboost) {

@@ -9,6 +9,7 @@ function initGame(classId) {
   const cls = CLASSES[classId] || CLASSES.mage;
   G = {
     act: 0,
+    mode: currentMode || 'standard',
     selectedClass: classId || 'mage',
     map: null,
     currentNode: null,
@@ -162,7 +163,8 @@ function applyStartingBonus(bonusId) {
 function generateMap(act) {
   G.act = act;
   const map = { act, rows: [], currentRow: 0 };
-  const numRows = act === 2 ? 8 : 7;
+  const isSprint = G.mode === 'sprint';
+  const numRows = isSprint ? 4 : (act === 2 ? 8 : 7);
   const nodePool = act === 0
     ? ['battle','battle','battle','event','shop','rest','treasure']
     : ['battle','battle','elite','event','shop','rest','treasure','battle'];

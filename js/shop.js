@@ -16,7 +16,7 @@ function openShop() {
     G.shopInventory.cards.push({
       ...card,
       uid: uid(),
-      price: GAME_CONFIG.shop.cardPrices[card.rarity] || 80,
+      price: Math.floor((GAME_CONFIG.shop.cardPrices[card.rarity] || 80) * (hasRelic('shop_discount') ? 0.8 : 1)),
       sold: false,
     });
   }

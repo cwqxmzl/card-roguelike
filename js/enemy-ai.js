@@ -147,6 +147,24 @@ function useHeroPower() {
       G.battle.heroCanAttack = true;
       addBattleLog(`你使用了英雄技能：${G.player.heroPower.name}，装备了一把1/2匕首`, 'player');
       break;
+    case 'druid':
+      G.player.armor += 2;
+      floatText('player-portrait', '+2', 'heal');
+      addBattleLog(`你使用了英雄技能：${G.player.heroPower.name}，获得2点护甲`, 'player');
+      break;
+    case 'shaman':
+      if (G.player.minions.length < 7) {
+        const m = createMinion({ id: 'totem_spirit', name: '幽灵狼', cost: 1, attack: 1, hp: 1, rarity: 'common', art: '🐺', text: '冲锋', charge: true }, true);
+        m.canAttack = true; m.attacksLeft = 1;
+        G.player.minions.push(m);
+        addBattleLog(`你使用了英雄技能：${G.player.heroPower.name}，召唤一个1/1冲锋幽灵狼`, 'player');
+      } else {
+        addBattleLog('战场已满，英雄技能无效', 'system');
+        G.player.mana += G.player.heroPower.cost;
+        G.player.heroPower.used = false;
+        return;
+      }
+      break;
   }
   renderBattle();
   if (G.enemy.hp <= 0) onBattleWon();
