@@ -669,6 +669,22 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
       floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+4', 'heal');
       addBattleLog(`${owner === G.player ? '你' : '敌方'}恢复4点生命`, owner === G.player ? 'player' : 'enemy');
       break;
+    case 'deal_3_all':
+      opponent.minions.filter(m => !m.dead).forEach(m => dealDamage(m, 3, owner));
+      break;
+    case 'gain_armor_5':
+      owner.armor += 5;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得5点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'buff_all_2_2':
+      owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; } });
+      addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+2/+2`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'heal_6':
+      owner.hp = Math.min(owner.maxHp, owner.hp + 6);
+      floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+6', 'heal');
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}恢复6点生命`, owner === G.player ? 'player' : 'enemy');
+      break;
     case 'buff_all_1_1':
       owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
       addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');

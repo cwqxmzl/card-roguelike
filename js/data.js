@@ -66,7 +66,7 @@ const CARD_POOL = [
   { id: 'war_hammer', name: '战锤', cost: 3, type: 'weapon', attack: 3, durability: 2, rarity: 'common', art: '🔨', text: '' },
   { id: 'flame_sword', name: '烈焰之剑', cost: 4, type: 'weapon', attack: 3, durability: 2, rarity: 'common', art: '⚔️', text: '战吼：造成1点伤害', battlecry: 'deal_1_face' },
   // --- Rares ---
-  { id: 'charge_knight', name: '冲锋骑士', cost: 3, type: 'minion', attack: 3, hp: 1, rarity: 'rare', art: '🐴', text: '冲锋', charge: true },
+  { id: 'charge_knight', name: '冲锋骑士', cost: 3, type: 'minion', attack: 3, hp: 2, rarity: 'rare', art: '🐴', text: '冲锋', charge: true },
   { id: 'windfury_harpy', name: '风怒鹰身人', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '🦅', text: '风怒（可攻击两次）', windfury: true },
   { id: 'cultist', name: '邪教徒', cost: 3, type: 'minion', attack: 2, hp: 2, rarity: 'rare', art: '🪬', text: '亡语：使一个友方随从+2/+2', deathrattle: 'buff_friendly_2_2' },
   { id: 'spellblade', name: '法术之刃', cost: 2, type: 'minion', attack: 1, hp: 3, rarity: 'rare', art: '🌀', text: '法术伤害+1', spellDamage: 1 },
@@ -80,7 +80,7 @@ const CARD_POOL = [
   { id: 'flamestrike', name: '烈焰风暴', cost: 5, type: 'spell', rarity: 'rare', art: '🌋', text: '对所有敌方随从造成4点伤害', effect: 'flamestrike' },
   { id: 'assassinate', name: '刺杀', cost: 5, type: 'spell', rarity: 'rare', art: '🗡️', text: '消灭一个敌方随从', effect: 'assassinate' },
   { id: 'circle_healing', name: '群体治疗', cost: 4, type: 'spell', rarity: 'rare', art: '💫', text: '恢复所有友方随从2点生命，英雄恢复4点', effect: 'mass_heal' },
-  { id: 'lightning_storm', name: '闪电风暴', cost: 4, type: 'spell', rarity: 'rare', art: '⛈️', text: '对所有敌方随从造成2点伤害', effect: 'consecration' },
+  { id: 'lightning_storm', name: '闪电风暴', cost: 4, type: 'spell', rarity: 'rare', art: '⛈️', text: '对所有敌方随从造成3点伤害', effect: 'deal_3_all' },
   // Rare Weapons
   { id: 'doom_blade', name: '末日之刃', cost: 5, type: 'weapon', attack: 5, durability: 2, rarity: 'rare', art: '🌑', text: '亡语：对敌方英雄造成3点伤害' },
   // --- Epics ---
@@ -98,12 +98,12 @@ const CARD_POOL = [
   { id: 'sylvanas', name: '黑暗女王', cost: 5, type: 'minion', attack: 5, hp: 4, rarity: 'legendary', art: '👸', artImg: 'assets/card-sylvanas.jpg', text: '亡语：获得一个敌方随从的控制权', deathrattle: 'mind_control_random' },
   { id: 'deathwing', name: '死亡之翼', cost: 10, type: 'minion', attack: 12, hp: 12, rarity: 'legendary', art: '🐲', artImg: 'assets/card-deathwing.jpg', text: '战吼：消灭所有其他随从，弃掉手牌', battlecry: 'deathwing' },
   { id: 'loot_hoarder', name: '藏宝地精', cost: 2, type: 'minion', attack: 2, hp: 1, rarity: 'rare', art: '💰', text: '亡语：抽一张牌', deathrattle: 'draw_1_owner' },
-  { id: 'faceless', name: '无面操纵者', cost: 6, type: 'minion', attack: 3, hp: 3, rarity: 'epic', art: '🎭', text: '战吼：变成一个友方随从的复制', battlecry: 'faceless_copy' },
+  { id: 'faceless', name: '无面操纵者', cost: 6, type: 'minion', attack: 5, hp: 5, rarity: 'epic', art: '🎭', text: '战吼：变成一个友方随从的复制', battlecry: 'faceless_copy' },
   // --- Class Legendaries ---
-  { id: 'arcane_wyrm', name: '奥术巨龙', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🐉', artImg: 'assets/card-arcane-wyrm.jpg', text: '战吼：对所有敌方随从造成2点伤害', battlecry: 'deal_2_all' },
-  { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 5, hp: 7, rarity: 'legendary', art: '🏰', artImg: 'assets/card-iron-bastion.jpg', text: '嘲讽·战吼：获得3点护甲', taunt: true, battlecry: 'gain_armor_3' },
+  { id: 'arcane_wyrm', name: '奥术巨龙', cost: 7, type: 'minion', attack: 7, hp: 7, rarity: 'legendary', art: '🐉', artImg: 'assets/card-arcane-wyrm.jpg', text: '战吼：对所有敌方随从造成3点伤害', battlecry: 'deal_3_all' },
+  { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 6, hp: 8, rarity: 'legendary', art: '🏰', artImg: 'assets/card-iron-bastion.jpg', text: '嘲讽·战吼：获得5点护甲', taunt: true, battlecry: 'gain_armor_5' },
   { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 4, hp: 3, rarity: 'legendary', art: '🦅', artImg: 'assets/card-storm-falcon.jpg', text: '冲锋·风怒', charge: true, windfury: true },
-  { id: 'lightbringer', name: '光明使者', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🕊️', text: '战吼：使所有友方随从+1/+1', battlecry: 'buff_all_1_1' },
+  { id: 'lightbringer', name: '光明使者', cost: 7, type: 'minion', attack: 7, hp: 7, rarity: 'legendary', art: '🕊️', text: '战吼：使所有友方随从+2/+2', battlecry: 'buff_all_2_2' },
   // --- Priest ---
   { id: 'holy_smite', name: '圣光惩击', cost: 2, type: 'spell', rarity: 'common', art: '✨', text: '对任意目标造成3点伤害', effect: 'smite' },
   { id: 'power_word_shield', name: '真言术·盾', cost: 1, type: 'spell', rarity: 'common', art: '🛡️', text: '使一个友方随从+2/+2，抽一张牌', effect: 'pw_shield' },
@@ -111,7 +111,7 @@ const CARD_POOL = [
   { id: 'soul_purify', name: '灵魂净化', cost: 3, type: 'spell', rarity: 'common', art: '🌑', text: '对所有敌方随从造成2点伤害', effect: 'consecration' },
   { id: 'holy_nova', name: '神圣新星', cost: 4, type: 'spell', rarity: 'rare', art: '🌟', text: '对所有敌人造成2点伤害，恢复所有友方角色2点生命', effect: 'holy_nova' },
   { id: 'holy_fire', name: '神圣之火', cost: 5, type: 'spell', rarity: 'rare', art: '🔥', text: '对任意目标造成5点伤害，恢复你5点生命', effect: 'holy_fire' },
-  { id: 'light_pope', name: '光明大祭司', cost: 7, type: 'minion', attack: 6, hp: 7, rarity: 'legendary', art: '🕯️', text: '战吼：恢复4点生命', battlecry: 'heal_4' },
+  { id: 'light_pope', name: '光明大祭司', cost: 7, type: 'minion', attack: 7, hp: 8, rarity: 'legendary', art: '🕯️', text: '战吼：恢复6点生命', battlecry: 'heal_6' },
   // --- New Cards (Balance Expansion) ---
   { id: 'scout', name: '斥候', cost: 1, type: 'minion', attack: 1, hp: 1, rarity: 'common', art: '🔭', text: '战吼：抽一张牌', battlecry: 'draw_1' },
   { id: 'torch_bearer', name: '持炬者', cost: 2, type: 'minion', attack: 2, hp: 3, rarity: 'common', art: '🔥', text: '战吼：造成1点伤害', battlecry: 'deal_1' },
@@ -121,8 +121,8 @@ const CARD_POOL = [
   { id: 'battle_axe', name: '战斧', cost: 2, type: 'weapon', attack: 2, durability: 2, rarity: 'common', art: '🪓', text: '' },
   { id: 'magic_missile', name: '魔法飞弹', cost: 1, type: 'spell', rarity: 'common', art: '✨', text: '造成1点伤害', effect: 'deal_1' },
   { id: 'boulderfist_ogre', name: '石拳食人魔', cost: 5, type: 'minion', attack: 6, hp: 7, rarity: 'rare', art: '👹', text: '' },
-  { id: 'spellbreaker', name: '破法者', cost: 4, type: 'minion', attack: 4, hp: 3, rarity: 'rare', art: '🔮', text: '战吼：造成1点伤害', battlecry: 'deal_1' },
-  { id: 'argent_commander', name: '银色指挥官', cost: 5, type: 'minion', attack: 4, hp: 2, rarity: 'rare', art: '⚔️', text: '冲锋·圣盾', charge: true, divineShield: true },
+  { id: 'spellbreaker', name: '战斗法师', cost: 4, type: 'minion', attack: 4, hp: 3, rarity: 'rare', art: '🔮', text: '战吼：造成1点伤害', battlecry: 'deal_1' },
+  { id: 'argent_commander', name: '银色指挥官', cost: 5, type: 'minion', attack: 4, hp: 3, rarity: 'rare', art: '⚔️', text: '冲锋·圣盾', charge: true, divineShield: true },
   { id: 'guardian_king', name: '守卫之王', cost: 6, type: 'minion', attack: 4, hp: 8, rarity: 'rare', art: '👑', text: '嘲讽', taunt: true },
   { id: 'ancient_warrior', name: '远古战士', cost: 7, type: 'minion', attack: 7, hp: 8, rarity: 'epic', art: '🗿', text: '' },
   { id: 'archmage', name: '大法师', cost: 6, type: 'minion', attack: 4, hp: 7, rarity: 'epic', art: '🧙', text: '法术伤害+2', spellDamage: 2 },
