@@ -181,7 +181,40 @@ function completeNode() {
     if (mode !== 'endless' && G.act >= victoryAt) {
       clearSave();
       saveMetaProgress('victory');
+      // P2-1: Achievement tracking on victory
+      trackStat('totalRuns');
+      trackEvent('run_end', G.selectedClass, 'victory');
+      trackEvent('class_win', G.selectedClass);
+      trackEvent('mode_pick', G.mode);
+      trackEvent('difficulty_pick', G.difficulty || 'normal');
+      if (!isAchievementUnlocked('first_victory')) unlockAchievement('first_victory');
+      if (G.difficulty === 'hard' && !isAchievementUnlocked('first_victory_hard')) unlockAchievement('first_victory_hard');
+      if (G.mode === 'endless' && !isAchievementUnlocked('first_victory_endless')) unlockAchievement('first_victory_endless');
+      if (G.mode === 'sprint' && !isAchievementUnlocked('first_victory_sprint')) unlockAchievement('first_victory_sprint');
+      if (G.player.hp <= 1 && !isAchievementUnlocked('low_hp_victory')) unlockAchievement('low_hp_victory');
+      if (G.relics.length === 1 && !isAchievementUnlocked('no_relic_run')) unlockAchievement('no_relic_run');
+      // Check all-classes achievement
       const meta = getMetaProgress();
+      if (meta.classWins) {
+        const winCount = Object.keys(meta.classWins).length;
+        if (winCount >= 9 && !isAchievementUnlocked('all_classes')) unlockAchievement('all_classes');
+      }
+      // Daily challenge result
+      if (G.dailyChallenge) {
+        const score = getDailyScore();
+        saveDailyResult('victory', score);
+        trackStat('dailyCompleted');
+        if (getStat('dailyCompleted') >= 7 && !isAchievementUnlocked('daily_7')) unlockAchievement('daily_7');
+      }
+      // Relic diversity tracking
+      G.relics.forEach(r => {
+        const data = getAchievements();
+        data.stats = data.stats || {};
+        data.stats.uniqueRelics = data.stats.uniqueRelics || [];
+        if (!data.stats.uniqueRelics.includes(r.id)) data.stats.uniqueRelics.push(r.id);
+        saveAchievements(data);
+      });
+      checkAchievements();
       document.getElementById('victory-info').innerHTML = `你征服了暗影裂境！<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 8} 裂境碎晶</span>`;
       playSfx('victory');
       showOverlay('overlay-victory');

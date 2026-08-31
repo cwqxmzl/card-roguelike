@@ -110,7 +110,8 @@ function renderClassSelect() {
       <div class="class-card-name" style="color:${cls.color}">${cls.name}</div>
       <div class="class-card-power">技能: ${cls.heroPower.name} (${cls.heroPower.cost}费)</div>
       <div class="class-card-desc">${cls.heroPower.description}</div>
-      <div class="class-card-deck">初始卡组: ${cls.starterDeck.length}张<br>专属卡池: ${cls.cardPool.length}张</div>
+      <div class="class-card-deck">初始卡组: ${cls.starterDeck.length}张 · 专属卡池: ${cls.cardPool.length}张</div>
+      <div class="class-card-archetypes" style="font-size:10px;color:#aaa;margin-top:4px;">流派: ${(cls.archetypes || []).join(' / ')}</div>
       <div class="select-hint">▶ 选择此职业</div>
     `;
     card.onclick = () => selectClass(key);
@@ -128,6 +129,10 @@ function selectClass(classId) {
   G.tutorial = localStorage.getItem('tutorialBattleDone') !== '1';
   generateMap(0);
   saveGame();
+  // P2-5: Analytics tracking
+  trackEvent('class_pick', classId);
+  trackEvent('mode_pick', currentMode);
+  trackEvent('difficulty_pick', currentDifficulty);
   showInitialReward();
 }
 

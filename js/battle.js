@@ -150,6 +150,36 @@ function startPlayerTurn() {
   G.battle.firstCardPlayed = false;
   resetChain();
 
+  // P1-1: start_of_turn effects on player minions
+  G.player.minions.forEach(m => {
+    if (m.startOfTurn && !m.dead) {
+      switch (m.startOfTurn) {
+        case 'draw_1':
+          drawCard(G.player, true);
+          addBattleLog(`${m.name}的回合开始效果：抽1张牌`, 'player');
+          break;
+        case 'heal_2':
+          G.player.hp = Math.min(G.player.maxHp, G.player.hp + 2);
+          floatText('player-portrait', '+2', 'heal');
+          addBattleLog(`${m.name}的回合开始效果：恢复2点生命`, 'player');
+          break;
+        case 'buff_self':
+          m.attack = (m.attack || 0) + 1;
+          m.currentHp = (m.currentHp || 0) + 1;
+          addBattleLog(`${m.name}的回合开始效果：+1/+1`, 'player');
+          break;
+        case 'armor_1':
+          G.player.armor += 1;
+          floatText('player-portrait', '+1', 'heal');
+          addBattleLog(`${m.name}的回合开始效果：+1护甲`, 'player');
+          break;
+        case 'deal_enemy_1':
+          if (G.enemy) { dealDamage(G.enemy, 1, m); }
+          break;
+      }
+    }
+  });
+
   // Draw card (extra draw relic)
   drawCard(G.player, true);
   if (hasRelic('extra_draw')) {
@@ -1463,6 +1493,9 @@ function dealDamage(target, amount, source) {
     }
     target.hp -= remaining;
     target.hp = Math.max(0, target.hp);
+    // P2-1: Track big damage achievements
+    if (remaining >= 15 && target === G.enemy) { if (!isAchievementUnlocked('big_damage')) unlockAchievement('big_damage'); }
+    if (remaining >= 30 && target === G.enemy) { if (!isAchievementUnlocked('huge_damage')) unlockAchievement('huge_damage'); }
     if (G.battleStats) {
       const ps = (source === G.player || (source && source.isPlayer === true));
       const es = (source === G.enemy || (source && source.isPlayer === false));
@@ -1517,6 +1550,13 @@ function dealDamage(target, amount, source) {
       playSfx('death');
       if (G.battleStats && !target.isPlayer && (source === G.player || (source && source.isPlayer === true))) G.battleStats.minionsKilled++;
       addBattleLog(`${targetName}被消灭`, 'system');
+      // P2-1: Track kill achievements
+      if (!target.isPlayer) {
+        trackStat('totalKills');
+        if (!isAchievementUnlocked('first_blood')) unlockAchievement('first_blood');
+        if (source && source.poisonous && G.enemy && G.enemy.isBoss) { if (!isAchievementUnlocked('poison_kill')) unlockAchievement('poison_kill'); }
+        if (target.overkill && target.overkill > 0 && !isAchievementUnlocked('overkill')) unlockAchievement('overkill');
+      }
       checkDeathrattle(target, target.isPlayer ? G.player : G.enemy, target.isPlayer ? G.enemy : G.player);
     }
     // Lifesteal: source minion with lifesteal heals its owner by damage dealt

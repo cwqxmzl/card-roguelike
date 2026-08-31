@@ -478,6 +478,11 @@ function confirmSurrender() {
   const shards = Math.max(2, Math.floor((G.act * 3 + (G.map.currentRow || 0)) / 2));
   clearSave();
   saveMetaProgress('defeat', shards);
+  // P2-1: Achievement tracking on surrender
+  trackStat('totalRuns');
+  trackEvent('run_end', G.selectedClass, 'defeat');
+  if (G.dailyChallenge) { saveDailyResult('defeat', getDailyScore()); }
+  checkAchievements();
   const meta = getMetaProgress();
   document.getElementById('gameover-info').innerHTML = `你投降了，结束了本次冒险。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || shards} 裂境碎晶</span>`;
   playSfx('defeat');
@@ -520,6 +525,17 @@ function onBattleLost() {
   }
   clearSave();
   saveMetaProgress('defeat');
+  // P2-1: Achievement tracking on defeat
+  trackStat('totalRuns');
+  trackEvent('run_end', G.selectedClass, 'defeat');
+  trackEvent('class_pick', G.selectedClass);
+  trackEvent('mode_pick', G.mode);
+  trackEvent('difficulty_pick', G.difficulty || 'normal');
+  if (G.dailyChallenge) {
+    const score = getDailyScore();
+    saveDailyResult('defeat', score);
+  }
+  checkAchievements();
 
   setTimeout(() => {
     const meta = getMetaProgress();

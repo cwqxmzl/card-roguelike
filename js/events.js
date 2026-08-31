@@ -241,6 +241,12 @@ function grantRelic(g) {
   const relic = available[Math.floor(Math.random() * available.length)];
   g.relics.push({ ...relic });
   applyRelic(relic);
+  // P2-1: Achievement tracking for relic acquisition
+  if (!isAchievementUnlocked('first_relic')) unlockAchievement('first_relic');
+  if (g.relics.length >= 10 && !isAchievementUnlocked('relic_10')) unlockAchievement('relic_10');
+  if (g.relics.length >= 15 && !isAchievementUnlocked('relic_15')) unlockAchievement('relic_15');
+  // P2-5: Analytics
+  trackEvent('relic_get', relic.id);
 }
 
 function applyRelic(relic) {
