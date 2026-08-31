@@ -130,6 +130,22 @@ const CARD_POOL = [
   { id: 'frostwolf_grunt', name: '霜狼步兵', cost: 3, type: 'minion', attack: 3, hp: 4, rarity: 'common', art: '🐺', text: '战吼：获得3点护甲', battlecry: 'gain_armor_3' },
   { id: 'guardian_of_kings', name: '王者守卫', cost: 5, type: 'minion', attack: 5, hp: 5, rarity: 'rare', art: '🛡️', text: '战吼：恢复4点生命', battlecry: 'heal_4' },
   { id: 'tundra_rhino', name: '苔原犀牛', cost: 4, type: 'minion', attack: 4, hp: 3, rarity: 'common', art: '🦏', text: '冲锋', charge: true, race: 'beast' },
+  // --- New Power Cards (Engine & Finisher Expansion) ---
+  // 构筑引擎：法术流
+  { id: 'arcane_scholar', name: '奥秘学者', cost: 3, type: 'minion', attack: 2, hp: 4, rarity: 'epic', art: '📖', text: '法术伤害+1，战吼：你手牌中所有法术牌费用-1', spellDamage: 1, battlecry: 'reduce_hand_spells' },
+  { id: 'mana_surge', name: '法力奔涌', cost: 4, type: 'spell', rarity: 'epic', art: '🌀', text: '抽3张牌', effect: 'draw_3' },
+  { id: 'spell_mastery', name: '法术精通', cost: 5, type: 'spell', rarity: 'epic', art: '🧙', text: '对所有敌方随从造成5点伤害', effect: 'flamestrike' },
+  // 构筑引擎：野兽流
+  { id: 'beast_king', name: '百兽之王', cost: 5, type: 'minion', attack: 4, hp: 6, rarity: 'epic', art: '🦁', text: '战吼：你每有一个野兽随从，抽一张牌', battlecry: 'draw_for_beasts', race: 'beast' },
+  { id: 'pack_alpha', name: '狼群首领', cost: 3, type: 'minion', attack: 3, hp: 3, rarity: 'rare', art: '🐺', text: '战吼：使所有友方野兽+1/+1', battlecry: 'buff_beasts_1_1', race: 'beast' },
+  // 构筑引擎：护甲流
+  { id: 'mithril_barrier', name: '秘银屏障', cost: 3, type: 'minion', attack: 0, hp: 6, rarity: 'epic', art: '🛡️', text: '嘲讽·战吼：获得3点护甲', taunt: true, battlecry: 'gain_armor_3' },
+  { id: 'armor_smith', name: '护甲铁匠', cost: 2, type: 'minion', attack: 2, hp: 3, rarity: 'rare', art: '🔨', text: '嘲讽·战吼：获得2点护甲', taunt: true, battlecry: 'gain_armor_2' },
+  // 构筑引擎：随从增益
+  { id: 'inspiring_leader', name: '鼓舞统帅', cost: 4, type: 'minion', attack: 3, hp: 5, rarity: 'epic', art: '🎖️', text: '战吼：使所有友方随从+1/+1', battlecry: 'buff_all_1_1' },
+  // 高费终结卡
+  { id: 'abyss_lord', name: '深渊领主', cost: 8, type: 'minion', attack: 8, hp: 8, rarity: 'legendary', art: '👹', text: '战吼：对所有敌人造成3点伤害', battlecry: 'deal_3_all_incl_hero' },
+  { id: 'titan_earthguard', name: '泰坦·大地守护者', cost: 9, type: 'minion', attack: 9, hp: 9, rarity: 'legendary', art: '🗻', text: '嘲讽·战吼：获得9点护甲', taunt: true, battlecry: 'gain_armor_9' },
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -138,42 +154,42 @@ const CLASSES = {
     name: '法师', portrait: '🧙', portraitImg: 'assets/portrait-mage.jpg', color: '#4169E1', hp: 30,
     heroPower: { name: '火焰冲击', cost: 2, type: 'mage', description: '对任意目标造成1点伤害' },
     starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','arcane_missiles','holy_light','lightning_bolt','fireball','arcane_intellect'],
-    cardPool: ['arcane_missiles','fireball','blizzard','flamestrike','pyroblast','polymorph','arcane_intellect','spellblade','water_elemental','mirror_entity','freeze_elem','card_drawer','healer','stone_golem','lightning_bolt','arcane_wyrm','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage'],
+    cardPool: ['arcane_missiles','fireball','blizzard','flamestrike','pyroblast','polymorph','arcane_intellect','spellblade','water_elemental','mirror_entity','freeze_elem','card_drawer','healer','stone_golem','lightning_bolt','arcane_wyrm','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','arcane_scholar','mana_surge','spell_mastery','inspiring_leader','abyss_lord','titan_earthguard',],
     signature: 'spell_power_1',
   },
   warrior: {
     name: '战士', portrait: '⚔️', portraitImg: 'assets/portrait-warrior.jpg', color: '#B22222', hp: 30,
     heroPower: { name: '全副武装', cost: 2, type: 'warrior', description: '获得2点护甲' },
     starterDeck: ['guardsman','stone_golem','orc_grunt','berserker','wolf','war_hammer','rusty_knife','healer','shield_bearer','ogre'],
-    cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist','iron_bastion','frostwolf_grunt','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage'],
+    cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist','iron_bastion','frostwolf_grunt','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','mithril_barrier','armor_smith','inspiring_leader','abyss_lord','titan_earthguard',],
     signature: 'armor_start',
   },
   hunter: {
     name: '猎人', portrait: '🏹', portraitImg: 'assets/portrait-hunter.jpg', color: '#228B22', hp: 30,
     heroPower: { name: '稳固射击', cost: 2, type: 'hunter', description: '对敌方英雄造成2点伤害' },
     starterDeck: ['wolf','murloc','archer','blood_imp','charge_knight','lightning_bolt','rusty_knife','berserker','ogre','fan_of_knives'],
-    cardPool: ['wolf','murloc','archer','charge_knight','windfury_harpy','blood_imp','fan_of_knives','lightning_bolt','berserker','ogre','sylvanas','loot_hoarder','storm_falcon','tundra_rhino','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage'],
+    cardPool: ['wolf','murloc','archer','charge_knight','windfury_harpy','blood_imp','fan_of_knives','lightning_bolt','berserker','ogre','sylvanas','loot_hoarder','storm_falcon','tundra_rhino','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','beast_king','pack_alpha','inspiring_leader','abyss_lord','titan_earthguard',],
     signature: 'beast_master',
   },
   paladin: {
     name: '圣骑士', portrait: '🛡️', portraitImg: 'assets/portrait-paladin.jpg', color: '#FFD700', hp: 30,
     heroPower: { name: '援军', cost: 2, type: 'paladin', description: '召唤一个1/1白银之手新兵' },
     starterDeck: ['guardsman','stone_golem','healer','paladin_knight','shield_bearer','holy_light','consecration','archer','card_drawer','wolf'],
-    cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas','lightbringer','guardian_of_kings','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage'],
+    cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas','lightbringer','guardian_of_kings','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard',],
     signature: 'divine_protection',
   },
   priest: {
     name: '牧师', portrait: '🙏', portraitImg: 'assets/portrait-priest.jpg', color: '#9370DB', hp: 32,
     heroPower: { name: '次级治疗', cost: 2, type: 'priest', description: '恢复任意目标2点生命' },
     starterDeck: ['guardsman','stone_golem','northshire','northshire','healer','holy_smite','soul_purify','power_word_shield','circle_healing','card_drawer'],
-    cardPool: ['holy_smite','power_word_shield','northshire','soul_purify','holy_nova','holy_fire','circle_healing','healer','light_pope','holy_light','guardsman','stone_golem','card_drawer','sylvanas','lightbringer','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage'],
+    cardPool: ['holy_smite','power_word_shield','northshire','soul_purify','holy_nova','holy_fire','circle_healing','healer','light_pope','holy_light','guardsman','stone_golem','card_drawer','sylvanas','lightbringer','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader',],
     signature: 'light_well',
   },
   warlock: {
     name: '术士', portrait: '😈', portraitImg: 'assets/portrait-warlock.jpg', color: '#8B008B', hp: 30,
     heroPower: { name: '生命分流', cost: 2, type: 'warlock', description: '受到2点伤害，抽一张牌' },
     starterDeck: ['blood_imp','guardsman','stone_golem','murloc','archer','lightning_bolt','holy_light','fan_of_knives','berserker','ogre'],
-    cardPool: ['blood_imp','death_stalker','undead_knight','cultist','sylvanas','deathwing','mind_control','faceless','lightning_bolt','fan_of_knives','berserker','ogre','wolf','murloc','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage'],
+    cardPool: ['blood_imp','death_stalker','undead_knight','cultist','sylvanas','deathwing','mind_control','faceless','lightning_bolt','fan_of_knives','berserker','ogre','wolf','murloc','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader',],
     signature: 'regen',
   },
 };

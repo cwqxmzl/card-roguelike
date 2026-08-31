@@ -236,7 +236,7 @@ function getClassCardPool() {
 }
 
 // Neutral cards that can appear in every class's card packs (new keyword cards stay obtainable)
-const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad','death_stalker','overload_lightning','overload_missiles','overload_wolf'];
+const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad','death_stalker','overload_lightning','overload_missiles','overload_wolf','arcane_scholar','beast_king','pack_alpha','mithril_barrier','armor_smith','inspiring_leader','abyss_lord','titan_earthguard'];
 
 function showCardPackReward() {
   const cls = CLASSES[G.selectedClass || 'mage'];

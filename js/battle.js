@@ -773,6 +773,32 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
       floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+6', 'heal');
       addBattleLog(`${owner === G.player ? '你' : '敌方'}恢复6点生命`, owner === G.player ? 'player' : 'enemy');
       break;
+    case 'reduce_hand_spells':
+      owner.hand.forEach(c => { if (c.type === 'spell' && c.cost > 0) c.cost = Math.max(0, c.cost - 1); });
+      addBattleLog(`${owner === G.player ? '你的' : '敌方的'}手牌中所有法术费用-1`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'draw_for_beasts':
+      const beastCount = owner.minions.filter(m => !m.dead && m.race === 'beast').length;
+      for (let i = 0; i < beastCount; i++) drawCard(owner, true);
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}有${beastCount}个野兽随从，抽取${beastCount}张牌`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'buff_beasts_1_1':
+      owner.minions.filter(m => !m.dead && m.race === 'beast').forEach(m => { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; });
+      addBattleLog(`${owner === G.player ? '你的' : '敌方的'}野兽随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'deal_3_all_incl_hero':
+      opponent.minions.filter(m => !m.dead).forEach(m => dealDamage(m, 3, owner));
+      dealDamage(opponent, 3, owner);
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}对所有敌人造成3点伤害`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'gain_armor_9':
+      owner.armor += 9;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得9点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'gain_armor_2':
+      owner.armor += 2;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得2点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
     case 'buff_all_1_1':
       owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 1; m.currentHp += 1; m.maxHp += 1; } });
       addBattleLog(`${owner === G.player ? '你的' : '敌方的'}随从获得+1/+1`, owner === G.player ? 'player' : 'enemy');
