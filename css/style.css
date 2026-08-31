@@ -617,6 +617,23 @@ html.fast-forward *::after {
 
 .buff-windfury { background: #4e1a6e; border-color: #c040e0; }
 
+.buff-evolved { background: #1a4e4e; border-color: #40e0d0; }
+
+.buff-rebirth { background: #6e1a4e; border-color: #e040c0; }
+
+/* 进化按钮（影之诗） */
+.evolve-btn {
+  position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(180deg, #ffd700, #b8860b);
+  color: #1a1a2e; font-size: 10px; font-weight: bold;
+  padding: 1px 8px; border-radius: 8px; border: 1px solid #ffe066;
+  cursor: pointer; z-index: 30; box-shadow: 0 0 8px rgba(255,215,0,0.5);
+  white-space: nowrap;
+}
+.evolve-btn:hover { transform: translateX(-50%) scale(1.1); background: linear-gradient(180deg, #fff0a0, #ffd700); }
+.minion.evolved { border-color: #40e0d0; box-shadow: 0 0 12px rgba(64,224,208,0.6); }
+.minion.rebirth-ready { border-style: dashed; }
+
 
 
 /* Hand area */

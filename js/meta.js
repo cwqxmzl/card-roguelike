@@ -10,6 +10,12 @@ const TUTORIAL_STEPS = [
   { icon: '🗡️', title: '攻击敌人', text: '点击自己的随从选中后，再点击敌方随从或英雄进行攻击。装备武器后英雄也可直接攻击。注意：有嘲讽随从时必须先消灭嘲讽！' },
   { icon: '⏭️', title: '结束回合', text: '操作完毕后点击右下角"结束回合"按钮，轮到敌方行动。敌方意图会显示在上方，提前规划应对策略。' },
   { icon: '📖', title: '冒险者手册', text: '· 长按或右键卡牌/随从 → 查看详细信息\n· 点击遗物图标 → 查看遗物效果\n· 📚查看抽牌堆 · 🗑️查看弃牌堆\n· 右侧战斗日志记录每一步操作\n· 战斗胜利后别忘了选择奖励来强化牌组！' },
+  { icon: '⚡', title: '进化（新机制）', text: '拥有"进化"标识的随从，出场时头上会出现金色⚡按钮。点击即可进化：该随从+2/+2并获得专属进化效果（伤害/召唤/增益等）。每场战斗限用2次，进化后本回合即可攻击！' },
+  { icon: '💫', title: '复生（新机制）', text: '拥有"复生"标识的随从被击败后会以部分生命值复活一次。合理利用复生随从能为你争取巨大场面优势！' },
+  { icon: '🔍', title: '发现（新机制）', text: '带有"发现"效果的法术会弹出3张候选卡牌，从中选择1张直接加入手牌。发现是获取关键卡牌的最佳途径！' },
+  { icon: '🔁', title: '回响（新机制）', text: '带有"回响"标识的卡牌打出后会回到手牌，本回合可以再次打出（每张只回响一次）。配合低费效果能打出惊人连击！' },
+  { icon: '⛓️', title: '连锁（新机制）', text: '带有"连锁"标识的卡牌会在你本回合打出第N张卡牌时触发额外效果。规划好出牌顺序，让连锁效果最大化！' },
+  { icon: '📈', title: '魔力增幅（新机制）', text: '带有"魔力增幅"标识的法术，每当你使用一张法术牌，它的费用就-1（有上限）。前期多用法术，后期就能低费打出强力大法术！' },
 ];
 
 let tutorialStep = 0;
@@ -201,6 +207,34 @@ function playSfx(type) {
         g.gain.linearRampToValueAtTime(0.06, now + i * 0.15 + 0.02);
         g.gain.linearRampToValueAtTime(0, now + i * 0.15 + 0.2);
         o.start(now + i * 0.15); o.stop(now + i * 0.15 + 0.2);
+      });
+      break;
+    case 'evolve':
+      osc.frequency.setValueAtTime(300, now);
+      osc.frequency.exponentialRampToValueAtTime(900, now + 0.25);
+      osc.type = 'triangle';
+      gain.gain.setValueAtTime(0.1, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.3);
+      osc.start(now); osc.stop(now + 0.3);
+      break;
+    case 'rebirth':
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(300, now + 0.2);
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.25);
+      osc.start(now); osc.stop(now + 0.25);
+      break;
+    case 'discover':
+      [660, 880, 1320].forEach((f, i) => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, now + i * 0.08);
+        g.gain.linearRampToValueAtTime(0.07, now + i * 0.08 + 0.02);
+        g.gain.linearRampToValueAtTime(0, now + i * 0.08 + 0.12);
+        o.start(now + i * 0.08); o.stop(now + i * 0.08 + 0.12);
       });
       break;
   }

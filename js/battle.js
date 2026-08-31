@@ -22,6 +22,7 @@ function startBattle(type) {
     weapon: null,
     spellPower: 0,
     intent: null,
+    evolvePoints: enemyData.isBoss ? 2 : 1,
   };
   
   // Apply difficulty to enemy stats
@@ -59,6 +60,7 @@ function startBattle(type) {
   G.player.maxMana = 0;
   G.player.spellPower = hasRelic('spell_power') ? 1 : 0;
   G.player.heroPower.used = false;
+  G.player.evolvePoints = 2;
 
   // Relic: armor start
   if (hasRelic('armor_start')) {
@@ -113,6 +115,7 @@ function startPlayerTurn() {
   G.player.heroPower.used = false;
   G.battle.heroCanAttack = !!G.player.weapon;
   G.battle.firstCardPlayed = false;
+  resetChain();
 
   // Draw card (extra draw relic)
   drawCard(G.player, true);
@@ -305,6 +308,7 @@ function startEnemyTurn() {
     else { m.canAttack = true; m.attacksLeft = m.windfury ? 2 : 1; }
   });
 
+  resetChain();
   G.enemy.intent = '思考中...';
   document.getElementById('battle-turn-info').textContent = `第 ${Math.ceil(G.battle.turn / 2)} 回合 - 敌方回合`;
   setEndTurnButtonState('enemy');
@@ -364,6 +368,17 @@ function enemyAITurn() {
   function proceedToAttacks() {
     if (G.battle.ended) return;
     if (G.enemy.hp <= 0) { onBattleWon(); return; }
+    // 敌方AI进化：自动进化场上可进化且值得进化的随从
+    try {
+      const evolvable = G.enemy.minions.filter(m => !m.dead && canEvolve(G.enemy, m));
+      const priority = evolvable.filter(m => (m.evolveEffect === 'deal_2' || m.evolveEffect === 'deal_2_all' || m.evolveEffect === 'buff_beasts_1_1' || m.evolveEffect === 'summon_2_2'));
+      const candidates = priority.length > 0 ? priority : evolvable;
+      if (candidates.length > 0 && G.enemy.evolvePoints > 0) {
+        const target = candidates[Math.floor(Math.random() * candidates.length)];
+        evolveMinion(G.enemy, target);
+        renderBattle();
+      }
+    } catch(e) { console.error('[ai-evolve]', e); }
     G.enemy.intent = '攻击中...';
     renderBattle();
     setTimeout(() => {
@@ -572,6 +587,7 @@ function setEndTurnButtonState(state) {
 function playCard(card, index) {
   if (!G.battle.isPlayerTurn || G.battle.ended) return;
   if (getCardCost(card) > G.player.mana) return;
+  // 连锁计数在打出时递增（结算在卡牌效果之后）
 
   // For targeted cards, enter targeting mode WITHOUT spending mana yet
   if (card.type === 'minion' && card.battlecry && needsBattlecryTarget(card) && hasBattlecryTargets(card) && G.player.minions.length < 7) {
@@ -607,6 +623,15 @@ function playCard(card, index) {
   G.player.hand.splice(index, 1);
   playSfx('play');
 
+  // === Advanced mechanics ===
+  // 连锁：打出后递增计数并检查触发
+  incrementChain();
+  checkChainTrigger(card, G.player, G.enemy);
+  // 发现：从候选池发现卡牌
+  if (card.discoverFrom && card.type === 'spell') {
+    triggerDiscover(card, G.player);
+  }
+  // 魔力增幅：法术计数（在 executeSpell 内部会调用 applySpellboost）
   if (card.type === 'minion') {
     const minion = createMinion(card, true);
     G.player.minions.push(minion);
@@ -622,8 +647,12 @@ function playCard(card, index) {
   } else if (card.type === 'spell') {
     addBattleLog(`你施放 ${card.name}`, 'player');
     executeSpell(card.effect, G.player, G.enemy, card);
+    // 魔力增幅：使用法术触发（影之诗 Spellboost）
+    applySpellboost();
     cleanupDeadMinions();
     G.player.discardPile.push(card);
+    // 回响：返回副本到手牌
+    maybeCreateEchoCopy(card);
     renderBattle();
     if (G.enemy.hp <= 0) { onBattleWon(); return; }
     if (G.player.hp <= 0) { onBattleLost(); return; }
@@ -674,6 +703,13 @@ function createMinion(card, isPlayer) {
     spellDamage: card.spellDamage || 0,
     isPlayer: isPlayer,
     dead: false,
+    // === Advanced mechanics fields ===
+    evolve: card.evolve || false,
+    evolved: false,
+    evolveEffect: card.evolveEffect || null,
+    rebirth: card.rebirth || false,
+    rebirthHp: card.rebirthHp || 1,
+    rebirthUsed: false,
   };
 }
 
@@ -1317,7 +1353,21 @@ function checkDeathrattle(minion, owner, opponent) {
 }
 
 function cleanupDeadMinions() {
-  const deadPlayerCount = G.player.minions.filter(m => m.dead).length;
+  let deadPlayerCount = 0;
+  let deadEnemyCount = 0;
+  // 复生处理：死亡但可复生的随从复活
+  G.player.minions.forEach(m => {
+    if (m.dead) {
+      if (maybeRebirth(m, G.player)) { deadPlayerCount = deadPlayerCount; }
+      else { deadPlayerCount++; }
+    }
+  });
+  G.enemy.minions.forEach(m => {
+    if (m.dead) {
+      if (maybeRebirth(m, G.enemy)) { deadEnemyCount = deadEnemyCount; }
+      else { deadEnemyCount++; }
+    }
+  });
   G.player.minions = G.player.minions.filter(m => !m.dead);
   G.enemy.minions = G.enemy.minions.filter(m => !m.dead);
   if (deadPlayerCount > 0 && hasRelic('deathrattle_draw') && G.battle && !G.battle.ended) {

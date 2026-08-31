@@ -216,7 +216,7 @@ function renderMinion(m, isPlayer) {
   const atkSpan = document.createElement('span');
   atkSpan.className = 'card-attack';
   atkSpan.textContent = m.currentAttack;
-  atkSpan.style.color = m.currentAttack > (m.attack || 0) ? '#20a040' : '#e67e22';
+  atkSpan.style.color = (m.evolved || m.currentAttack > (m.attack || 0)) ? '#20a040' : '#e67e22';
   const hpSpan = document.createElement('span');
   hpSpan.className = 'card-hp';
   hpSpan.textContent = m.currentHp;
@@ -233,8 +233,10 @@ function renderMinion(m, isPlayer) {
     divineShield: { icon: '✨', name: '圣盾', desc: '免疫下一次伤害' },
     frozen: { icon: '❄', name: '冻结', desc: '无法攻击，下回合解冻' },
     windfury: { icon: '🌀', name: '风怒', desc: '每回合可攻击两次' },
+    evolved: { icon: '⚡', name: '进化', desc: '已进化，+2/+2' },
+    rebirth: { icon: '💫', name: '复生', desc: '死亡时以'+'复活' },
   };
-  ['taunt', 'divineShield', 'frozen', 'windfury'].forEach(key => {
+  ['taunt', 'divineShield', 'frozen', 'windfury', 'evolved', 'rebirth'].forEach(key => {
     if (m[key]) {
       const b = document.createElement('div');
       b.className = 'buff-icon buff-' + key.replace('divineShield', 'divine');
@@ -277,6 +279,11 @@ function renderMinion(m, isPlayer) {
   if (G.battle.targetingMode === 'hero_power' && isHeroPowerTargetValid(m)) {
     div.classList.add('minion-target');
     div.onclick = () => executeHeroPowerOnTarget(m);
+  }
+
+  // 进化按钮（影之诗）
+  if (isPlayer && G.battle.isPlayerTurn && !G.battle.targetingMode) {
+    maybeRenderEvolveButton(div, m, true);
   }
 
   // Detail view: right-click (desktop) or long-press (mobile, only when not targeting)

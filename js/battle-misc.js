@@ -141,6 +141,12 @@ function showCardDetail(card) {
   if (card.poisonous) html += '<div style="font-size:12px;color:#66ff66;margin-top:4px;">☠ 剧毒 — 消灭任何受伤随从</div>';
   if (card.freezeOnHit) html += '<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">❄ 冰冻攻击 — 命中后冻结目标</div>';
   if (card.overload) html += '<div style="font-size:12px;color:#9b59b6;margin-top:4px;">⚡ 过载' + card.overload + ' — 下回合开始时法力-' + card.overload + '</div>';
+  if (card.evolve) html += `<div style="font-size:12px;color:#40e0d0;margin-top:4px;">⚡ 进化 — 进化时+2/+2${card.evolveEffect ? '并获得进化效果' : ''}（每场战斗${2}次）</div>`;
+  if (card.rebirth) html += `<div style="font-size:12px;color:#e040c0;margin-top:4px;">💫 复生 — 死亡时以${card.rebirthHp || 1}点生命复活一次</div>`;
+  if (card.discoverFrom) html += '<div style="font-size:12px;color:#ffd700;margin-top:4px;">🔍 发现 — 从3张候选中选择1张加入手牌</div>';
+  if (card.echo) html += '<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">🔁 回响 — 打出后返回手牌，本回合可再次打出</div>';
+  if (card.chain) html += `<div style="font-size:12px;color:#ff8c42;margin-top:4px;">⛓️ 连锁 — 本回合第${card.chain}张打出时触发额外效果</div>`;
+  if (card.spellboost) html += `<div style="font-size:12px;color:#a78bfa;margin-top:4px;">📈 魔力增幅 — 每使用一张法术，费用-1（最多减${card.spellboost}）</div>`;
   if (card.frozen) html += '<div style="font-size:12px;color:#7ec8e3;margin-top:4px;">❄ 已冻结 — 无法攻击，下回合解冻</div>';
   if (card.currentAttack !== undefined && card.currentHp !== undefined && (card.currentAttack !== card.attack || card.currentHp !== card.maxHp)) {
     html += `<div style="font-size:12px;color:#aaa;margin-top:6px;padding:4px 10px;background:rgba(0,0,0,0.2);border-radius:6px;">当前: ${card.currentAttack}/${card.currentHp}${card.currentAttack !== card.attack ? ' (攻+' + (card.currentAttack - card.attack) + ')' : ''}${card.currentHp < card.maxHp ? ' (损血' + (card.maxHp - card.currentHp) + ')' : card.currentHp > card.maxHp ? ' (增益+' + (card.currentHp - card.maxHp) + ')' : ''}</div>`;
@@ -153,6 +159,8 @@ function showCardDetail(card) {
 function closeCardDetail(event) {
   if (event && event.target.id !== 'card-detail-overlay') return;
   document.getElementById('card-detail-overlay').classList.remove('active');
+  // 清理发现回调（若发现弹窗未选择就关闭）
+  if (window.__discoverChoices) { window.__discoverChoices = null; window.__discoverCallback = null; }
 }
 
 // ===================== BATTLE END =====================

@@ -491,6 +491,20 @@
 
       冲锋随从打出即可攻击。圣盾抵消一次伤害。亡语在随从死亡时触发。<br><br>
 
+      <b style="color:var(--gold);">高级机制</b><br>
+
+      <b>⚡进化</b>：随从头上的金色按钮，点击+2/+2并触发进化效果，每场限2次。<br>
+
+      <b>💫复生</b>：被击败后以部分生命复活一次。<br>
+
+      <b>🔍发现</b>：从3张候选中选择1张加入手牌。<br>
+
+      <b>🔁回响</b>：打出后回手，本回合可再打一次。<br>
+
+      <b>⛓️连锁</b>：本回合第N张打出时触发额外效果。<br>
+
+      <b>📈魔力增幅</b>：每用一张法术，此牌费用-1。<br><br>
+
       <b style="color:var(--gold);">冒险模式</b><br>
 
       三幕冒险，每幕有随机分支路径。节点类型：普通战斗、精英战、商店、事件、休息、宝箱、首领。<br>
@@ -687,7 +701,7 @@
 
   <div id="card-detail-overlay" class="overlay" style="z-index:400;" onclick="closeCardDetail(event)">
 
-    <div id="card-detail-content" style="background:#1a1a2e;border:1px solid var(--gold);border-radius:10px;padding:20px;max-width:320px;cursor:default;" onclick="event.stopPropagation()">
+    <div id="card-detail-content" style="background:#1a1a2e;border:1px solid var(--gold);border-radius:10px;padding:20px;max-width:340px;max-height:80vh;overflow-y:auto;cursor:default;" onclick="event.stopPropagation()">
 
       <div id="card-detail-inner"></div>
 
@@ -736,6 +750,8 @@
 <script src="js/render-ui.js"></script>
 
 <script src="js/battle.js"></script>
+
+<script src="js/mechanics.js"></script>
 
 <script src="js/enemy-ai.js"></script>
 
