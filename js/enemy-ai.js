@@ -232,6 +232,27 @@ function drawCard(entity, showLog) {
   }
 }
 
+
+function tutorCard(player, predicate, label) {
+  if (!player.drawPile || player.drawPile.length === 0) {
+    addBattleLog('牌库已空，无法检索', 'system');
+    return;
+  }
+  const idx = player.drawPile.findIndex(predicate);
+  if (idx < 0) {
+    addBattleLog(`牌库中没有${label}牌可检索`, 'system');
+    return;
+  }
+  const card = player.drawPile.splice(idx, 1)[0];
+  if (player.hand.length >= GAME_CONFIG.battle.maxHandSize) {
+    player.discardPile.push(card);
+    addBattleLog(`手牌已满，${card.name}被弃置`, 'system');
+  } else {
+    player.hand.push(card);
+    addBattleLog(`检索：从牌库获得 ${card.name}`, 'player');
+  }
+}
+
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));

@@ -115,6 +115,8 @@ function renderMap() {
 function showNodeDetail(node, info) {
   const nodeDesc = {
     battle: '普通战斗，击败敌人可获得金币和卡牌奖励',
+    tutorial_1: '教学关：学习如何打出卡牌攻击敌人',
+    tutorial_2: '教学关：学习英雄技能与随从配合',
     elite: '精英战斗，难度较高但奖励更丰厚',
     shop: '商店，可花费金币购买卡牌和遗物',
     event: '随机事件，可能带来机遇或风险',
@@ -139,7 +141,7 @@ function showNodeDetail(node, info) {
 function enterNode(node) {
   G.currentNode = node;
   switch (node.type) {
-    case 'battle': case 'elite': startBattle(node.type); break;
+    case 'battle': case 'elite': case 'tutorial_1': case 'tutorial_2': startBattle(node.type); break;
     case 'shop': openShop(); break;
     case 'event': openEvent(); break;
     case 'rest': showOverlay('overlay-rest'); break;

@@ -5,14 +5,20 @@
 // ===================== BATTLE =====================
 function startBattle(type) {
   let enemyData;
-  // 无限模式：第3幕后循环使用第三幕敌人并逐步增强
-  const bossIdx = Math.min(G.act, ENEMIES.boss.length - 1);
-  if (type === 'boss') {
-    enemyData = { ...ENEMIES.boss[bossIdx] };
-  } else if (type === 'elite') {
-    enemyData = { ...ENEMIES.elite[Math.floor(Math.random() * ENEMIES.elite.length)] };
+  const isTut1 = type === 'tutorial_1';
+  const isTut2 = type === 'tutorial_2';
+  if (isTut1 || isTut2) {
+    enemyData = { ...TUTORIAL_ENEMIES[isTut1 ? 0 : 1] };
   } else {
-    enemyData = { ...ENEMIES.normal[Math.floor(Math.random() * ENEMIES.normal.length)] };
+    // 无限模式：第3幕后循环使用第三幕敌人并逐步增强
+    const bossIdx = Math.min(G.act, ENEMIES.boss.length - 1);
+    if (type === 'boss') {
+      enemyData = { ...ENEMIES.boss[bossIdx] };
+    } else if (type === 'elite') {
+      enemyData = { ...ENEMIES.elite[Math.floor(Math.random() * ENEMIES.elite.length)] };
+    } else {
+      enemyData = { ...ENEMIES.normal[Math.floor(Math.random() * ENEMIES.normal.length)] };
+    }
   }
   // 无限模式缩放：每多1幕 +18% 生命、+12% 攻击
   const endlessBoost = (G.mode === 'endless' && G.act > 2) ? Math.pow(1.18, G.act - 2) : 1;
@@ -58,7 +64,11 @@ function startBattle(type) {
   shuffle(G.enemy.drawPile);
   
   // Reset player for battle
-  G.player.drawPile = [...G.player.deck];
+  let battleDeck = G.player.deck;
+  if (isTut1 || isTut2) {
+    battleDeck = TUTORIAL_DECK.map(id => { const data = getCardData(id); return data ? { ...data, uid: uid() } : null; }).filter(Boolean);
+  }
+  G.player.drawPile = [...battleDeck];
   shuffle(G.player.drawPile);
   G.player.hand = [];
   G.player.discardPile = [];
@@ -98,7 +108,7 @@ function startBattle(type) {
     G.player.hand.push({ ...getCardData('the_coin'), uid: uid() });
   }
   
-  G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null, firstCardPlayed: false };
+  G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null, firstCardPlayed: false, tutorialMsg: (isTut1 || isTut2) ? enemyData.tutorialMsg : null };
   G.battleStats = { dmgDealt: 0, dmgTaken: 0, cardsPlayed: 0, spellsCast: 0, minionsKilled: 0 };
   
   // Start player turn
@@ -973,6 +983,40 @@ function executeSpell(effect, player, enemy, card, target) {
       drawCard(player, true);
       drawCard(player, true);
       addBattleLog(`${caster}抽了两张牌`, logType);
+      break;
+    case 'tutor_minion':
+      tutorCard(player, c => c.type === 'minion', '随从');
+      break;
+    case 'tutor_spell':
+      tutorCard(player, c => c.type === 'spell', '法术');
+      break;
+    case 'tutor_spell_2':
+      tutorCard(player, c => c.type === 'spell', '法术');
+      tutorCard(player, c => c.type === 'spell', '法术');
+      break;
+    case 'tutor_weapon':
+      tutorCard(player, c => c.type === 'weapon', '武器');
+      break;
+    case 'tutor_cost_le2':
+      tutorCard(player, c => (c.cost || 0) <= 2, '低费');
+      break;
+    case 'tutor_race_beast':
+      tutorCard(player, c => c.race === 'beast', '野兽');
+      break;
+    case 'tutor_rare_plus':
+      tutorCard(player, c => c.rarity === 'rare' || c.rarity === 'epic' || c.rarity === 'legendary', '稀有');
+      break;
+    case 'tutor_race_elemental':
+      tutorCard(player, c => c.race === 'elemental', '元素');
+      break;
+    case 'tutor_race_mech':
+      tutorCard(player, c => c.race === 'mech', '机械');
+      break;
+    case 'tutor_race_dragon':
+      tutorCard(player, c => c.race === 'dragon', '龙');
+      break;
+    case 'tutor_race_murloc':
+      tutorCard(player, c => c.race === 'murloc', '鱼人');
       break;
     case 'fan_of_knives':
       enemy.minions.forEach(m => dealDamage(m, 1 + sp, player));

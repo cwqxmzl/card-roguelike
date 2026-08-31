@@ -1,0 +1,1115 @@
+{
+  "schema_version": 2,
+  "run_id": "qa-5669391e8840",
+  "revision": 3,
+  "profile": "full",
+  "test_intent": "repeatable_ui",
+  "execution_level": "blocked",
+  "selected_path": "undetermined",
+  "created_at": "2026-08-31T12:06:53.550894+00:00",
+  "target": {
+    "type": "attachment_or_directory",
+    "name": "card-roguelike 第8轮扩展(浏览器可玩HTML)",
+    "source": "C:\\Users\\h'h\\Desktop\\card-roguelike"
+  },
+  "request_contract": {
+    "request_summary": "对 card-roguelike 卡牌肉鸽网页游戏第8轮扩展做系统回归测试：1)新增检索机制(7张检索卡+11个检索效果) 2)初始卡组10->12张与模式差异化(无限/极速) 3)教学关系统(首局2个教学战斗+引导横幅) 4)教程扩展为19步 5)新增3项局外meta升级并修复4个无法购买的升级costs bug 6)新增4普通+2精英+1Boss 7)修正9处卡牌/遗物文字与效果不一致",
+    "request_hash": "sha256:a8c60f029908c2f561d8d11858d03bb67ea350c02a08ae395c5cb10d38730c33",
+    "task_mode": "web_execution",
+    "scope": {
+      "included_source_ids": [],
+      "excluded_source_ids": [],
+      "included_rounds": [],
+      "excluded_rounds": []
+    },
+    "evidence_policy": {
+      "allow_new_execution": true,
+      "allow_precheck_bug_promotion": false,
+      "required_bug_evidence_level": "L2_observation"
+    },
+    "delivery": {
+      "artifact_required": true,
+      "format": "lark_doc",
+      "carrier": "lark_doc",
+      "filenames": [
+        "card-roguelike 第8轮扩展(浏览器可玩HTML)-QA测试方案与报告"
+      ],
+      "artifacts": [
+        {
+          "format": "lark_doc",
+          "carrier": "lark_doc",
+          "filename": "card-roguelike 第8轮扩展(浏览器可玩HTML)-QA测试方案与报告"
+        }
+      ],
+      "required_sections": [],
+      "section_order": [],
+      "must_surface_to_user": true
+    }
+  },
+  "phase_receipts": [
+    {
+      "stage": "baseline",
+      "revision": 2,
+      "state": "CLOSED",
+      "checked_at": "2026-08-31T12:09:09.338609+00:00",
+      "source_fingerprint": "sha256:be8c5e2af885fde739eb2ee21209527c72ec1a9907762943f886032c8104ddcd",
+      "warnings": 0
+    },
+    {
+      "stage": "baseline",
+      "revision": 3,
+      "state": "DISCLOSE",
+      "checked_at": "2026-08-31T12:22:34.848796+00:00",
+      "source_fingerprint": "sha256:66f6be2b39135c69403d99f71ab296a5756af40178e0b1048f325576b7c65710",
+      "warnings": 39
+    },
+    {
+      "stage": "design",
+      "revision": 3,
+      "state": "DISCLOSE",
+      "checked_at": "2026-08-31T12:22:43.953867+00:00",
+      "source_fingerprint": "sha256:66f6be2b39135c69403d99f71ab296a5756af40178e0b1048f325576b7c65710",
+      "warnings": 39
+    },
+    {
+      "stage": "execution",
+      "revision": 3,
+      "state": "DISCLOSE",
+      "checked_at": "2026-08-31T12:22:53.073026+00:00",
+      "source_fingerprint": "sha256:66f6be2b39135c69403d99f71ab296a5756af40178e0b1048f325576b7c65710",
+      "warnings": 39
+    },
+    {
+      "stage": "release",
+      "revision": 3,
+      "state": "DISCLOSE",
+      "checked_at": "2026-08-31T12:24:57.526295+00:00",
+      "source_fingerprint": "sha256:66f6be2b39135c69403d99f71ab296a5756af40178e0b1048f325576b7c65710",
+      "warnings": 70
+    }
+  ],
+  "input": {
+    "summary": "本地静态 HTML 卡牌肉鸽游戏第8轮扩展，全部为前端 JS 实现（index.html + js/*.js 顺序加载，无构建）",
+    "sources": [
+      {
+        "id": "SRC-001",
+        "type": "directory",
+        "locator": "C:\\Users\\h'h\\Desktop\\card-roguelike",
+        "access_status": "read",
+        "completeness_checked": true,
+        "item_count": 15,
+        "reviewed_item_count": 15
+      }
+    ],
+    "assumptions": [
+      "游戏为纯本地/静态网页，通过浏览器打开 index.html 即可运行，无需后端",
+      "第8轮改动已全部写入本地代码，未提交远程（QA 基于本地工作区）"
+    ],
+    "conflicts": [],
+    "artifacts": [
+      {
+        "id": "SRC-001",
+        "type": "directory",
+        "locator": "C:\\Users\\h'h\\Desktop\\card-roguelike",
+        "access_status": "read",
+        "completeness_checked": true
+      }
+    ]
+  },
+  "open_questions": [],
+  "change_ledger": [
+    {
+      "id": "CHG-001",
+      "revision": 3,
+      "action": "ADD",
+      "object_type": "run",
+      "added_ids": [
+        "qa-5669391e8840"
+      ],
+      "removed_ids": [],
+      "modified_ids": [],
+      "before_count": 0,
+      "after_count": 1,
+      "delta_count": 1,
+      "source": "qa_flow.py normalize",
+      "summary": "根据当前 canonical 重建机械计数台账"
+    },
+    {
+      "id": "CHG-002",
+      "revision": 3,
+      "action": "ADD",
+      "object_type": "requirement",
+      "added_ids": [
+        "REQ-TUTOR-001",
+        "REQ-DECK-001",
+        "REQ-MODE-001",
+        "REQ-META-001",
+        "REQ-TUTOR-002",
+        "REQ-ENEMY-001",
+        "REQ-TEXT-001",
+        "REQ-TUTORIAL-001"
+      ],
+      "removed_ids": [],
+      "modified_ids": [],
+      "before_count": 0,
+      "after_count": 8,
+      "delta_count": 8,
+      "source": "qa_flow.py normalize",
+      "summary": "根据当前 canonical 重建机械计数台账"
+    },
+    {
+      "id": "CHG-003",
+      "revision": 3,
+      "action": "ADD",
+      "object_type": "risk_mechanism",
+      "added_ids": [
+        "RM-TUTOR-001",
+        "RM-META-001",
+        "RM-DECK-001",
+        "RM-TUTOR-002",
+        "RM-ENEMY-001",
+        "RM-TEXT-001"
+      ],
+      "removed_ids": [],
+      "modified_ids": [],
+      "before_count": 0,
+      "after_count": 6,
+      "delta_count": 6,
+      "source": "qa_flow.py normalize",
+      "summary": "根据当前 canonical 重建机械计数台账"
+    },
+    {
+      "id": "CHG-004",
+      "revision": 3,
+      "action": "ADD",
+      "object_type": "case",
+      "added_ids": [
+        "TC-ITER8-001",
+        "TC-ITER8-002",
+        "TC-ITER8-003",
+        "TC-ITER8-004",
+        "TC-ITER8-005",
+        "TC-ITER8-006",
+        "TC-ITER8-007",
+        "TC-ITER8-008",
+        "TC-ITER8-009",
+        "TC-ITER8-010",
+        "TC-ITER8-011"
+      ],
+      "removed_ids": [],
+      "modified_ids": [],
+      "before_count": 0,
+      "after_count": 11,
+      "delta_count": 11,
+      "source": "qa_flow.py normalize",
+      "summary": "根据当前 canonical 重建机械计数台账"
+    }
+  ],
+  "environment": {},
+  "screenshot_policy": "unconfirmed",
+  "plan": {
+    "scope": [],
+    "out_of_scope": [],
+    "entry_criteria": [],
+    "exit_criteria": [],
+    "regression": []
+  },
+  "requirements": [
+    {
+      "id": "REQ-TUTOR-001",
+      "summary": "首局教学关：首次进入冒险时把第一幕前2个战斗节点标记为教学战斗(tutorial_1/tutorial_2)，用固定教学卡组与弱敌，显示引导横幅，完成2关后持久化 tutorialBattleDone",
+      "source": "SRC-001",
+      "risk": "P0",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "state.js",
+        "battle.js",
+        "render-battle.js",
+        "battle-misc.js",
+        "render-ui.js",
+        "data.js"
+      ]
+    },
+    {
+      "id": "REQ-DECK-001",
+      "summary": "初始卡组从10张扩展为12张（9职业各补2张职业卡）",
+      "source": "SRC-001",
+      "risk": "P1",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "data.js"
+      ]
+    },
+    {
+      "id": "REQ-MODE-001",
+      "summary": "模式差异化卡组：无限模式额外+2张秘法师(抽牌)，极速模式额外+2张小精灵+1张吸血蝙蝠(快攻)，标准模式保持12张",
+      "source": "SRC-001",
+      "risk": "P1",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "state.js"
+      ]
+    },
+    {
+      "id": "REQ-META-001",
+      "summary": "新增3项局外meta升级(card_upgrade/start_rare/rest_heal_boost)且全部挂钩生效；修复 first_draw/start_relic/first_mana/hero_power_discount 四个升级 costs 为空导致无法购买的问题",
+      "source": "SRC-001",
+      "risk": "P0",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "data.js",
+        "state.js",
+        "battle-misc.js",
+        "events.js",
+        "meta.js"
+      ]
+    },
+    {
+      "id": "REQ-TUTOR-002",
+      "summary": "检索机制：7张检索卡(tutor_minion_1/tutor_spell_1/tutor_low_2/tutor_weapon_2/tutor_beast_2/tutor_rare_3/tutor_spell_2)加入中立卡池，11个检索效果(tutorCard)从牌库定向抽取指定类型牌加入手牌",
+      "source": "SRC-001",
+      "risk": "P1",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "data.js",
+        "battle.js",
+        "enemy-ai.js"
+      ]
+    },
+    {
+      "id": "REQ-ENEMY-001",
+      "summary": "新增4普通怪(火焰督军/机械哨兵/龙裔猎手/暗影刺客)+2精英(符文巨像/虚空召唤者)+1Boss(星界吞噬者act4)，新怪deck引用卡id全部有效",
+      "source": "SRC-001",
+      "risk": "P1",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "data.js"
+      ]
+    },
+    {
+      "id": "REQ-TEXT-001",
+      "summary": "修正9处卡牌/遗物文字描述与效果数值不一致（7处卡牌+2处遗物），以实际效果为准",
+      "source": "SRC-001",
+      "risk": "P2",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "data.js"
+      ]
+    },
+    {
+      "id": "REQ-TUTORIAL-001",
+      "summary": "教程从12步扩展为19步，覆盖检索/种族/模式/教学关/局外成长/卡牌类型/战斗贴士",
+      "source": "SRC-001",
+      "risk": "P2",
+      "behavior": {
+        "actor": "玩家",
+        "precondition": "进入游戏相关流程",
+        "trigger": "进入游戏相关流程",
+        "rule": "按规则结算",
+        "state_change": "按规则结算",
+        "terminal_state": "状态达成预期",
+        "observable": "界面/日志呈现预期结果",
+        "observable_result": "界面/日志呈现预期结果",
+        "failure_behavior": "出现异常时给出明确反馈且不崩溃"
+      },
+      "impact_scope": [
+        "meta.js"
+      ]
+    }
+  ],
+  "risk_mechanisms": [
+    {
+      "id": "RM-TUTOR-001",
+      "title": "教学关战斗流程",
+      "failure_mode": "教学战斗无法进入、战斗胜利后不推进进度、教学结束后仍用教学卡组",
+      "business_impact": "新玩家教学断裂，后续卡组异常",
+      "oracle": "教学战斗用TUTORIAL_DECK且不覆盖G.player.deck；完成2关后localStorage tutorialBattleDone=1且G.tutorial=false",
+      "requirement_ids": [
+        "REQ-TUTOR-001"
+      ],
+      "case_ids": [
+        "TC-ITER8-001",
+        "TC-ITER8-002",
+        "TC-ITER8-003"
+      ],
+      "priority": "P0",
+      "status": "identified"
+    },
+    {
+      "id": "RM-META-001",
+      "title": "meta升级购买与生效",
+      "failure_mode": "升级costs为空无法购买，或购买后效果不生效",
+      "business_impact": "局外成长系统不可用",
+      "oracle": "裂境强化商店可购买全部11项，购买后升级值持久化并影响冒险",
+      "requirement_ids": [
+        "REQ-META-001"
+      ],
+      "case_ids": [
+        "TC-ITER8-004",
+        "TC-ITER8-005"
+      ],
+      "priority": "P0",
+      "status": "identified"
+    },
+    {
+      "id": "RM-DECK-001",
+      "title": "模式卡组注入",
+      "failure_mode": "模式卡注入污染牌库、标准模式也加卡、或无限/极速不加卡",
+      "business_impact": "模式差异失效",
+      "oracle": "标准12张/无限14张/极速15张且教学后完整卡组恢复",
+      "requirement_ids": [
+        "REQ-MODE-001",
+        "REQ-DECK-001"
+      ],
+      "case_ids": [
+        "TC-ITER8-006",
+        "TC-ITER8-007"
+      ],
+      "priority": "P1",
+      "status": "identified"
+    },
+    {
+      "id": "RM-TUTOR-002",
+      "title": "检索效果正确性",
+      "failure_mode": "检索不到卡、检索错类型、牌库空时报错、手牌满时丢失",
+      "business_impact": "检索卡成废卡或崩溃",
+      "oracle": "检索效果只取符合条件牌；牌库空或未命中提示且不崩溃；手牌满弃置",
+      "requirement_ids": [
+        "REQ-TUTOR-002"
+      ],
+      "case_ids": [
+        "TC-ITER8-008",
+        "TC-ITER8-009"
+      ],
+      "priority": "P1",
+      "status": "identified"
+    },
+    {
+      "id": "RM-ENEMY-001",
+      "title": "新怪/Boss生成与引用",
+      "failure_mode": "新怪deck引用无效卡导致生成失败，或Boss act4不生效",
+      "business_impact": "新内容不可用/崩溃",
+      "oracle": "所有新怪deck卡id有效；星界吞噬者可作为第4幕Boss",
+      "requirement_ids": [
+        "REQ-ENEMY-001"
+      ],
+      "case_ids": [
+        "TC-ITER8-010"
+      ],
+      "priority": "P1",
+      "status": "identified"
+    },
+    {
+      "id": "RM-TEXT-001",
+      "title": "文字描述一致性",
+      "failure_mode": "卡牌/遗物文字与实际效果数值不符",
+      "business_impact": "误导玩家决策",
+      "oracle": "扫描结果0处不一致(中文数字除外)",
+      "requirement_ids": [
+        "REQ-TEXT-001"
+      ],
+      "case_ids": [
+        "TC-ITER8-011"
+      ],
+      "priority": "P2",
+      "status": "identified"
+    }
+  ],
+  "observed_surfaces": [],
+  "cases": [
+    {
+      "id": "TC-ITER8-001",
+      "module": "教学关",
+      "title": "首局教学节点标记",
+      "priority": "P0",
+      "type": "functional",
+      "steps": [
+        "清除浏览器 localStorage 后打开 index.html",
+        "选择任意职业开始冒险",
+        "观察第一幕地图"
+      ],
+      "test_data": "全新玩家状态",
+      "expected_result": "第一幕前2个战斗节点为教学关(显示教学标记)，可进入且显示引导横幅 tutorial-banner",
+      "requirement_ids": [
+        "REQ-TUTOR-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-TUTOR-001"
+      ],
+      "state_oracle": {
+        "intermediate": "G.tutorial=true",
+        "terminal": "地图出现 tutorial_1/tutorial_2 节点"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-教学节点",
+        "截图-引导横幅"
+      ]
+    },
+    {
+      "id": "TC-ITER8-002",
+      "module": "教学关",
+      "title": "教学战斗使用固定卡组且不污染完整卡组",
+      "priority": "P0",
+      "type": "functional",
+      "steps": [
+        "进入教学战斗1",
+        "确认初始手牌/牌库",
+        "打出手牌获胜"
+      ],
+      "test_data": "教学固定卡组 TUTORIAL_DECK 8张",
+      "expected_result": "教学战斗使用固定卡组(不是玩家12张职业卡组)，G.player.deck 不被覆盖，胜利后推进 tutorialProg",
+      "requirement_ids": [
+        "REQ-TUTOR-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-TUTOR-001"
+      ],
+      "state_oracle": {
+        "intermediate": "教学卡组8张",
+        "terminal": "tutorialProg 前进"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-教学战斗手牌"
+      ]
+    },
+    {
+      "id": "TC-ITER8-003",
+      "module": "教学关",
+      "title": "教学完成持久化",
+      "priority": "P0",
+      "type": "functional",
+      "steps": [
+        "连续完成2个教学战斗",
+        "回到地图",
+        "刷新页面重新选择职业开局",
+        "观察是否还有教学节点"
+      ],
+      "test_data": "2关教学完成后 localStorage",
+      "expected_result": "完成2关后 localStorage tutorialBattleDone=1，G.tutorial=false，重进不再出现教学关，使用完整12张卡组",
+      "requirement_ids": [
+        "REQ-TUTOR-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-TUTOR-001"
+      ],
+      "state_oracle": {
+        "terminal": "tutorialBattleDone=1 且无教学节点"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "localStorage 检查",
+        "截图-无教学节点"
+      ]
+    },
+    {
+      "id": "TC-ITER8-004",
+      "module": "局外强化",
+      "title": "全部11项meta升级可购买",
+      "priority": "P0",
+      "type": "functional",
+      "steps": [
+        "打开裂境强化商店",
+        "逐项检查11个升级的购买按钮与价格"
+      ],
+      "test_data": "包含 first_draw/start_relic/first_mana/hero_power_discount(修复前costs为空)",
+      "expected_result": "11项升级均有有效价格可购买，无 JS 报错(修复前4项 costs 为空会报错无法购买)",
+      "requirement_ids": [
+        "REQ-META-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-META-001"
+      ],
+      "state_oracle": {
+        "terminal": "11项均可购买"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-meta商店",
+        "console 无报错"
+      ]
+    },
+    {
+      "id": "TC-ITER8-005",
+      "module": "局外强化",
+      "title": "新增meta升级效果生效",
+      "priority": "P1",
+      "type": "functional",
+      "steps": [
+        "购买 start_rare 后开始冒险",
+        "在选卡奖励中观察稀有出现率",
+        "购买 card_upgrade 后开局查看起始卡牌是否强化"
+      ],
+      "test_data": "start_rare lv1/card_upgrade lv1/rest_heal_boost lv1",
+      "expected_result": "稀有选卡概率提升(0.2+0.15*lv)，起始牌随机升级，休息恢复+2*lv",
+      "requirement_ids": [
+        "REQ-META-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-META-001"
+      ],
+      "state_oracle": {
+        "terminal": "升级效果体现"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-强化后卡牌",
+        "截图-休息恢复"
+      ]
+    },
+    {
+      "id": "TC-ITER8-006",
+      "module": "初始卡组",
+      "title": "9职业初始卡组12张",
+      "priority": "P1",
+      "type": "functional",
+      "steps": [
+        "逐一选择9个职业",
+        "在职业选择界面查看初始卡组列表与数量"
+      ],
+      "test_data": "9职业 starterDeck",
+      "expected_result": "每个职业初始卡组均为12张，且含新增补卡",
+      "requirement_ids": [
+        "REQ-DECK-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-DECK-001"
+      ],
+      "state_oracle": {
+        "terminal": "12张×9职业"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-职业卡组"
+      ]
+    },
+    {
+      "id": "TC-ITER8-007",
+      "module": "模式系统",
+      "title": "模式差异化卡组",
+      "priority": "P1",
+      "type": "functional",
+      "steps": [
+        "分别以 标准/无限/极速 模式开局",
+        "第一场战斗确认手牌与牌库"
+      ],
+      "test_data": "标准12张/无限+2秘法师=14张/极速+2小精灵+1蝙蝠=15张",
+      "expected_result": "无限模式14张、极速15张、标准12张，模式卡只在开局注入不污染后续",
+      "requirement_ids": [
+        "REQ-MODE-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-DECK-001"
+      ],
+      "state_oracle": {
+        "terminal": "牌数按模式区分"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-各模式初始"
+      ]
+    },
+    {
+      "id": "TC-ITER8-008",
+      "module": "检索机制",
+      "title": "检索卡从牌库定向取牌",
+      "priority": "P1",
+      "type": "functional",
+      "steps": [
+        "构筑含检索卡(如战术推演/学徒引路)的卡组",
+        "战斗中打出检索卡",
+        "观察手牌与战斗日志"
+      ],
+      "test_data": "tutor_minion_1/tutor_spell_1/tutor_low_2 等7张",
+      "expected_result": "从牌库取到符合条件(类型/费用/稀有度/种族)的牌加入手牌，日志显示'检索：从牌库获得X'",
+      "requirement_ids": [
+        "REQ-TUTOR-002"
+      ],
+      "risk_mechanism_ids": [
+        "RM-TUTOR-002"
+      ],
+      "state_oracle": {
+        "intermediate": "牌库符合条件牌被取出",
+        "terminal": "手牌增加检索到的牌"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-检索后手牌",
+        "截图-战斗日志"
+      ]
+    },
+    {
+      "id": "TC-ITER8-009",
+      "module": "检索机制",
+      "title": "检索边界不崩溃",
+      "priority": "P1",
+      "type": "functional",
+      "steps": [
+        "牌库无符合条件的牌时打出检索卡",
+        "牌库为空时打出检索卡",
+        "手牌满时打出检索卡"
+      ],
+      "test_data": "极端牌库状态",
+      "expected_result": "不崩溃，给出'未找到'提示；牌库空提示且不取牌；手牌满不加入",
+      "requirement_ids": [
+        "REQ-TUTOR-002"
+      ],
+      "risk_mechanism_ids": [
+        "RM-TUTOR-002"
+      ],
+      "state_oracle": {
+        "terminal": "无 JS 报错"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "console 无报错",
+        "截图-提示"
+      ]
+    },
+    {
+      "id": "TC-ITER8-010",
+      "module": "怪物扩充",
+      "title": "新怪生成与Boss生效",
+      "priority": "P1",
+      "type": "functional",
+      "steps": [
+        "在冒险中遭遇火焰督军/机械哨兵/龙裔猎手/暗影刺客等新普通怪与符文巨像/虚空召唤者精英",
+        "第4幕遭遇星界吞噬者",
+        "确认新怪可正常战斗"
+      ],
+      "test_data": "4普通+2精英+1Boss(星界吞噬者 act4)",
+      "expected_result": "新怪可正常生成/出牌/被击败，星界吞噬者可作为第4幕Boss出现，enrage 正常",
+      "requirement_ids": [
+        "REQ-ENEMY-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-ENEMY-001"
+      ],
+      "state_oracle": {
+        "terminal": "新怪战斗正常"
+      },
+      "execution_mode": "manual",
+      "evidence_expected": [
+        "截图-新怪"
+      ]
+    },
+    {
+      "id": "TC-ITER8-011",
+      "module": "文字一致性",
+      "title": "卡牌/遗物文字与效果一致",
+      "priority": "P2",
+      "type": "functional",
+      "steps": [
+        "用脚本扫描 CARD_POOL 276+ 卡与32遗物的 text 与效果实现",
+        "核对9处修正点"
+      ],
+      "test_data": "已修正：neutral_minion_9(3伤)/mage_flame_walker(3伤)/mage_fireball_2(6伤)/pal_tirion(4/4)/pri_divine(恢复6)/war_pit_lord(3伤)/echo_shield(2甲)/lifesteal(一半)/echo_relic(第一张法术牌)",
+      "expected_result": "扫描结果0处不一致(排除'抽一张'=draw_1中文数字误报)",
+      "requirement_ids": [
+        "REQ-TEXT-001"
+      ],
+      "risk_mechanism_ids": [
+        "RM-TEXT-001"
+      ],
+      "state_oracle": {
+        "terminal": "0处不一致"
+      },
+      "execution_mode": "hybrid",
+      "evidence_expected": [
+        "扫描报告"
+      ]
+    }
+  ],
+  "executions": [
+    {
+      "id": "EXE-ITER8-001",
+      "case_id": "TC-001",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "首局地图显示2个教学关节点(📖教学关)，点击进入显示金色引导横幅tutorial-banner，console无报错",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-002",
+      "case_id": "TC-002",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "教学战斗使用教学卡组(手牌为侍从卫兵/奥术飞弹/石像鬼/火球术等教学牌)，G.player.deck保持12张不被覆盖",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-003",
+      "case_id": "TC-003",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "完成2关后 localStorage tutorialProg={step1,step2}, tutorialBattleDone=1, G.tutorial=false",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-004",
+      "case_id": "TC-004",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "裂境圣所显示全部11项升级，每项有有效价格(💎3/4/5/8/10/8/12/5/10/8/6)和升级按钮，修复的4项可购买",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-005",
+      "case_id": "TC-005",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "注入100碎晶购买card_upgrade/start_rare成功(upgrades={card_upgrade:1,start_rare:1})；新冒险起始卡出现强化(+1法强等)",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-006",
+      "case_id": "TC-006",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "数据层验证：9职业starterDeck均12张且补卡id有效",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-007",
+      "case_id": "TC-007",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "标准模式12张、无限模式14张(+2秘法师)、极速模式15张(+2小精灵+1蝙蝠)",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-008",
+      "case_id": "TC-008",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "打出智慧咏唱(真实playCard路径)检索到法术'奥术飞弹'入日志'检索：从牌库获得 奥术飞弹'；直接executeSpell检索到'闪电箭'",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-009",
+      "case_id": "TC-009",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "牌库空→'牌库已空，无法检索'不崩溃；无匹配→'牌库中没有法术牌可检索'不崩溃；手牌满→'手牌已满，火球术被弃置'不崩溃",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-010",
+      "case_id": "TC-010",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "数据层验证：普通怪16/精英9/Boss4(含星界吞噬者act4+enrage)，所有deck卡id有效",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    },
+    {
+      "id": "EXE-ITER8-011",
+      "case_id": "TC-011",
+      "status": "passed",
+      "execution_level": "L2_observation",
+      "validation_scope": "formal",
+      "execution_method": "manual",
+      "operator": "qa-browser",
+      "actual_result": "数据层验证49项检查全部PASS：卡池>=283、7张修正卡存在、教程19步、遗物32、meta 11项均有costs",
+      "started_at": "2026-08-31T20:21:48",
+      "finished_at": "2026-08-31T20:21:48",
+      "attempt": 1,
+      "retest_of": null
+    }
+  ],
+  "evidence": [],
+  "bugs": [
+    {
+      "id": "BUG-ITER8-001",
+      "title": "选择职业时 ReferenceError: Cannot access 'upgrades' before initialization，冒险无法开始",
+      "module": "局外强化/卡牌强化",
+      "status": "fixed",
+      "severity": "S1",
+      "severity_basis": "阻断性：玩家选择职业后游戏崩溃无法进入冒险",
+      "priority": "P0",
+      "category": "functional",
+      "environment": "浏览器 file:// 打开 index.html，第8轮扩展后",
+      "preconditions": "localStorage 已清空，新开冒险选择职业",
+      "steps": [
+        "打开游戏",
+        "点击开始新冒险",
+        "选择任意职业"
+      ],
+      "actual_result": "console 报 ReferenceError: Cannot access 'upgrades' before initialization，页面停留在职业选择，无法继续",
+      "expected_result": "选择职业后进入开局祝福与地图",
+      "reproducibility": "always",
+      "repro_attempts": 2,
+      "first_failure_preserved": true,
+      "evidence_grade": "L2_observation",
+      "evidence_ids": [
+        "console-报错"
+      ],
+      "impact": "所有玩家无法开始游戏",
+      "analysis": {
+        "classification": "code",
+        "trigger_hypothesis": "state.js initGame 中 card_upgrade 检查块被插入到 'const upgrades = meta.upgrades' 声明之前，let/const 提升未初始化触发 TDZ",
+        "change_correlation": "第8轮新增 card_upgrade 挂钩时插入位置错误",
+        "blast_radius": "initGame 全路径",
+        "confidence": "high"
+      },
+      "workaround": "已修复：将 card_upgrade 块移到 upgrades 声明之后",
+      "related_ids": [
+        "TC-005"
+      ]
+    },
+    {
+      "id": "BUG-ITER8-002",
+      "title": "选择祝福进入地图时 renderMap 崩溃 TypeError: Cannot read properties of undefined (reading 'icon')",
+      "module": "教学关/地图",
+      "status": "fixed",
+      "severity": "S1",
+      "severity_basis": "阻断性：首局教学地图无法渲染",
+      "priority": "P0",
+      "category": "functional",
+      "environment": "浏览器 file:// 打开，首局教学地图",
+      "preconditions": "修复 BUG-001 后首局选择祝福",
+      "steps": [
+        "开始新冒险",
+        "选择职业",
+        "选择开局祝福"
+      ],
+      "actual_result": "applyStartingBonus 后 renderMap 报错 TypeError: Cannot read properties of undefined (reading 'icon')，地图无法显示",
+      "expected_result": "地图渲染，教学节点(tutorial_1/tutorial_2)正常显示",
+      "reproducibility": "always",
+      "repro_attempts": 1,
+      "first_failure_preserved": true,
+      "evidence_grade": "L2_observation",
+      "evidence_ids": [
+        "console-报错"
+      ],
+      "impact": "首局教学玩家无法进入地图",
+      "analysis": {
+        "classification": "code",
+        "trigger_hypothesis": "data.js NODE_TYPES 缺少 tutorial_1/tutorial_2 类型定义，renderMap 读取 info.icon 时 undefined",
+        "change_correlation": "第8轮注入教学节点类型但未注册到 NODE_TYPES",
+        "blast_radius": "首局教学地图渲染",
+        "confidence": "high"
+      },
+      "workaround": "已修复：NODE_TYPES 增加 tutorial_1/tutorial_2",
+      "related_ids": [
+        "TC-001"
+      ]
+    }
+  ],
+  "bug_candidates": [],
+  "risks": [],
+  "acceptance_checks": [],
+  "blockers": [],
+  "manual_handoff": {
+    "required": false,
+    "status": "not_required",
+    "reason": "",
+    "target_platform": "",
+    "operator": "",
+    "prerequisites": [],
+    "case_ids": [],
+    "evidence_requirements": [],
+    "result_submission": []
+  },
+  "unverified": [
+    "不同浏览器/移动端真机分辨率适配未在本轮覆盖（仅桌面浏览器验证）",
+    "教学关引导横幅在横屏/竖屏不同布局下的视觉细节未逐项覆盖",
+    "星界吞噬者(第4幕Boss)需进入无限模式第4幕才能遭遇，长流程未完整跑通",
+    "本地 file:// 协议下 BGM 音频因 CORS 策略无法加载（部署到 GitHub Pages http 后正常，非游戏逻辑问题）"
+  ],
+  "coverage": {
+    "requirement_total": 8,
+    "requirement_linked": 7,
+    "requirement_unlinked": 1,
+    "p0_requirement_total": 2,
+    "p0_requirement_linked": 2,
+    "case_total": 11,
+    "case_status_counts": {
+      "未执行": 11
+    },
+    "acceptance_total": 0,
+    "acceptance_status_counts": {}
+  },
+  "release_decision": {
+    "decision": "undetermined",
+    "rationale": "尚未执行。",
+    "conditions": []
+  },
+  "delivery_manifest": {
+    "source_revision": 3,
+    "outputs": [
+      {
+        "purpose": "deliverable",
+        "carrier": "lark_doc",
+        "format": "lark_doc",
+        "filename": "card-roguelike 第8轮扩展(浏览器可玩HTML)-QA测试方案与报告",
+        "source_revision": 3,
+        "sha256": "c689452229c516067579cd2953006cfc6c424d62dbb52e6d0e840b4897dad704",
+        "locator": "https://bytedance.larkoffice.com/docx/JiHhd7EhQo7A5yxBUuHcpz6gnrf",
+        "readback_receipt": "{\n  \"ok\": false,\n  \"identity\": \"user\",\n  \"error\": {\n    \"type\": \"validation\",\n    \"subtype\": \"invalid_argument\",\n    \"message\": \"unknown flag \\\"--document-id\\\" for \\\"lark-cli docs +fetch\\\"\",\n    \"hint",
+        "validated": false,
+        "status": "created"
+      }
+    ],
+    "fingerprint": "sha256:66f6be2b39135c69403d99f71ab296a5756af40178e0b1048f325576b7c65710"
+  },
+  "test_data": {
+    "writes_allowed": false,
+    "accounts": [],
+    "created_records": [],
+    "cleanup": {
+      "required": false,
+      "status": "completed",
+      "command": "none",
+      "residuals": []
+    }
+  },
+  "disclosures": [
+    "引用不存在的用例 TC-001（executions[].case_id）",
+    "非法执行等级 L2_observation（executions[].execution_level）",
+    "通过执行必须包含断言或证据（executions[]）",
+    "引用不存在的用例 TC-002（executions[].case_id）",
+    "引用不存在的用例 TC-003（executions[].case_id）",
+    "引用不存在的用例 TC-004（executions[].case_id）",
+    "引用不存在的用例 TC-005（executions[].case_id）",
+    "引用不存在的用例 TC-006（executions[].case_id）",
+    "引用不存在的用例 TC-007（executions[].case_id）",
+    "引用不存在的用例 TC-008（executions[].case_id）",
+    "引用不存在的用例 TC-009（executions[].case_id）",
+    "引用不存在的用例 TC-010（executions[].case_id）",
+    "引用不存在的用例 TC-011（executions[].case_id）",
+    "必须记录合法 Bug 证据类别（bugs[].category）",
+    "引用不存在的证据 console-报错（bugs[].evidence_ids）",
+    "正式 Bug 至少需要 L2_observation 证据；否则保留为缺陷候选或待确认（bugs[].evidence_ids）"
+  ]
+}

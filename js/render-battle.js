@@ -5,7 +5,22 @@
 // ===================== BATTLE RENDER =====================
 function renderBattle() {
   if (!G.enemy) return;
-  
+
+  // Tutorial banner
+  const tutMsg = G.battle && G.battle.tutorialMsg;
+  let bannerEl = document.getElementById('tutorial-banner');
+  if (tutMsg) {
+    if (!bannerEl) {
+      bannerEl = document.createElement('div');
+      bannerEl.id = 'tutorial-banner';
+      bannerEl.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);background:rgba(20,20,40,0.92);color:#ffd700;border:1px solid #ffd700;border-radius:10px;padding:8px 16px;font-size:13px;z-index:99;max-width:90vw;text-align:center;box-shadow:0 0 12px rgba(255,215,0,0.3);pointer-events:none;line-height:1.5;';
+      document.body.appendChild(bannerEl);
+    }
+    bannerEl.textContent = tutMsg;
+  } else if (bannerEl) {
+    bannerEl.remove();
+  }
+
   // Enemy info
   document.getElementById('enemy-portrait').textContent = G.enemy.portrait;
   const enemyNameEl = document.getElementById('enemy-name');

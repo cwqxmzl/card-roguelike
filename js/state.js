@@ -42,6 +42,15 @@ function initGame(classId) {
   const sig = PASSIVE_TREASURES.find(t => t.id === cls.signature);
   if (sig) G.relics.push({ ...sig });
 
+  // Mode-based starting deck tuning
+  const modeDeck = (G.mode === 'endless' ? ['card_drawer', 'card_drawer']
+                 : G.mode === 'sprint' ? ['wisp', 'wisp', 'vampire_bat']
+                 : []);
+  modeDeck.forEach(id => {
+    const data = getCardData(id);
+    if (data) G.player.deck.push({ ...data, uid: uid() });
+  });
+
   // Apply meta upgrades
   const meta = getMetaProgress();
   const upgrades = meta.upgrades || {};
@@ -52,6 +61,17 @@ function initGame(classId) {
   if (upgrades.first_mana) G.relics.push({ id: 'meta_first_mana', name: '法力涌动', icon: '🔷', effect: 'extra_mana_start', description: '第一回合+1法力' });
   if (upgrades.hero_power_discount) G.player.heroPower.cost = Math.max(0, G.player.heroPower.cost - 1);
   if (upgrades.start_relic) grantRelic(G);
+
+  // Meta upgrade: card_upgrade - upgrade 2 random starting cards per level
+  if (upgrades.card_upgrade) {
+    const n = 2 * upgrades.card_upgrade;
+    const targets = G.player.deck.slice().sort(() => Math.random() - 0.5).slice(0, n);
+    targets.forEach(c => {
+      if (c.type === 'minion') { c.attack = (c.attack || 0) + 1; c.hp = (c.hp || 0) + 1; }
+      else if (c.type === 'spell') { c.spellDamage = (c.spellDamage || 0) + 1; }
+      else if (c.type === 'weapon') { c.attack = (c.attack || 0) + 1; }
+    });
+  }
 
   // Apply difficulty
   applyDifficulty();
@@ -94,6 +114,8 @@ function selectClass(classId) {
   if (!cls) return;
   initGame(classId);
   G.selectedClass = classId;
+  // 首次游玩进入教学关
+  G.tutorial = localStorage.getItem('tutorialBattleDone') !== '1';
   generateMap(0);
   saveGame();
   showInitialReward();
@@ -189,6 +211,22 @@ function generateMap(act) {
   map.rows[numRows - 1] = [{ type: 'boss', completed: false, row: numRows - 1, col: 0, id: 'boss' }];
   // Mark first available nodes
   map.rows[0].forEach(n => n.available = true);
+
+  // 首局教学关：把前2个战斗节点标记为教学战斗
+  if (G.tutorial && act === 0) {
+    let marked = 0;
+    map.rows.forEach((row, r) => {
+      if (marked >= 2) return;
+      row.forEach(n => {
+        if (marked >= 2) return;
+        if (n.type === 'battle' && r < numRows - 1) {
+          n.type = marked === 0 ? 'tutorial_1' : 'tutorial_2';
+          marked++;
+        }
+      });
+    });
+  }
+
 
   // Generate connections between rows (branching path system)
   for (let r = 0; r < numRows - 1; r++) {

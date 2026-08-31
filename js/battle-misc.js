@@ -189,7 +189,23 @@ function onBattleWon() {
   addBattleLog(`获得${goldReward}金币`, 'system');
   playMusic('menu');
 
+  // Tutorial progression: complete both tutorial battles -> mark done
+  if (type === 'tutorial_1' || type === 'tutorial_2') {
+    const step = type === 'tutorial_1' ? 1 : 2;
+    try {
+      const prog = JSON.parse(localStorage.getItem('tutorialProg') || '{}');
+      prog['step' + step] = true;
+      localStorage.setItem('tutorialProg', JSON.stringify(prog));
+      if (step === 2) {
+        localStorage.setItem('tutorialBattleDone', '1');
+        if (G.tutorial) G.tutorial = false;
+        setTimeout(() => { if (!G.battle || !G.battle.ended) return; addBattleLog('教学完成！接下来的战斗将使用你的完整卡组', 'system'); }, 300);
+      }
+    } catch (e) {}
+  }
+
   // Boss: always get a passive treasure + reward choice
+
   if (type === 'boss') {
     setTimeout(() => {
       grantRelic(G);
@@ -260,7 +276,8 @@ function showCardPackReward() {
   const cards = [];
   for (let i = 0; i < 3; i++) {
     let card;
-    if (Math.random() < 0.2 && G.act > 0) {
+    const rareLv = (getMetaProgress().upgrades && getMetaProgress().upgrades.start_rare) || 0;
+    if (Math.random() < (0.2 + rareLv * 0.15) && G.act > 0) {
       const rares = filtered.filter(c => c.rarity === 'epic' || c.rarity === 'legendary');
       card = rares.length > 0 ? rares[Math.floor(Math.random() * rares.length)] : filtered[Math.floor(Math.random() * filtered.length)];
     } else {
