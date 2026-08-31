@@ -187,6 +187,51 @@ function generateMap(act) {
   map.rows[numRows - 1] = [{ type: 'boss', completed: false, row: numRows - 1, col: 0, id: 'boss' }];
   // Mark first available nodes
   map.rows[0].forEach(n => n.available = true);
+
+  // Generate connections between rows (branching path system)
+  for (let r = 0; r < numRows - 1; r++) {
+    const currRow = map.rows[r];
+    const nextRow = map.rows[r + 1];
+    currRow.forEach(node => {
+      node.connections = [];
+      // Connect to adjacent columns in next row (col-1, col, col+1)
+      const candidates = nextRow.filter(n =>
+        Math.abs(n.col - node.col) <= 1 || nextRow.length === 1
+      );
+      if (candidates.length === 0) {
+        // Fallback: connect to nearest
+        const nearest = nextRow.reduce((a, b) =>
+          Math.abs(a.col - node.col) < Math.abs(b.col - node.col) ? a : b
+        );
+        node.connections.push(nearest.id);
+      } else {
+        // Connect to 1-2 candidates (at least 1, randomly 2)
+        const shuffled = candidates.sort(() => Math.random() - 0.5);
+        const numConn = Math.min(shuffled.length, 1 + Math.floor(Math.random() * 2));
+        for (let i = 0; i < numConn; i++) {
+          node.connections.push(shuffled[i].id);
+        }
+      }
+    });
+    // Ensure every node in next row has at least one incoming connection
+    nextRow.forEach(n => {
+      const hasIncoming = currRow.some(cn => cn.connections && cn.connections.includes(n.id));
+      if (!hasIncoming) {
+        // Connect from nearest node in current row
+        const nearest = currRow.reduce((a, b) =>
+          Math.abs(a.col - n.col) < Math.abs(b.col - n.col) ? a : b
+        );
+        if (!nearest.connections) nearest.connections = [];
+        nearest.connections.push(n.id);
+      }
+    });
+  }
+  // Boss row: all previous row nodes connect to boss
+  const prevRow = map.rows[numRows - 2];
+  const boss = map.rows[numRows - 1][0];
+  boss.connections = [];
+  prevRow.forEach(n => { n.connections = [boss.id]; });
+
   G.map = map;
   G.currentNode = null;
 }

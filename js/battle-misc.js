@@ -374,6 +374,47 @@ function renderRewardCards(cards, title) {
   showOverlay('overlay-reward');
 }
 
+// ===================== SURRENDER & FAST FORWARD =====================
+function surrenderBattle() {
+  showOverlay('overlay-surrender');
+}
+
+function confirmSurrender() {
+  hideOverlay('overlay-surrender');
+  if (G.battle) {
+    G.battle.ended = true;
+    G.battle.surrendered = true;
+    if (G.battle.safetyTimer) { clearTimeout(G.battle.safetyTimer); G.battle.safetyTimer = null; }
+    if (G.battle.attackSafetyTimer) { clearTimeout(G.battle.attackSafetyTimer); G.battle.attackSafetyTimer = null; }
+  }
+  addBattleLog('你选择了投降...', 'system');
+  const shards = Math.max(2, Math.floor((G.act * 3 + (G.map.currentRow || 0)) / 2));
+  clearSave();
+  saveMetaProgress('defeat', shards);
+  const meta = getMetaProgress();
+  document.getElementById('gameover-info').innerHTML = `你投降了，结束了本次冒险。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || shards} 裂境碎晶</span>`;
+  playSfx('defeat');
+  showOverlay('overlay-gameover');
+}
+
+function toggleFastForward() {
+  G.fastForward = !G.fastForward;
+  const btn = document.getElementById('ff-toggle');
+  if (btn) {
+    btn.classList.toggle('active', G.fastForward);
+    btn.textContent = G.fastForward ? '⏩ 快进中' : '⏩ 快进';
+  }
+  // Speed up CSS animations via a root class
+  document.documentElement.classList.toggle('fast-forward', G.fastForward);
+  // Add a brief feedback hint
+  const turnInfo = document.getElementById('battle-turn-info');
+  if (turnInfo && G.fastForward) {
+    const orig = turnInfo.textContent;
+    turnInfo.textContent = '⏩ 快进中';
+    setTimeout(() => { if (turnInfo.textContent === '⏩ 快进中') turnInfo.textContent = orig; }, 600);
+  }
+}
+
 function onBattleLost() {
   if (G.battle.ended) return;
   G.battle.ended = true;

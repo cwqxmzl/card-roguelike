@@ -92,9 +92,12 @@ function saveSettings() {
   try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(SETTINGS)); } catch(e) {}
 }
 
-// Animation pacing: when "战斗动画" is off, reduce battle pacing delays to 0
+// Animation pacing: when "战斗动画" is off, reduce battle pacing delays to 0.
+// When fast-forward is active, halve the delay.
 function animDelay(ms) {
-  return SETTINGS.animations ? ms : 0;
+  if (!SETTINGS.animations) return 0;
+  if (G && G.fastForward) return Math.max(0, Math.floor(ms / 2));
+  return ms;
 }
 
 function showSettings() {

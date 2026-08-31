@@ -22,9 +22,48 @@ function renderMap() {
   
   const container = document.getElementById('map-nodes');
   const frag = document.createDocumentFragment();
+
+  // SVG connection lines (branching path visualization)
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('class', 'map-connections');
+  svg.setAttribute('style', 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible;');
+  const rowH = 100;
+  const nodeCenter = 45;
+  for (let ri = 0; ri < G.map.rows.length - 1; ri++) {
+    const row = G.map.rows[ri];
+    const nextRow = G.map.rows[ri + 1];
+    row.forEach(node => {
+      if (!node.connections) return;
+      node.connections.forEach(connId => {
+        let target = null;
+        nextRow.forEach(n => { if (n.id === connId) target = n; });
+        if (!target) return;
+        const x1 = ((node.col + 0.5) / row.length) * 100;
+        const y1 = ri * rowH + nodeCenter;
+        const x2 = ((target.col + 0.5) / nextRow.length) * 100;
+        const y2 = (ri + 1) * rowH + nodeCenter;
+        const line = document.createElementNS(svgNS, 'line');
+        line.setAttribute('x1', x1 + '%');
+        line.setAttribute('y1', y1 + 'px');
+        line.setAttribute('x2', x2 + '%');
+        line.setAttribute('y2', y2 + 'px');
+        const isDone = node.completed && target.completed;
+        const isActive = node.completed && target.available && !target.completed;
+        line.setAttribute('stroke', isDone ? '#5cb85c' : isActive ? '#ffd700' : 'rgba(255,255,255,0.12)');
+        line.setAttribute('stroke-width', isActive || isDone ? '3' : '2');
+        line.setAttribute('stroke-dasharray', isActive || isDone ? '' : '5,4');
+        line.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(line);
+      });
+    });
+  }
+  frag.appendChild(svg);
+
   G.map.rows.forEach((row, ri) => {
     const rowDiv = document.createElement('div');
     rowDiv.className = 'map-row';
+    rowDiv.setAttribute('style', 'position:relative;z-index:1;');
     row.forEach(node => {
       const nodeDiv = document.createElement('div');
       const info = NODE_TYPES[node.type];
@@ -109,10 +148,21 @@ function completeNode() {
   if (!node) return;
   node.completed = true;
   node.available = false;
-  // Unlock next row nodes
-  const nextRow = node.row + 1;
-  if (nextRow < G.map.rows.length) {
-    G.map.rows[nextRow].forEach(n => n.available = true);
+  // Unlock only connected nodes in next row (branching path)
+  if (node.connections && node.connections.length > 0) {
+    node.connections.forEach(connId => {
+      G.map.rows.forEach(row => {
+        row.forEach(n => {
+          if (n.id === connId) n.available = true;
+        });
+      });
+    });
+  } else {
+    // Fallback: unlock next row if no connections (old saves)
+    const nextRow = node.row + 1;
+    if (nextRow < G.map.rows.length) {
+      G.map.rows[nextRow].forEach(n => n.available = true);
+    }
   }
   G.currentNode = null;
   

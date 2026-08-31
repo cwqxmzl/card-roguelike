@@ -197,6 +197,91 @@ function endTurn() {
   }, animDelay(300));
 }
 
+
+// ===================== ENEMY PERSONALITY =====================
+// Personality passive abilities that trigger during battle.
+// 'vampiric'  - enemy heals for damage it deals
+// 'frenzy'    - gains +1 attack each time it takes damage
+// 'guardian'  - gains armor at start of its turn
+// 'commander' - minions get +1 attack while alive
+// 'swarm'     - summons a 1/1 at start of its turn if board empty
+// 'reflect'   - reflects damage back when taking damage
+
+const ENEMY_PERSONALITY_INFO = {
+  vampiric:  '🩸 吸血：造成伤害时恢复等量生命',
+  frenzy:    '🔥 狂怒：受到伤害时攻击+1',
+  guardian:  '🛡️ 守护：每回合获得3点护甲',
+  commander: '⚔️ 指挥官：己方随从攻击+1',
+  swarm:     '🐝 群聚：回合开始召唤1/1',
+  reflect:   '🪞 反伤：受到伤害时反弹1点',
+};
+
+function getPersonalityText() {
+  if (!G.enemy || !G.enemy.personality) return '';
+  return ENEMY_PERSONALITY_INFO[G.enemy.personality] || '';
+}
+
+// Called at the start of the enemy turn
+function applyEnemyPersonalityTurnStart() {
+  if (!G.enemy || !G.enemy.personality || G.battle.ended) return;
+  const p = G.enemy.personality;
+  const e = G.enemy;
+
+  if (p === 'guardian') {
+    e.armor += 3;
+    floatText('enemy-portrait', '+3甲', 'armor');
+    addBattleLog(`${e.name}的守护特性生效，获得3点护甲`, 'enemy');
+  }
+  if (p === 'swarm') {
+    const alive = e.minions.filter(m => !m.dead).length;
+    if (alive < 2) {
+      e.minions.push(createMinion({ id: 'person_swarm_' + uid(), name: '小生物', cost: 0, type: 'minion', attack: 1, hp: 1, art: '🐝', text: '' }, false));
+      addBattleLog(`${e.name}的群聚特性生效，召唤一个1/1小生物`, 'enemy');
+    }
+  }
+  if (p === 'commander') {
+    e.minions.forEach(m => {
+      if (!m.dead) { m.currentAttack = (m.currentAttack || m.attack || 0) + 1; }
+    });
+    addBattleLog(`${e.name}的指挥官特性生效，己方随从攻击+1`, 'enemy');
+  }
+}
+
+// Called when the enemy deals damage (for vampiric)
+function applyEnemyPersonalityOnDealDamage(dmg) {
+  if (!G.enemy || G.enemy.personality !== 'vampiric' || !(dmg > 0)) return;
+  const e = G.enemy;
+  const before = e.hp;
+  e.hp = Math.min(e.maxHp, e.hp + dmg);
+  const healed = e.hp - before;
+  if (healed > 0) {
+    floatText('enemy-portrait', '+' + healed, 'heal');
+    addBattleLog(`${e.name}的吸血特性生效，恢复${healed}点生命`, 'enemy');
+  }
+}
+
+// Called when the enemy takes damage (for frenzy / reflect)
+function applyEnemyPersonalityOnTakeDamage(dmg, source) {
+  if (!G.enemy || !G.enemy.personality || !(dmg > 0) || G.enemy.dead) return;
+  const p = G.enemy.personality;
+  const e = G.enemy;
+
+  if (p === 'frenzy') {
+    e.frenzyBonus = (e.frenzyBonus || 0) + 1;
+    // Apply to all enemy minions and hero attacks
+    e.minions.forEach(m => {
+      if (!m.dead) { m.currentAttack = (m.currentAttack || m.attack || 0) + 1; }
+    });
+    addBattleLog(`${e.name}的狂怒特性生效，攻击+1！`, 'enemy');
+  }
+  if (p === 'reflect' && source) {
+    dealDamage(source, 1, e);
+    floatText(source === G.player ? 'player-portrait' : 'enemy-portrait', '-1', 'damage');
+    addBattleLog(`${e.name}的反伤特性生效，反弹1点伤害`, 'enemy');
+  }
+}
+
+
 function startEnemyTurn() {
   if (G.battle.ended) return;
   G.battle.isPlayerTurn = false;
@@ -206,6 +291,9 @@ function startEnemyTurn() {
   G.enemy.maxMana = Math.min(GAME_CONFIG.battle.maxMana, G.enemy.maxMana + 1);
   G.enemy.mana = G.enemy.maxMana - (G.enemy.overload || 0);
   G.enemy.overload = 0;
+
+  // Enemy personality: turn start effects
+  applyEnemyPersonalityTurnStart();
 
   drawCard(G.enemy, false);
   addBattleLog(`敌方抽牌（手牌${G.enemy.hand.length}张）`, 'enemy');
@@ -939,6 +1027,8 @@ function attack(attacker, target, isEnemyAttacking) {
   if (target === G.player || target === G.enemy) {
     dealDamage(target, atkDmg, owner);
     floatText(target === G.player ? 'player-portrait' : 'enemy-portrait', '-' + atkDmg, 'damage');
+    // Enemy personality: vampiric heals the enemy for damage dealt
+    if (isEnemyAttacking) applyEnemyPersonalityOnDealDamage(atkDmg);
     // Thorns relic: when the enemy hits your hero, reflect 1 damage to the attacker
     if (isEnemyAttacking && hasRelic('thorns') && !attacker.dead) {
       dealDamage(attacker, 1, G.player);
@@ -949,6 +1039,8 @@ function attack(attacker, target, isEnemyAttacking) {
 
     // dealDamage handles divine shield and 0 damage correctly
     dealDamage(target, atkDmg, owner);
+    // Enemy personality: vampiric heals the enemy for damage dealt
+    if (isEnemyAttacking) applyEnemyPersonalityOnDealDamage(atkDmg);
 
     // Counterattack - only if target can fight back
     if (!attacker.dead && targetDmg > 0) {
@@ -1056,6 +1148,10 @@ function dealDamage(target, amount, source) {
     }
     // Lifesteal: source minion with lifesteal heals its owner by damage dealt
     applyLifesteal(source, remaining);
+    // Enemy personality: frenzy / reflect on taking damage
+    if (target === G.enemy && !G.enemy.dead) {
+      applyEnemyPersonalityOnTakeDamage(remaining, source);
+    }
   } else {
     if (target.divineShield) {
       target.divineShield = false;

@@ -75,7 +75,9 @@ function renderBattleStats() {
 function getEnemyIntentText() {
   if (!G || !G.enemy) return '';
   const enraged = G.enemy.enraged ? ' ⚡激怒' : '';
-  return G.enemy.intent ? `敌方意图：${G.enemy.intent}${enraged}` : (enraged ? `${G.enemy.name || '敌方'}已激怒` : '');
+  const persona = getPersonalityText();
+  const base = G.enemy.intent ? `敌方意图：${G.enemy.intent}${enraged}` : (enraged ? `${G.enemy.name || '敌方'}已激怒` : '');
+  return persona ? (base ? base + '  ' + persona : persona) : base;
 }
 
 function computeEnemyIntent() {
