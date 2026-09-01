@@ -102,7 +102,7 @@ const CARD_POOL = [
   // --- Class Legendaries ---
   { id: 'arcane_wyrm', name: '奥术巨龙', cost: 7, type: 'minion', attack: 7, hp: 7, rarity: 'legendary', art: '🐉', artImg: 'assets/card-arcane-wyrm.jpg', text: '战吼：对所有敌方随从造成3点伤害', battlecry: 'deal_3_all' },
   { id: 'iron_bastion', name: '钢铁堡垒', cost: 6, type: 'minion', attack: 6, hp: 8, rarity: 'legendary', art: '🏰', artImg: 'assets/card-iron-bastion.jpg', text: '嘲讽·战吼：获得5点护甲', taunt: true, battlecry: 'gain_armor_5' },
-  { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 4, hp: 3, rarity: 'legendary', art: '🦅', artImg: 'assets/card-storm-falcon.jpg', text: '冲锋·风怒', charge: true, windfury: true },
+  { id: 'storm_falcon', name: '风暴猎鹰', cost: 5, type: 'minion', attack: 5, hp: 3, rarity: 'legendary', art: '🦅', artImg: 'assets/card-storm-falcon.jpg', text: '冲锋·风怒', charge: true, windfury: true },
   { id: 'lightbringer', name: '光明使者', cost: 7, type: 'minion', attack: 7, hp: 7, rarity: 'legendary', art: '🕊️', text: '战吼：使所有友方随从+2/+2', battlecry: 'buff_all_2_2' },
   // --- Priest ---
   { id: 'holy_smite', name: '圣光惩击', cost: 2, type: 'spell', rarity: 'common', art: '✨', text: '对任意目标造成3点伤害', effect: 'smite' },
@@ -160,7 +160,7 @@ const CARD_POOL = [
   { id: 'neutral_spell_8', name: '烈焰风暴·改', cost: 7, type: 'spell', rarity: 'epic', art: '🌋', text: '对所有敌人造成4点伤害', effect: 'deal_4_all' },
   { id: 'neutral_minion_9', name: '混沌领主', cost: 7, type: 'minion', attack: 8, hp: 7, rarity: 'epic', art: '👹', text: '战吼：对所有敌方随从造成3点伤害', battlecry: 'deal_3_all' },
   { id: 'neutral_minion_10', name: '虚空观察者', cost: 4, type: 'minion', attack: 2, hp: 6, rarity: 'rare', art: '👁️', text: '亡语：抽2张牌', deathrattle: 'draw_2_owner' },
-  { id: 'neutral_spell_11', name: '时间扭曲', cost: 5, type: 'spell', rarity: 'epic', art: '⏳', text: '获得1个法力水晶', effect: 'gain_mana_1' },
+  { id: 'neutral_spell_11', name: '时间扭曲', cost: 5, type: 'spell', rarity: 'epic', art: '⏳', text: '获得2个法力水晶', effect: 'gain_mana_2' },
   { id: 'neutral_minion_12', name: '深渊触须', cost: 5, type: 'minion', attack: 3, hp: 7, rarity: 'rare', art: '🦑', text: '亡语：召唤一个3/3召唤物', deathrattle: 'summon_3_3' },
   { id: 'neutral_minion_13', name: '黄金战士', cost: 4, type: 'minion', attack: 5, hp: 4, rarity: 'rare', art: '🛡️', text: '战吼：获得2点护甲', battlecry: 'gain_armor_2' },
 
@@ -170,7 +170,7 @@ const CARD_POOL = [
   { id: 'tutor_low_2', name: '战术推演', cost: 2, type: 'spell', rarity: 'rare', art: '🧠', text: '检索：从牌库抽1张费用2点或更低的牌', effect: 'tutor_cost_le2' },
   { id: 'tutor_weapon_2', name: '军备库', cost: 2, type: 'spell', rarity: 'common', art: '⚔️', text: '检索：从牌库抽1张武器牌到手中', effect: 'tutor_weapon' },
   { id: 'tutor_beast_2', name: '兽群呼唤', cost: 2, type: 'spell', rarity: 'rare', art: '🐺', text: '检索：从牌库抽1张野兽牌到手中', effect: 'tutor_race_beast' },
-  { id: 'tutor_rare_3', name: '命运启示', cost: 3, type: 'spell', rarity: 'epic', art: '🔮', text: '检索：从牌库抽1张稀有或更高稀有度的牌', effect: 'tutor_rare_plus' },
+  { id: 'tutor_rare_3', name: '命运启示', cost: 3, type: 'spell', rarity: 'epic', art: '🔮', text: '检索：从牌库抽2张稀有或更高稀有度的牌', effect: 'tutor_rare_plus_2' },
   { id: 'tutor_spell_2', name: '深谋远虑', cost: 3, type: 'spell', rarity: 'epic', art: '📚', text: '检索：从牌库抽2张法术牌到手中', effect: 'tutor_spell_2' },
 
   // =============== 法师新卡（15张） ===============
@@ -188,7 +188,7 @@ const CARD_POOL = [
   { id: 'mage_frost_giant', name: '冰霜巨人', cost: 6, type: 'minion', attack: 7, hp: 7, rarity: 'epic', art: '🧊', text: '' },
   { id: 'mage_scorch', name: '灼烧', cost: 1, type: 'spell', rarity: 'common', art: '🔥', text: '造成2点伤害', effect: 'deal_2' },
   { id: 'mage_mana_wyrm', name: '法力浮龙', cost: 2, type: 'minion', attack: 1, hp: 3, rarity: 'common', art: '🐉', text: '法术伤害+1', spellDamage: 1 },
-  { id: 'mage_time_warp', name: '时空穿梭', cost: 7, type: 'spell', rarity: 'legendary', art: '⏳', text: '抽3张牌', effect: 'draw_3' },
+  { id: 'mage_time_warp', name: '时空穿梭', cost: 7, type: 'spell', rarity: 'legendary', art: '⏳', text: '抽3张牌，并获得1个额外回合', effect: 'time_warp' },
 
   // =============== 战士新卡（15张） ===============
   { id: 'war_pierce', name: '破甲', cost: 1, type: 'spell', rarity: 'common', art: '🗡️', text: '造成2点伤害', effect: 'deal_2' },
@@ -307,7 +307,7 @@ const CARD_POOL = [
 
   // ---- 魔力增幅系（影之诗 Spellboost） ----
   { id: 'boost_fireball', name: '增幅火球', cost: 6, type: 'spell', rarity: 'epic', art: '🔥', text: '造成6点伤害。魔力增幅：每使用一张法术，费用-1', effect: 'deal_6_face', spellboost: 4 },
-  { id: 'boost_blizzard', name: '增幅暴风雪', cost: 8, type: 'spell', rarity: 'epic', art: '❄️', text: '对所有敌方随从造成3点伤害并冻结。魔力增幅：每使用一张法术，费用-1', effect: 'blizzard', spellboost: 5 },
+  { id: 'boost_blizzard', name: '增幅暴风雪', cost: 7, type: 'spell', rarity: 'epic', art: '❄️', text: '对所有敌方随从造成3点伤害并冻结。魔力增幅：每使用一张法术，费用-1', effect: 'blizzard', spellboost: 5 },
 
   // ===================== ROGUE (盗贼) =====================
   { id: 'backstab', name: '背刺', cost: 1, type: 'spell', rarity: 'common', art: '🔪', text: '造成3点伤害', effect: 'deal_3_face' },
@@ -319,7 +319,7 @@ const CARD_POOL = [
   { id: 'stealth_knife', name: '潜行匕首', cost: 1, type: 'weapon', attack: 1, durability: 3, rarity: 'common', art: '🗡️', text: '武器' },
   { id: 'sprint', name: '疾跑', cost: 4, type: 'spell', rarity: 'common', art: '💨', text: '抽3张牌', effect: 'draw_3' },
   { id: 'combo_strike', name: '连击之刃', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '⚡', text: '战吼：造成2点伤害', battlecry: 'deal_2' },
-  { id: 'shadow_step', name: '暗影步', cost: 1, type: 'spell', rarity: 'epic', art: '🌫️', text: '回响·获得1点法力水晶', effect: 'gain_mana_1', echo: true },
+  { id: 'shadow_step', name: '暗影步', cost: 1, type: 'spell', rarity: 'epic', art: '🌫️', text: '回响·获得1点法力水晶并抽一张牌', effect: 'gain_mana_draw', echo: true },
   { id: 'bribery', name: '收买', cost: 4, type: 'spell', rarity: 'epic', art: '💰', text: '获得一个敌方随从的控制权', effect: 'mind_control' },
   { id: 'master_poisoner', name: '淬毒大师', cost: 5, type: 'minion', attack: 4, hp: 4, rarity: 'epic', art: '🧪', text: '剧毒', poisonous: true },
   { id: 'rogue_legend', name: '影之君主', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '👑', text: '冲锋·潜行', charge: true, stealth: true },
@@ -331,7 +331,7 @@ const CARD_POOL = [
   { id: 'mark_wild', name: '野性印记', cost: 3, type: 'spell', rarity: 'rare', art: '🖐️', text: '所有友方随从+2/+2', effect: 'buff_friendly_2_2' },
   { id: 'moonfire', name: '月火术', cost: 1, type: 'spell', rarity: 'common', art: '🌙', text: '造成1点伤害', effect: 'deal_1' },
   { id: 'nourish', name: '滋养', cost: 4, type: 'spell', rarity: 'rare', art: '💧', text: '抽3张牌', effect: 'draw_3' },
-  { id: 'treant_call', name: '召唤树人', cost: 5, type: 'spell', rarity: 'epic', art: '🌲', text: '召唤两个2/2树人', effect: 'summon_two_2_2' },
+  { id: 'treant_call', name: '召唤树人', cost: 5, type: 'spell', rarity: 'epic', art: '🌲', text: '召唤两个3/2树人', effect: 'summon_two_3_2' },
   { id: 'pack_alpha', name: '狼群首领', cost: 4, type: 'minion', attack: 4, hp: 4, rarity: 'rare', art: '🐺', text: '野兽·战吼：召唤一个2/2幼狼', battlecry: 'summon_2_2', race: 'beast' },
   { id: 'ancient_guard', name: '古树守卫', cost: 5, type: 'minion', attack: 3, hp: 8, rarity: 'rare', art: '🛡️', text: '嘲讽', taunt: true },
   { id: 'forest_king', name: '森林之王', cost: 7, type: 'minion', attack: 6, hp: 8, rarity: 'legendary', art: '👑', text: '嘲讽·野兽', taunt: true, race: 'beast' },
@@ -347,7 +347,7 @@ const CARD_POOL = [
   { id: 'earth_shield', name: '大地之盾', cost: 2, type: 'spell', rarity: 'common', art: '🪨', text: '获得3点护甲', effect: 'gain_armor_3' },
   { id: 'lava_burst', name: '熔岩爆裂', cost: 4, type: 'spell', rarity: 'rare', art: '🌋', text: '造成5点伤害', effect: 'deal_5' },
   { id: 'storm_giant', name: '风暴巨人', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'epic', art: '🗿', text: '风怒', windfury: true },
-  { id: 'totem_army', name: '图腾军团', cost: 5, type: 'spell', rarity: 'epic', art: '🪔', text: '召唤两个0/2嘲讽图腾', effect: 'summon_two_0_2' },
+  { id: 'totem_army', name: '图腾军团', cost: 5, type: 'spell', rarity: 'epic', art: '🪔', text: '召唤两个2/2嘲讽图腾', effect: 'summon_two_0_2' },
   { id: 'elem_surge', name: '元素涌动', cost: 3, type: 'spell', rarity: 'epic', art: '✨', text: '造成3点伤害并抽1张牌', effect: 'deal_3_draw_1' },
 
   // ===================== 体系卡牌：元素/机械/龙/鱼人/恶魔/野兽 =====================
@@ -406,7 +406,7 @@ const CARD_POOL = [
   { id: 'sa_totem_boost', name: '图腾之力', cost: 2, type: 'spell', rarity: 'common', art: '🪔', text: '所有友方随从+1/+1', effect: 'buff_all_1_1' },
   { id: 'sa_elem_blast', name: '元素冲击', cost: 3, type: 'spell', rarity: 'rare', art: '🔥', text: '造成4点伤害', effect: 'deal_4' },
   { id: 'sa_wild_strike', name: '野性打击', cost: 3, type: 'spell', rarity: 'common', art: '🌩️', text: '造成5点伤害', effect: 'deal_5' },
-  { id: 'sa_totem_army_2', name: '图腾军团', cost: 5, type: 'spell', rarity: 'epic', art: '🪔', text: '召唤两个0/2嘲讽图腾', effect: 'summon_two_0_2' },
+  { id: 'sa_totem_army_2', name: '图腾军团', cost: 5, type: 'spell', rarity: 'epic', art: '🪔', text: '召唤两个2/2嘲讽图腾', effect: 'summon_two_0_2' },
   { id: 'sa_chain_lightning', name: '连锁闪电', cost: 3, type: 'spell', rarity: 'rare', art: '⚡', text: '造成3点伤害，抽一张牌', effect: 'deal_3_draw_1' },
   { id: 'sa_frost_shock_2', name: '冰霜震击', cost: 1, type: 'spell', rarity: 'common', art: '❄️', text: '冻结一个敌方随从', effect: 'freeze_enemy' },
   { id: 'sa_fire_elemental', name: '火焰元素使', cost: 5, type: 'minion', attack: 5, hp: 5, rarity: 'common', art: '🔥', text: '元素' },
@@ -570,10 +570,10 @@ const ENEMIES = {
 
   ],
   boss: [
-    { name: '森林之王·古树', portrait: '🌳', hp: 70, deck: ['stone_golem','war_golem','shield_bearer','giant','undead_knight','healer','paladin_knight','summoner','ogre','flamestrike','consecration','cultist','ragnaros','guardsman'], ai: 'control', isBoss: true, act: 1, rewardRelic: true, enrage: { summons: [{ name: '古树守卫', attack: 3, hp: 3, art: '🌳', taunt: true }] } },
-    { name: '暗影领主', portrait: '🦇', hp: 85, deck: ['sylvanas','mind_control','assassinate','undead_knight','cultist','summoner','mirror_entity','deathwing','loot_hoarder','flamestrike','blizzard','equality','doom_blade','ragnaros'], ai: 'control', isBoss: true, act: 2, rewardRelic: true, enrage: { buff: 2 } },
-    { name: '裂境之主·虚空', portrait: '👁️', hp: 115, deck: ['ragnaros','deathwing','sylvanas','undead_knight','giant','dragon','pyroblast','mind_control','flamestrike','equality','assassinate','blizzard','doom_blade','water_elemental','faceless'], ai: 'boss', isBoss: true, act: 3, rewardRelic: true, enrage: { summons: [{ name: '虚空行者', attack: 4, hp: 4, art: '👁️' }], buff: 1 } },
-    { name: '星界吞噬者', portrait: '🌌', hp: 140, deck: ['deathwing','ragnaros','sylvanas','pyroblast','mind_control','flamestrike','blizzard','equality','assassinate','doom_blade','giant','dragon','faceless','archmage','fireball'], ai: 'boss', isBoss: true, act: 4, rewardRelic: true, enrage: { summons: [{ name: '星界触须', attack: 5, hp: 5, art: '🌌' }], buff: 2 } },
+    { name: '森林之王·古树', portrait: '🌳', hp: 80, deck: ['stone_golem','war_golem','shield_bearer','giant','undead_knight','healer','paladin_knight','summoner','ogre','flamestrike','consecration','cultist','ragnaros','guardsman'], ai: 'control', isBoss: true, act: 1, rewardRelic: true, enrage: { summons: [{ name: '古树守卫', attack: 4, hp: 4, art: '🌳', taunt: true }] } },
+    { name: '暗影领主', portrait: '🦇', hp: 95, deck: ['sylvanas','mind_control','assassinate','undead_knight','cultist','summoner','mirror_entity','deathwing','loot_hoarder','flamestrike','blizzard','equality','doom_blade','ragnaros'], ai: 'control', isBoss: true, act: 2, rewardRelic: true, enrage: { buff: 3 } },
+    { name: '裂境之主·虚空', portrait: '👁️', hp: 128, deck: ['ragnaros','deathwing','sylvanas','undead_knight','giant','dragon','pyroblast','mind_control','flamestrike','equality','assassinate','blizzard','doom_blade','water_elemental','faceless'], ai: 'boss', isBoss: true, act: 3, rewardRelic: true, enrage: { summons: [{ name: '虚空行者', attack: 5, hp: 5, art: '👁️' }], buff: 1 } },
+    { name: '星界吞噬者', portrait: '🌌', hp: 155, deck: ['deathwing','ragnaros','sylvanas','pyroblast','mind_control','flamestrike','blizzard','equality','assassinate','doom_blade','giant','dragon','faceless','archmage','fireball'], ai: 'boss', isBoss: true, act: 4, rewardRelic: true, enrage: { summons: [{ name: '星界触须', attack: 6, hp: 6, art: '🌌' }], buff: 2 } },
 
   ]
 };

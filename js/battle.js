@@ -154,7 +154,7 @@ function startPlayerTurn() {
   G.player.minions.forEach(m => {
     if (m.startOfTurn && !m.dead) {
       switch (m.startOfTurn) {
-        case 'draw_1':
+    case 'draw_1':
           drawCard(G.player, true);
           addBattleLog(`${m.name}的回合开始效果：抽1张牌`, 'player');
           break;
@@ -215,6 +215,14 @@ function startPlayerTurn() {
 
 function endTurn() {
   if (G.battle.ended || !G.battle.isPlayerTurn) return;
+  // 第10轮：时空穿梭额外回合（连续玩家回合，敌方不动）
+  if (G.battle.extraTurn) {
+    G.battle.extraTurn = false;
+    G.battle.turnPhase = 'extra';
+    addBattleLog('—— 时空穿梭 · 额外回合 ——', 'system');
+    startPlayerTurn();
+    return;
+  }
   G.battle.isPlayerTurn = false;
   G.battle.turnPhase = 'enemy_start';
   setEndTurnButtonState('enemy');
@@ -1094,13 +1102,13 @@ function executeSpell(effect, player, enemy, card, target) {
       enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
       break;
     case 'flamestrike':
-      enemy.minions.forEach(m => dealDamage(m, 4 + sp, player));
+      enemy.minions.forEach(m => dealDamage(m, 5 + sp, player));
       break;
     case 'lightning_storm':
       enemy.minions.forEach(m => dealDamage(m, 2 + sp, player));
       break;
     case 'blizzard':
-      enemy.minions.forEach(m => { dealDamage(m, 2 + sp, player); m.frozen = true; m.canAttack = false; });
+      enemy.minions.forEach(m => { dealDamage(m, 3 + sp, player); m.frozen = true; m.canAttack = false; });
       addBattleLog(`${caster}暴风雪${sp > 0 ? '(法术强度+' + sp + ')' : ''}冻结所有敌方随从`, logType);
       break;
     case 'polymorph':
@@ -1187,10 +1195,10 @@ function executeSpell(effect, player, enemy, card, target) {
     case 'summon_two_0_2':
       for (let i = 0; i < 2; i++) {
         if (player.minions.length < 7) {
-          player.minions.push(createMinion({ id: 'totem_token', name: '图腾', cost: 1, attack: 0, hp: 2, rarity: 'common', art: '🪔', text: '', taunt: true }, player === G.player));
+          player.minions.push(createMinion({ id: 'totem_token', name: '图腾', cost: 1, attack: 2, hp: 2, rarity: 'common', art: '🪔', text: '', taunt: true }, player === G.player));
         }
       }
-      addBattleLog(`${caster}召唤了两个0/2嘲讽图腾`, logType);
+      addBattleLog(`${caster}召唤了两个2/2嘲讽图腾`, logType);
       break;
     case 'deal_3_draw_1':
       dealDamage(target || enemy, 3 + sp, player);
@@ -1255,9 +1263,9 @@ function executeSpell(effect, player, enemy, card, target) {
       dealDamage(target || enemy, 5 + sp, player);
       break;
     case 'holy_fire':
-      dealDamage(target || enemy, 5 + sp, player);
-      player.hp = Math.min(player.maxHp, player.hp + 5);
-      addBattleLog(`${caster}神圣之火：造成${5 + sp}点伤害并恢复5点生命`, logType);
+      dealDamage(target || enemy, 6 + sp, player);
+      player.hp = Math.min(player.maxHp, player.hp + 6);
+      addBattleLog(`${caster}神圣之火：造成${6 + sp}点伤害并恢复6点生命`, logType);
       break;
 
     case 'deal_2':
@@ -1320,6 +1328,32 @@ function executeSpell(effect, player, enemy, card, target) {
         player.minions.push(w);
         addBattleLog(`${caster}召唤了一只1/1冲锋幽灵狼`, logType);
       }
+      break;
+    case 'time_warp':
+      drawCard(player, true); drawCard(player, true); drawCard(player, true);
+      G.battle.extraTurn = true;
+      addBattleLog(`${caster}发动时空穿梭！抽3张牌并获得1个额外回合`, logType);
+      break;
+    case 'summon_two_3_2':
+      for (let i = 0; i < 2; i++) {
+        if (player.minions.length < 7) {
+          player.minions.push(createMinion({ id: 'treant_token2', name: '树人', cost: 3, attack: 3, hp: 2, rarity: 'common', art: '🌲', text: '' }, player === G.player));
+        }
+      }
+      addBattleLog(`${caster}召唤了两个3/2树人`, logType);
+      break;
+    case 'gain_mana_2':
+      player.mana = Math.min(10, player.mana + 2);
+      addBattleLog(`${caster}获得2个法力水晶`, logType);
+      break;
+    case 'gain_mana_draw':
+      player.mana = Math.min(10, player.mana + 1);
+      drawCard(player, true);
+      addBattleLog(`${caster}获得1个法力水晶并抽一张牌`, logType);
+      break;
+    case 'tutor_rare_plus_2':
+      tutorCard(player, c => c.rarity === 'rare' || c.rarity === 'epic' || c.rarity === 'legendary', '稀有');
+      tutorCard(player, c => c.rarity === 'rare' || c.rarity === 'epic' || c.rarity === 'legendary', '稀有');
       break;
     case 'draw_1':
       drawCard(player, true);
