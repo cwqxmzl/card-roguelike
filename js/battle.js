@@ -15,9 +15,15 @@ function startBattle(type) {
     if (type === 'boss') {
       enemyData = { ...ENEMIES.boss[bossIdx] };
     } else if (type === 'elite') {
-      enemyData = { ...ENEMIES.elite[Math.floor(Math.random() * ENEMIES.elite.length)] };
+      // 第11轮：按当前幕筛选精英池（第N幕 = act N），增强后兜底全池
+      const elitePool = ENEMIES.elite.filter(e => !e.act || e.act === Math.min(G.act + 1, 3));
+      const ep = elitePool.length ? elitePool : ENEMIES.elite;
+      enemyData = { ...ep[Math.floor(Math.random() * ep.length)] };
     } else {
-      enemyData = { ...ENEMIES.normal[Math.floor(Math.random() * ENEMIES.normal.length)] };
+      // 第11轮：按当前幕筛选普通怪池
+      const normalPool = ENEMIES.normal.filter(e => !e.act || e.act === Math.min(G.act + 1, 3));
+      const np = normalPool.length ? normalPool : ENEMIES.normal;
+      enemyData = { ...np[Math.floor(Math.random() * np.length)] };
     }
   }
   // 无限模式缩放：每多1幕 +18% 生命、+12% 攻击
