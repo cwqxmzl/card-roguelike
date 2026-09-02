@@ -148,6 +148,16 @@ function startPlayerTurn() {
     G.player.armor += 1;
     floatText('player-portrait', '+1', 'heal');
   }
+  // 第12轮：生命泉——每回合开始恢复2点生命
+  if (hasRelic('regen_2')) {
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 2);
+    floatText('player-portrait', '+2', 'heal');
+  }
+  // 第12轮：智慧卷轴——每回合开始额外抽1张
+  if (hasRelic('extra_draw')) {
+    drawCard(G.player, true);
+    addBattleLog('智慧卷轴：额外抽1张牌', 'player');
+  }
   if (G.player.overload > 0) { addBattleLog(`你的法力被过载削减${G.player.overload}点`, 'system'); }
   addBattleLog(`—— 第 ${Math.ceil(G.battle.turn / 2)} 回合 · 你的回合 ——`, 'system');
   G.player.overload = 0;
@@ -793,6 +803,8 @@ function createMinion(card, isPlayer) {
   if (isPlayer && hasRelic('divine_shield_attack') && card.divineShield) { attack += 1; }
   // Relic: charge_boost (+1/+1 for charge minions)
   if (isPlayer && hasRelic('charge_boost') && card.charge) { attack += 1; hp += 1; }
+  // 第12轮：力量图腾——你的随从攻击力+1
+  if (isPlayer && hasRelic('minion_attack_1')) { attack += 1; }
   // Relic: divine protection (divine shield on summon)
   const hasDivine = (isPlayer && hasRelic('divine_protection')) || card.divineShield || false;
 
@@ -811,6 +823,8 @@ function createMinion(card, isPlayer) {
     windfury: card.windfury || false,
     charge: card.charge || false,
     stealth: card.stealth || false,
+    // 第12轮：法术迸发标记（卡牌自带或法术迸发护符光环）
+    spellburst: card.spellburst || (isPlayer && hasRelic('spellburst_aura')) || false,
     spellDamage: card.spellDamage || 0,
     isPlayer: isPlayer,
     dead: false,
@@ -1382,6 +1396,17 @@ function executeSpell(effect, player, enemy, card, target) {
       }
       addBattleLog(`${caster}恢复4点生命`, logType);
       break;
+  }
+  // 第12轮：法术迸发机制——玩家施放法术后，有法术迸发的随从+1/+1
+  if (isPlayer) {
+    G.player.minions.forEach(m => {
+      if (!m.dead && m.spellburst) {
+        m.currentAttack += 1;
+        m.currentHp += 1;
+        m.maxHp += 1;
+        addBattleLog(`${m.name}的法术迸发：+1/+1`, 'player');
+      }
+    });
   }
 }
 

@@ -225,6 +225,8 @@ function onBattleWon() {
   if (type === 'boss') {
     G.battle.bossBonusChoices = (typeof metaLevel === 'function') ? metaLevel('boss_reward') : 0;
     if (hasRelic('boss_gold')) { G.gold += 30; addBattleLog('首领之印：额外获得30金币', 'player'); }
+    // 第12轮：贪婪之心——每场战斗胜利额外获得20金币
+    if (hasRelic('extra_gold')) { G.gold += 20; addBattleLog('贪婪之心：额外获得20金币', 'player'); }
     setTimeout(() => {
       grantRelic(G);
       showRewardTypeSelection(`击败 ${G.enemy.name}！`);

@@ -1946,3 +1946,108 @@ html.fast-forward *::after {
   padding: 20px;
   text-align: left;
 }
+
+
+/* ===================== 第12轮：动画特效增强 ===================== */
+
+/* 随从入场弹跳动画 */
+@keyframes minion-enter {
+  0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+  80% { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+.minion-enter {
+  animation: minion-enter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 伤害飘字 */
+@keyframes damage-float {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { transform: translateY(-10px) scale(1.3); opacity: 1; }
+  100% { transform: translateY(-50px) scale(1); opacity: 0; }
+}
+.damage-text {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255,0,0,0.8), 2px 2px 4px rgba(0,0,0,0.8);
+  pointer-events: none;
+  z-index: 1000;
+  animation: damage-float 1s ease-out forwards;
+}
+.heal-text {
+  color: #44ff44;
+  text-shadow: 0 0 8px rgba(0,255,0,0.8), 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* 屏幕震动（受击） */
+@keyframes screen-shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5px, -3px); }
+  20% { transform: translate(5px, 3px); }
+  30% { transform: translate(-4px, 2px); }
+  40% { transform: translate(4px, -2px); }
+  50% { transform: translate(-3px, -1px); }
+  60% { transform: translate(3px, 1px); }
+  70% { transform: translate(-2px, 0); }
+  80% { transform: translate(2px, 0); }
+}
+.screen-shake {
+  animation: screen-shake 0.4s ease-in-out;
+}
+
+/* 卡牌悬停增强 */
+.card:hover {
+  transform: translateY(-12px) scale(1.08);
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4), 0 0 15px rgba(255, 215, 0, 0.2);
+  z-index: 100;
+}
+
+/* 传说卡牌金色光晕 */
+.card.rarity-legendary {
+  box-shadow: 0 0 15px rgba(255, 165, 0, 0.5), inset 0 0 10px rgba(255, 165, 0, 0.1);
+}
+.card.rarity-legendary:hover {
+  box-shadow: 0 8px 30px rgba(255, 165, 0, 0.6), 0 0 25px rgba(255, 165, 0, 0.4);
+}
+
+/* 史诗卡牌紫色光晕 */
+.card.rarity-epic {
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.4);
+}
+
+/* 按钮脉冲动画（重要按钮） */
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(255, 215, 0, 0); }
+}
+.btn-primary:hover {
+  animation: btn-pulse 1.5s infinite;
+}
+
+/* 回合切换闪光 */
+@keyframes turn-flash {
+  0% { background-color: rgba(255, 215, 0, 0); }
+  50% { background-color: rgba(255, 215, 0, 0.15); }
+  100% { background-color: rgba(255, 215, 0, 0); }
+}
+.turn-flash {
+  animation: turn-flash 0.6s ease-out;
+}
+
+/* 遗物获得闪光 */
+@keyframes relic-glow {
+  0% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.2); filter: brightness(1.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.relic-new {
+  animation: relic-glow 0.8s ease-out;
+}
+
+/* 平滑过渡 */
+.card, .minion, .btn, .relic-icon {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

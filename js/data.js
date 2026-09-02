@@ -448,6 +448,48 @@ const CARD_POOL = [
   { id: 'war_shadowflame', name: '暗影烈焰', cost: 5, type: 'spell', rarity: 'epic', art: '🌑', text: '对所有敌方随从造成4点伤害', effect: 'deal_4_all' },
   { id: 'war_infernal', name: '地狱火', cost: 7, type: 'minion', attack: 6, hp: 6, rarity: 'epic', art: '☄️', text: '战吼：对所有敌方随从造成2点伤害', battlecry: 'deal_2_all', race: 'demon' },
   { id: 'war_demonheart', name: '恶魔之心', cost: 6, type: 'spell', rarity: 'rare', art: '💜', text: '恢复8点生命', effect: 'heal_8' },
+  // ===== 第12轮：牧师体系扩充（+6） =====
+  { id: 'pri_shadow_pain', name: '暗言术：痛', cost: 2, type: 'spell', rarity: 'common', art: '💜', text: '造成3点伤害', effect: 'deal_3' },
+  { id: 'pri_holy_shield', name: '神圣护盾', cost: 2, type: 'spell', rarity: 'common', art: '🛡️', text: '获得4点护甲', effect: 'gain_armor_4' },
+  { id: 'pri_spirit_priest', name: '灵魂祭司', cost: 3, type: 'minion', attack: 3, hp: 4, rarity: 'common', art: '👻', text: '战吼：恢复4点生命', battlecry: 'heal_4' },
+  { id: 'pri_mind_spike', name: '心灵尖刺', cost: 3, type: 'spell', rarity: 'rare', art: '🗡️', text: '造成5点伤害', effect: 'deal_5' },
+  { id: 'pri_holy_champion', name: '圣光勇士', cost: 5, type: 'minion', attack: 4, hp: 5, rarity: 'rare', art: '⚔️', text: '战吼：所有随从获得+1/+1', battlecry: 'buff_all_1_1' },
+  { id: 'pri_shadow_madness', name: '暗影狂乱', cost: 5, type: 'spell', rarity: 'epic', art: '🌑', text: '控制一个敌方随从', effect: 'mind_control' },
+  // ===== 第12轮：德鲁伊体系扩充（+6） =====
+  { id: 'dru_growth', name: '成长', cost: 2, type: 'spell', rarity: 'common', art: '🌱', text: '获得3点护甲', effect: 'gain_armor_3' },
+  { id: 'dru_savage_roar', name: '野蛮咆哮', cost: 3, type: 'spell', rarity: 'rare', art: '🦁', text: '所有随从获得+2/+2', effect: 'buff_all_2_2' },
+  { id: 'dru_swift', name: '迅捷德鲁伊', cost: 3, type: 'minion', attack: 3, hp: 3, rarity: 'common', art: '🐆', text: '冲锋', charge: true },
+  { id: 'dru_force_nature', name: '自然之力', cost: 4, type: 'spell', rarity: 'rare', art: '🌳', text: '召唤两个3/3树人', effect: 'summon_two_3_3' },
+  { id: 'dru_ancient_guardian', name: '远古守护者', cost: 5, type: 'minion', attack: 4, hp: 6, rarity: 'rare', art: '🌲', text: '嘲讽', taunt: true, race: 'beast' },
+  { id: 'dru_cenarius', name: '塞纳留斯', cost: 7, type: 'minion', attack: 5, hp: 5, rarity: 'legendary', art: '🍃', text: '战吼：所有随从获得+1/+1', battlecry: 'buff_all_1_1' },
+  // ===== 第12轮：战士体系扩充（+4） =====
+  { id: 'war_shield_block', name: '盾牌格挡', cost: 2, type: 'spell', rarity: 'common', art: '🛡️', text: '获得4点护甲', effect: 'gain_armor_4' },
+  { id: 'war_battle_rage', name: '战斗怒火', cost: 3, type: 'spell', rarity: 'common', art: '😤', text: '抽2张牌', effect: 'draw_2' },
+  { id: 'war_frothing', name: '狂战士', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '🪓', text: '激怒：攻击力+2', enrage: 2 },
+  { id: 'war_grommash', name: '格罗玛什', cost: 6, type: 'minion', attack: 5, hp: 5, rarity: 'epic', art: '⚔️', text: '冲锋', charge: true },
+  // ===== 第12轮：萨满体系扩充（+4） =====
+  { id: 'sha_rockbiter', name: '石化武器', cost: 1, type: 'spell', rarity: 'common', art: '🪨', text: '造成2点伤害', effect: 'deal_2' },
+  { id: 'sha_healing_rain', name: '治疗之雨', cost: 3, type: 'spell', rarity: 'common', art: '🌧️', text: '恢复4点生命', effect: 'heal_4' },
+  { id: 'sha_totem_carver', name: '图腾雕刻者', cost: 3, type: 'minion', attack: 2, hp: 4, rarity: 'rare', art: '🗿', text: '战吼：召唤一个1/1冲锋图腾', battlecry: 'summon_1_1_charge' },
+  { id: 'sha_elem_destruction', name: '元素毁灭', cost: 5, type: 'spell', rarity: 'epic', art: '⚡', text: '对所有敌方随从造成4点伤害', effect: 'deal_4_all' },
+  // ===== 第12轮：法师+2 =====
+  { id: 'mag_frost_nova', name: '冰霜新星', cost: 3, type: 'spell', rarity: 'rare', art: '❄️', text: '冻结所有敌方随从', effect: 'freeze_all' },
+  { id: 'mag_arcane_blast', name: '奥术冲击', cost: 4, type: 'spell', rarity: 'rare', art: '💫', text: '造成5点伤害，抽1张牌', effect: 'deal_5_draw_1' },
+  // ===== 第12轮：猎人+2 =====
+  { id: 'hun_deadly_shot', name: '致命射击', cost: 3, type: 'spell', rarity: 'rare', art: '🎯', text: '消灭一个敌方随从', effect: 'assassinate' },
+  { id: 'hun_savannah', name: '长鬃草原狮', cost: 6, type: 'minion', attack: 5, hp: 5, rarity: 'epic', art: '🦁', text: '嘲讽', taunt: true, race: 'beast' },
+  // ===== 第12轮：圣骑+2 =====
+  { id: 'pal_consecrate', name: '奉献', cost: 4, type: 'spell', rarity: 'common', art: '✨', text: '对所有敌方随从造成3点伤害', effect: 'deal_3_all' },
+  { id: 'pal_tirion', name: '提里奥·弗丁', cost: 8, type: 'minion', attack: 6, hp: 6, rarity: 'legendary', art: '🛡️', text: '圣盾·嘲讽·战吼：恢复6点生命', divineShield: true, taunt: true, battlecry: 'heal_6' },
+  // ===== 第12轮：术士+2 =====
+  { id: 'war_shadow_bolt', name: '暗影箭', cost: 2, type: 'spell', rarity: 'common', art: '🏹', text: '造成4点伤害', effect: 'deal_4' },
+  { id: 'war_voidcaller', name: '虚空召唤者', cost: 4, type: 'minion', attack: 3, hp: 4, rarity: 'rare', art: '🌀', text: '战吼：召唤一个2/2虚空行者', battlecry: 'summon_2_2', race: 'demon' },
+  // ===== 第12轮：盗贼+2 =====
+  { id: 'ro_backstab', name: '背刺', cost: 1, type: 'spell', rarity: 'common', art: '🗡️', text: '造成2点伤害', effect: 'deal_2' },
+  { id: 'ro_sap', name: '闷棍', cost: 3, type: 'spell', rarity: 'common', art: '💫', text: '冻结一个敌方随从', effect: 'freeze_enemy' },
+  // ===== 第12轮：中立+2 =====
+  { id: 'neu_bloodfen', name: '血沼迅猛龙', cost: 2, type: 'minion', attack: 3, hp: 2, rarity: 'common', art: '🦖', text: '', race: 'beast' },
+  { id: 'neu_senjin', name: '森金持盾卫士', cost: 4, type: 'minion', attack: 3, hp: 5, rarity: 'common', art: '🛡️', text: '嘲讽', taunt: true },
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -457,7 +499,8 @@ const CLASSES = {
     archetypes: ['法术流', '元素流', '控制流'],
     heroPower: { name: '火焰冲击', cost: 2, type: 'mage', description: '对任意目标造成1点伤害' },
     starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','arcane_missiles','holy_light','lightning_bolt','fireball','arcane_intellect','arcane_wyrm','mage_apprentice','magic_missile','mage_scorch','mana_wraith','mage_frost_bolt','scout','mage_mana_wyrm','polymorph','spellblade','torch_bearer','mage_crystal_guard','mage_sorcerer','mage_firestorm','freeze_elem','mage_frost_giant'],
-    cardPool: ['arcane_missiles','fireball','blizzard','flamestrike','pyroblast','polymorph','arcane_intellect','spellblade','water_elemental','mirror_entity','freeze_elem','card_drawer','healer','stone_golem','lightning_bolt','arcane_wyrm','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','arcane_scholar','mana_surge','spell_mastery','inspiring_leader','abyss_lord','titan_earthguard','mage_spark','mage_apprentice','mage_frost_bolt','mage_flame_walker','mage_mana_bind','mage_arcane_explosion','mage_fireball_2','mage_crystal_guard','mage_archmage_2','mage_firestorm','mage_sorcerer','mage_frost_giant','mage_scorch','mage_mana_wyrm','mage_time_warp','disc_mage','echo_dagger','evo_frost','evo_legend','boost_fireball','boost_blizzard'],
+    cardPool: ['arcane_missiles','fireball','blizzard','flamestrike','pyroblast','polymorph','arcane_intellect','spellblade','water_elemental','mirror_entity','freeze_elem','card_drawer','healer','stone_golem','lightning_bolt','arcane_wyrm','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','arcane_scholar','mana_surge','spell_mastery','inspiring_leader','abyss_lord','titan_earthguard','mage_spark','mage_apprentice','mage_frost_bolt','mage_flame_walker','mage_mana_bind','mage_arcane_explosion','mage_fireball_2','mage_crystal_guard','mage_archmage_2','mage_firestorm','mage_sorcerer','mage_frost_giant','mage_scorch','mage_mana_wyrm','mage_time_warp','disc_mage','echo_dagger','evo_frost','evo_legend','boost_fireball','boost_blizzard',
+    'mag_frost_nova','mag_arcane_blast'],
     signature: 'spell_power_1',
   },
   warrior: {
@@ -465,7 +508,8 @@ const CLASSES = {
     archetypes: ['武器流', '护甲流', '快攻流'],
     heroPower: { name: '全副武装', cost: 2, type: 'warrior', description: '获得2点护甲' },
     starterDeck: ['guardsman','stone_golem','orc_grunt','berserker','wolf','war_hammer','rusty_knife','healer','shield_bearer','ogre','armor_smith','war_iron_skin','war_pierce','battle_axe','frostwolf_grunt','war_shield_maiden','war_cleave','war_berserker_2','war_axe_2','war_shield_bash','war_ironbark','war_legion','war_iron_golem','war_colossus','chain_fire','war_rage_charge'],
-    cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist','iron_bastion','frostwolf_grunt','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','mithril_barrier','armor_smith','inspiring_leader','abyss_lord','titan_earthguard','war_pierce','war_armor_up','war_shield_maiden','war_cleave','war_iron_skin','war_berserker_2','war_shield_bash','war_ironbark','war_battle_cry','war_axe_2','war_legion','war_iron_golem','war_rage_charge','war_armored_soldier','war_colossus','evo_knight','evo_guardian','echo_shield','chain_guard','chain_fire'],
+    cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist','iron_bastion','frostwolf_grunt','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','mithril_barrier','armor_smith','inspiring_leader','abyss_lord','titan_earthguard','war_pierce','war_armor_up','war_shield_maiden','war_cleave','war_iron_skin','war_berserker_2','war_shield_bash','war_ironbark','war_battle_cry','war_axe_2','war_legion','war_iron_golem','war_rage_charge','war_armored_soldier','war_colossus','evo_knight','evo_guardian','echo_shield','chain_guard','chain_fire',
+    'war_shield_block','war_battle_rage','war_frothing','war_grommash'],
     signature: 'armor_start',
   },
   hunter: {
@@ -474,7 +518,8 @@ const CLASSES = {
     heroPower: { name: '稳固射击', cost: 2, type: 'hunter', description: '对敌方英雄造成2点伤害' },
     starterDeck: ['wolf','murloc','archer','blood_imp','charge_knight','lightning_bolt','rusty_knife','berserker','ogre','fan_of_knives','hun_trap','hun_dog','hun_steady','hun_marksman','hun_wolf_pack','hun_hawk','hun_master','hun_crossbow','hun_beast_call','tundra_rhino','pack_alpha','beast_king','hun_multi_shot','hun_tiger','windfury_harpy','storm_falcon'],
     cardPool: ['wolf','murloc','archer','charge_knight','windfury_harpy','blood_imp','fan_of_knives','lightning_bolt','berserker','ogre','sylvanas','loot_hoarder','storm_falcon','tundra_rhino','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','beast_king','pack_alpha','inspiring_leader','abyss_lord','titan_earthguard','hun_steady','hun_trap','hun_dog','hun_marksman','hun_beast_call','hun_wolf_pack','hun_hawk','hun_master','hun_crossbow','hun_beast_king_2','hun_multi_shot','hun_tiger','hun_scout_2','hun_eagle_horn','hun_mammoth','evo_beast_tamer','reb_serpent','disc_hunter','echo_dagger',
-    'hun_rapid_fire','hun_tracking','hun_cobra','hun_pack_leader','hun_kill_shot','hun_bear','hun_spirit_beast','hun_elephant'],
+    'hun_rapid_fire','hun_tracking','hun_cobra','hun_pack_leader','hun_kill_shot','hun_bear','hun_spirit_beast','hun_elephant',
+    'hun_deadly_shot','hun_savannah'],
     signature: 'beast_master',
   },
   paladin: {
@@ -483,7 +528,8 @@ const CLASSES = {
     heroPower: { name: '援军', cost: 2, type: 'paladin', description: '召唤一个1/1白银之手新兵' },
     starterDeck: ['guardsman','stone_golem','healer','paladin_knight','shield_bearer','holy_light','consecration','archer','card_drawer','wolf','pal_squire','pal_blessing','pal_divine_shield','pal_knight_2','pal_heal_prayer','pal_consecration_2','pal_sword','pal_aurora','pal_sun_guard','pal_tirion','pal_bless_army','pal_shieldbearer_2','pal_hammer_wrath','pal_champion','pal_guardian_2','guardian_of_kings'],
     cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas','lightbringer','guardian_of_kings','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','pal_blessing','pal_squire','pal_divine_shield','pal_knight_2','pal_heal_prayer','pal_consecration_2','pal_sword','pal_aurora','pal_sun_guard','pal_tirion','pal_bless_army','pal_shieldbearer_2','pal_hammer_wrath','pal_champion','pal_guardian_2','evo_priest','reb_phoenix','disc_paladin','echo_shield','evo_guardian',
-    'pal_might','pal_zealot','pal_guardian_3','pal_light_2','pal_righteousness','pal_champion_2'],
+    'pal_might','pal_zealot','pal_guardian_3','pal_light_2','pal_righteousness','pal_champion_2',
+    'pal_consecrate','pal_tirion'],
     signature: 'divine_protection',
   },
   priest: {
@@ -491,7 +537,8 @@ const CLASSES = {
     archetypes: ['治疗流', '暗影流', '控制流'],
     heroPower: { name: '次级治疗', cost: 2, type: 'priest', description: '恢复任意目标2点生命' },
     starterDeck: ['guardsman','stone_golem','northshire','northshire','healer','holy_smite','soul_purify','power_word_shield','circle_healing','card_drawer','pri_cleric','pri_smite_2','pri_heal_2','pri_shadow_word','pri_light_well','pri_mass_heal_2','pri_holy_nova_2','pri_guardian','pri_resurrect','pri_shadow_master','pri_divine','pri_holy_fire_2','pri_psychic','pri_guardian_angel','pri_mind_blast','holy_nova'],
-    cardPool: ['holy_smite','power_word_shield','northshire','soul_purify','holy_nova','holy_fire','circle_healing','healer','light_pope','holy_light','guardsman','stone_golem','card_drawer','sylvanas','lightbringer','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader','pri_smite_2','pri_heal_2','pri_shadow_word','pri_cleric','pri_light_well','pri_mass_heal_2','pri_holy_nova_2','pri_guardian','pri_resurrect','pri_shadow_master','pri_divine','pri_holy_fire_2','pri_psychic','pri_guardian_angel','pri_mind_blast','evo_priest','reb_undead','reb_ghost','disc_paladin','boost_blizzard'],
+    cardPool: ['holy_smite','power_word_shield','northshire','soul_purify','holy_nova','holy_fire','circle_healing','healer','light_pope','holy_light','guardsman','stone_golem','card_drawer','sylvanas','lightbringer','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader','pri_smite_2','pri_heal_2','pri_shadow_word','pri_cleric','pri_light_well','pri_mass_heal_2','pri_holy_nova_2','pri_guardian','pri_resurrect','pri_shadow_master','pri_divine','pri_holy_fire_2','pri_psychic','pri_guardian_angel','pri_mind_blast','evo_priest','reb_undead','reb_ghost','disc_paladin','boost_blizzard',
+    'pri_shadow_pain','pri_holy_shield','pri_spirit_priest','pri_mind_spike','pri_holy_champion','pri_shadow_madness'],
     signature: 'light_well',
   },
   warlock: {
@@ -500,7 +547,8 @@ const CLASSES = {
     heroPower: { name: '生命分流', cost: 2, type: 'warlock', description: '受到2点伤害，抽一张牌' },
     starterDeck: ['blood_imp','guardsman','stone_golem','murloc','archer','lightning_bolt','holy_light','fan_of_knives','berserker','ogre','war_void_walker','war_imp','war_drain','war_demon','war_hellfire','war_drain_life','war_imp_king','war_corruption','war_shadow_bolt','war_doomguard','war_pit_lord','war_lifedrain','war_demonlord','war_fel_dog','war_soul_drain','death_stalker'],
     cardPool: ['blood_imp','death_stalker','undead_knight','cultist','sylvanas','deathwing','mind_control','faceless','lightning_bolt','fan_of_knives','berserker','ogre','wolf','murloc','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader','war_drain','war_imp','war_demon','war_hellfire','war_drain_life','war_imp_king','war_corruption','war_shadow_bolt','war_doomguard','war_pit_lord','war_lifedrain','war_demonlord','war_fel_dog','war_soul_drain','war_void_walker','reb_undead','reb_ghost','reb_phoenix','evo_summoner','chain_fire',
-    'war_soulfire','war_felguard','war_darkbargain','war_shadowflame','war_infernal','war_demonheart'],
+    'war_soulfire','war_felguard','war_darkbargain','war_shadowflame','war_infernal','war_demonheart',
+    'war_shadow_bolt','war_voidcaller'],
     signature: 'regen',
   },
   rogue: {
@@ -509,7 +557,8 @@ const CLASSES = {
     heroPower: { name: '致命药膏', cost: 2, type: 'rogue', description: '装备一把1/2匕首' },
     starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','backstab','sin_strike','eviscerate','fan_knives','sap','poison_blade','shadow_step','stealth_knife','sprint','combo_strike','bribery','master_poisoner','rogue_legend','evo_knight','echo_dagger','chain_fire','neutral_kobold','magic_missile','scout','mana_wraith','battle_axe'],
     cardPool: ['backstab','sin_strike','eviscerate','fan_knives','sap','poison_blade','stealth_knife','sprint','combo_strike','shadow_step','bribery','master_poisoner','rogue_legend','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_knight','echo_dagger','chain_fire','ro_shiv','ro_poison_bite','ro_shadow_strike','ro_blade_flurry','ro_ambush','ro_sprint_2','ro_stealth_ally','ro_assassin','ro_poison_master','ro_combo_master','ro_bounty_hunter','ro_shadow_master','ro_poison_knife','ro_dagger_dancer','ro_cutthroat','ro_thief',
-    'ro_cold_blood','ro_sinister_strike','ro_evasion','ro_master_of_disguise','ro_assassinate_2','ro_perdition','ro_vanish','ro_legend_2'],
+    'ro_cold_blood','ro_sinister_strike','ro_evasion','ro_master_of_disguise','ro_assassinate_2','ro_perdition','ro_vanish','ro_legend_2',
+    'ro_backstab','ro_sap'],
     signature: 'double_battlecry',
   },
   druid: {
@@ -517,7 +566,8 @@ const CLASSES = {
     archetypes: ['野兽流', '自然法术流', '护甲成长流'],
     heroPower: { name: '野性印记', cost: 2, type: 'druid', description: '获得2点护甲' },
     starterDeck: ['guardsman','stone_golem','wolf','archer','healer','claw','bite','wild_growth','ironbark','mark_wild','moonfire','treant_call','nourish','ancient_guard','forest_king','starfall','pack_alpha','beast_king','tundra_rhino','evo_beast_tamer','reb_serpent','chain_fire','magic_missile','mana_wraith','torch_bearer','battle_axe'],
-    cardPool: ['claw','bite','wild_growth','ironbark','mark_wild','moonfire','nourish','treant_call','pack_alpha','ancient_guard','forest_king','starfall','wolf','tundra_rhino','beast_king','pack_alpha','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_beast_tamer','reb_serpent','chain_fire','dr_moonfire_2','dr_wild_power','dr_nature_force','dr_starfire_2','dr_jungle_ward','dr_bark_skin','dr_swipe','dr_vine','dr_bear_form','dr_guardian_2','dr_apprentice','dr_seer','dr_ancien','dr_elder','dr_wolf_rider','dr_root'],
+    cardPool: ['claw','bite','wild_growth','ironbark','mark_wild','moonfire','nourish','treant_call','pack_alpha','ancient_guard','forest_king','starfall','wolf','tundra_rhino','beast_king','pack_alpha','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_beast_tamer','reb_serpent','chain_fire','dr_moonfire_2','dr_wild_power','dr_nature_force','dr_starfire_2','dr_jungle_ward','dr_bark_skin','dr_swipe','dr_vine','dr_bear_form','dr_guardian_2','dr_apprentice','dr_seer','dr_ancien','dr_elder','dr_wolf_rider','dr_root',
+    'dru_growth','dru_savage_roar','dru_swift','dru_force_nature','dru_ancient_guardian','dru_cenarius'],
     signature: 'beast_master',
   },
   shaman: {
@@ -525,7 +575,8 @@ const CLASSES = {
     archetypes: ['图腾流', '元素流', '过载流'],
     heroPower: { name: '图腾召唤', cost: 2, type: 'shaman', description: '召唤一个1/1冲锋幽灵狼' },
     starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf','earth_shield','lava_burst','overload_lightning','overload_missiles','overload_wolf','windfury_totem','totem_army','elem_surge','storm_giant','freeze_elem','water_elemental','lightning_storm','evo_frost','chain_fire','magic_missile','scout'],
-    cardPool: ['frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf','lightning_storm','windfury_totem','earth_shield','lava_burst','storm_giant','totem_army','elem_surge','lightning_bolt','freeze_elem','water_elemental','overload_lightning','overload_missiles','overload_wolf','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_frost','chain_fire','reb_phoenix','sa_lightning_2','sa_heal_totem','sa_storm_fury','sa_totem_boost','sa_elem_blast','sa_wild_strike','sa_totem_army_2','sa_chain_lightning','sa_frost_shock_2','sa_fire_elemental','sa_tide_priest','sa_thunder_herald','sa_wind_totem','sa_earth_elemental','sa_magma','sa_storm_watcher'],
+    cardPool: ['frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf','lightning_storm','windfury_totem','earth_shield','lava_burst','storm_giant','totem_army','elem_surge','lightning_bolt','freeze_elem','water_elemental','overload_lightning','overload_missiles','overload_wolf','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_frost','chain_fire','reb_phoenix','sa_lightning_2','sa_heal_totem','sa_storm_fury','sa_totem_boost','sa_elem_blast','sa_wild_strike','sa_totem_army_2','sa_chain_lightning','sa_frost_shock_2','sa_fire_elemental','sa_tide_priest','sa_thunder_herald','sa_wind_totem','sa_earth_elemental','sa_magma','sa_storm_watcher',
+    'sha_rockbiter','sha_healing_rain','sha_totem_carver','sha_elem_destruction'],
     signature: 'spell_power_1',
   },
 }
@@ -597,7 +648,8 @@ const ENEMIES = {
 
   ],
   elite: [
-    { name: '石拳巨魔', act: 1, portrait: '🧌', hp: 52, deck: ['ogre','war_golem','berserker','war_hammer','doom_blade','shield_bearer','stone_golem','giant','undead_knight','fireball'], ai: 'aggressive', personality: 'frenzy' },
+    { name: '石拳巨魔', act: 1, portrait: '🧌', hp: 52, deck: ['ogre','war_golem','berserker','war_hammer','doom_blade','shield_bearer','stone_golem','giant','undead_knight','fireball',
+], ai: 'aggressive', personality: 'frenzy' },
     { name: '龙裔术士', act: 2, portrait: '🐲', hp: 50, deck: ['dragon','pyroblast','flamestrike','mind_control','spellblade','freeze_elem','arcane_intellect','equality','water_elemental','fireball'], ai: 'spell', personality: 'reflect' },
     { name: '死亡领主', act: 2, portrait: '⚰️', hp: 55, deck: ['undead_knight','sylvanas','cultist','summoner','mirror_entity','assassinate','mind_control','shield_bearer','deathwing','loot_hoarder'], ai: 'control', personality: 'vampiric' },
     { name: '风暴召唤者', act: 1, portrait: '⛈️', hp: 48, deck: ['freeze_elem','lightning_storm','blizzard','water_elemental','arcane_missiles','lightning_bolt','spellblade','flamestrike','consecration','card_drawer'], ai: 'spell', personality: 'guardian' },
@@ -606,6 +658,8 @@ const ENEMIES = {
     { name: '虚空恐魔', act: 1, portrait: '👹', hp: 55, deck: ['blood_imp','cultist','undead_knight','death_stalker','sylvanas','deathwing','mind_control','berserker','ogre','doom_blade'], ai: 'aggressive', personality: 'vampiric' },
     { name: '符文巨像', act: 3, portrait: '🗿', hp: 66, deck: ['stone_golem','shield_bearer','guardsman','iron_bastion','guardian_king','ancient_warrior','boulderfist_ogre','war_golem','giant','undead_knight'], ai: 'control', personality: 'guardian' },
     { name: '虚空召唤者', act: 3, portrait: '🌀', hp: 58, deck: ['summoner','cultist','undead_knight','sylvanas','deathwing','loot_hoarder','mirror_entity','assassinate','mind_control','doom_blade'], ai: 'control', personality: 'vampiric' },
+    { name: '虚空领主', act: 3, portrait: '👁️', hp: 65, deck: ['voidwalker','cultist','summoner','mirror_entity','undead_knight','assassinate','sylvanas','deathwing','mind_control','shadow_bolt'], ai: 'control', personality: 'vampiric' },
+    { name: '元素领主', act: 3, portrait: '🌪️', hp: 60, deck: ['fire_elemental','water_elemental','freeze_elem','lightning_storm','blizzard','flamestrike','pyroblast','arcane_intellect','spellblade','fireball'], ai: 'spell', personality: 'frenzy' },
 
   ],
   boss: [
@@ -669,6 +723,11 @@ const RELICS = [
   { id: 'boss_gold', name: '首领之印', icon: '👑', desc: '击败首领时额外获得30金币', effect: 'boss_gold' },
   { id: 'start_shield', name: '圣盾徽章', icon: '😇', desc: '战斗开始时，你的英雄获得1层圣盾', effect: 'start_shield' },
   { id: 'spell_halve', name: '法术共鸣', icon: '🔮', desc: '你的法术牌费用减半（向上取整）', effect: 'spell_halve' },
+  { id: 'wisdom_scroll', name: '智慧卷轴', icon: '📜', desc: '每回合开始额外抽1张牌', effect: 'extra_draw' },
+  { id: 'greedy_heart', name: '贪婪之心', icon: '💰', desc: '每场战斗胜利额外获得20金币', effect: 'extra_gold' },
+  { id: 'life_spring', name: '生命泉', icon: '💧', desc: '每回合开始恢复2点生命', effect: 'regen_2' },
+  { id: 'power_totem', name: '力量图腾', icon: '🗿', desc: '你的随从攻击力+1', effect: 'minion_attack_1' },
+  { id: 'spellburst_amulet', name: '法术迸发护符', icon: '🔮', desc: '你的随从获得法术迸发（施放法术后+1/+1）', effect: 'spellburst_aura' },
 ];
 
 // ===================== META PROGRESSION (局外肉鸽) =====================
@@ -761,6 +820,33 @@ const EVENTS = [
       { text: '强化武器（升级一张随机武器牌）', cond: g => g.player.deck.some(c => c.type === 'weapon'), action: g => { const weapons = g.player.deck.filter(c => c.type === 'weapon'); if (weapons.length) { const w = weapons[Math.floor(Math.random()*weapons.length)]; w.upgraded = true; w.attack = (w.attack||0)+1; w.durability = (w.durability||0)+1; log(`${w.name}被强化了！`); } } },
       { text: '购买护甲（消耗25金币，获得3点护甲）', cond: g => g.gold >= 25, action: g => { g.gold -= 25; g.player.armor += 3; log('铁匠为你披上一件坚固的护甲，获得3点护甲'); } },
       { text: '告别铁匠', cond: g => true, action: g => { log('你向铁匠道别'); } },
+    ]
+  },
+  {
+    title: '神秘宝箱', act: 2,
+    text: '你在路边发现一个布满灰尘的宝箱，锁已经锈迹斑斑。你可以尝试打开它，但要小心陷阱。',
+    choices: [
+      { text: '强行撬开（可能触发陷阱）', cond: g => true, action: g => { if (Math.random() < 0.5) { g.gold += 60; log('宝箱里装满了金币！获得60金币'); } else { const dmg = Math.floor(Math.random()*6)+4; g.player.hp -= dmg; log(`陷阱触发！你受到${dmg}点伤害，但还是拿到了20金币`); g.gold += 20; } } },
+      { text: '用钥匙技巧开启（消耗10金币）', cond: g => g.gold >= 10, action: g => { g.gold -= 10; g.gold += 50; log('你巧妙地打开了宝箱，获得50金币'); } },
+      { text: '离开', cond: g => true, action: g => { log('你决定不冒险，继续前行'); } },
+    ]
+  },
+  {
+    title: '冒险者营地', act: 2,
+    text: '你来到一个冒险者营地，篝火旁坐着几位旅人。他们提供各种服务。',
+    choices: [
+      { text: '购买治疗（花费30金币，恢复15点生命）', cond: g => g.gold >= 30, action: g => { g.gold -= 30; g.player.hp = Math.min(g.player.maxHp, g.player.hp + 15); log('营地医师为你疗伤，恢复15点生命'); } },
+      { text: '购买强化（花费50金币，随机升级一张牌）', cond: g => g.gold >= 50, action: g => { g.gold -= 50; g.pendingUpgrade = true; log('营地锻造师为你强化卡牌'); } },
+      { text: '休息（恢复5点生命）', cond: g => true, action: g => { g.player.hp = Math.min(g.player.maxHp, g.player.hp + 5); log('你在篝火旁休息，恢复5点生命'); } },
+    ]
+  },
+  {
+    title: '时空裂隙', act: 3,
+    text: '一道扭曲的时空裂隙出现在你面前，里面传来未知的能量。进入可能获得强大的力量，也可能迷失在时空之中。',
+    choices: [
+      { text: '进入裂隙（消耗10点生命，获得一件遗物）', cond: g => g.player.hp > 10, action: g => { g.player.hp -= 10; grantRelic(g); log('你穿越时空裂隙，在虚空中获得了一件遗物！'); } },
+      { text: '汲取能量（获得40金币和1张随机牌）', cond: g => true, action: g => { g.gold += 40; log('你汲取了裂隙的能量，获得40金币'); } },
+      { text: '绕行', cond: g => true, action: g => { log('你小心翼翼地绕过裂隙，继续冒险'); } },
     ]
   },
   {
