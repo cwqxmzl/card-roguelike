@@ -32,6 +32,8 @@ function renderBattle() {
   enemyHpFill.style.width = (G.enemy.hp / G.enemy.maxHp * 100) + '%';
   enemyHpFill.classList.toggle('low-hp', G.enemy.hp / G.enemy.maxHp < 0.3);
   document.getElementById('enemy-armor').textContent = G.enemy.armor > 0 ? `🛡️ ${G.enemy.armor}` : '';
+  const enemyStatusEl = document.getElementById('enemy-status');
+  if (enemyStatusEl) enemyStatusEl.innerHTML = typeof getStatusIcons === 'function' ? getStatusIcons(G.enemy) : '';
   const intentEl = document.getElementById('enemy-intent');
   if (intentEl) intentEl.textContent = getEnemyIntentText();
 
@@ -64,6 +66,8 @@ function renderBattle() {
   playerHpFill.style.width = (G.player.hp / G.player.maxHp * 100) + '%';
   playerHpFill.classList.toggle('low-hp', G.player.hp / G.player.maxHp < 0.3);
   document.getElementById('player-armor').textContent = G.player.armor > 0 ? `🛡️ ${G.player.armor}` : '';
+  const playerStatusEl = document.getElementById('player-status');
+  if (playerStatusEl) playerStatusEl.innerHTML = typeof getStatusIcons === 'function' ? getStatusIcons(G.player) : '';
   document.getElementById('player-weapon').textContent = G.player.weapon ? `🗡️${G.player.weapon.attack} | ${G.player.weapon.currentDurability}` : '';
   
   // Hero power
@@ -153,7 +157,8 @@ function renderBattle() {
   } else if (G.battle.targetingMode === 'hero_power' && G.battle.heroPowerTargeting) {
     document.getElementById('battle-turn-info').textContent = `选择目标 - ${G.player.heroPower.name}（点击空白处取消）`;
   } else {
-    document.getElementById('battle-turn-info').textContent = `第 ${Math.ceil(G.battle.turn / 2)} 回合 - ${G.battle.isPlayerTurn ? '你的回合' : '敌方回合'}`;
+    const _turnNum = G.battle.isPlayerTurn ? Math.ceil(G.battle.turn / 2) : Math.floor(G.battle.turn / 2);
+    document.getElementById('battle-turn-info').textContent = `第 ${_turnNum} 回合 - ${G.battle.isPlayerTurn ? '你的回合' : '敌方回合'}`;
   }
   setEndTurnButtonState(G.battle.isPlayerTurn && !G.battle.ended ? 'player' : 'enemy');
   applyBattleAnimations();

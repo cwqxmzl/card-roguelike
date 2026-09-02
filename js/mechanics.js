@@ -292,3 +292,75 @@ function getSpellboostedCost(card) {
   }
   return cost;
 }
+
+
+// ===================== 状态系统（第15轮：统一 Buff/Debuff 组件） =====================
+// 借鉴《杀戮尖塔》标准状态体系：中毒/易伤/虚弱/力量/敏捷。
+// 状态挂在实体（玩家/敌人/随从）的 states 对象上：{ type: { stacks, turns } }。
+const STATUS_INFO = {
+  poison:    { icon: '☠️', name: '中毒', desc: '回合开始受到层数点伤害，随后层数-1' },
+  vulnerable: { icon: '💔', name: '易伤', desc: '受到的所有伤害 +50%' },
+  weak:      { icon: '🥀', name: '虚弱', desc: '造成的所有伤害 -50%' },
+  strength:  { icon: '💪', name: '力量', desc: '本方随从攻击力 +层数' },
+  agility:   { icon: '🛡️', name: '敏捷', desc: '每回合开始获得等量护甲' },
+};
+
+function applyStatus(target, type, value, turns) {
+  if (!target || !STATUS_INFO[type] || value <= 0) return;
+  target.states = target.states || {};
+  const s = target.states[type] || { stacks: 0, turns: 0 };
+  s.stacks = (s.stacks || 0) + value;
+  if (turns !== undefined) s.turns = Math.max(s.turns, turns);
+  target.states[type] = s;
+}
+
+function hasStatus(target, type) {
+  return !!(target && target.states && target.states[type] && target.states[type].stacks > 0);
+}
+
+function removeStatus(target, type) {
+  if (target && target.states) delete target.states[type];
+}
+
+// 回合开始结算状态（中毒扣血、持续回合递减）
+function tickStatuses(target) {
+  if (!target || !target.states || (G.battle && G.battle.ended)) return;
+  for (const type in target.states) {
+    const s = target.states[type];
+    if (!s || s.stacks <= 0) { delete target.states[type]; continue; }
+    if (type === 'poison') {
+      dealDamage(target, s.stacks, null);
+      s.stacks--;
+      if (s.stacks <= 0) { delete target.states[type]; continue; }
+    }
+    // 中毒靠层数自然衰减，不递减回合；力量/敏捷为永久状态
+    if (type !== 'poison' && type !== 'strength' && type !== 'agility') {
+      s.turns--;
+      if (s.turns <= 0) { delete target.states[type]; continue; }
+    }
+  }
+}
+
+// 获取实体状态图标（UI 展示）
+function getStatusIcons(target) {
+  if (!target || !target.states) return '';
+  return Object.entries(target.states)
+    .filter(([t, s]) => s && s.stacks > 0 && STATUS_INFO[t])
+    .map(([t, s]) => {
+      const info = STATUS_INFO[t];
+      return `<span class="status-icon" title="${info.name}（${s.stacks}）：${info.desc}">${info.icon}${s.stacks}</span>`;
+    })
+    .join('');
+}
+
+// ===================== 极简事件总线（第15轮：统一触发钩子） =====================
+const eventBus = {
+  events: {},
+  on(name, cb) { if (!this.events[name]) this.events[name] = []; this.events[name].push(cb); },
+  off(name, cb) { if (this.events[name]) this.events[name] = this.events[name].filter(x => x !== cb); },
+  emit(name, data) { (this.events[name] || []).forEach(cb => { try { cb(data); } catch (e) { console.error('[eventBus]', name, e); } }); },
+  clear(name) { if (name) delete this.events[name]; else this.events = {}; },
+};
+
+// 回合开始事件：玩家/敌方状态结算（挂载到事件总线，供遗物/卡牌扩展监听）
+eventBus.on('turnStart', (unit) => { if (typeof tickStatuses === 'function') tickStatuses(unit); });

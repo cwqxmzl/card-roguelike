@@ -591,6 +591,19 @@ showScreen('menu');
 // Keyboard shortcuts (desktop)
 document.addEventListener('keydown', (e) => {
   if (!G || !G.battle || G.battle.ended) return;
+  // 第15轮：数字键快速打出手牌（避开输入框）
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag !== 'INPUT' && tag !== 'TEXTAREA' && G.battle.isPlayerTurn && !G.battle.targetingMode) {
+    const num = parseInt(e.key, 10);
+    if (num >= 1 && num <= 9) {
+      const idx = num - 1;
+      if (G.player.hand[idx] && getCardCost(G.player.hand[idx]) <= G.player.mana) {
+        e.preventDefault();
+        playCard(G.player.hand[idx], idx);
+      }
+      return;
+    }
+  }
   if (e.key === 'Escape') {
     if (G.battle.targetingMode) {
       G.battle.targetingMode = null;

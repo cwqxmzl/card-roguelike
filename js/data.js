@@ -490,6 +490,12 @@ const CARD_POOL = [
   // ===== 第12轮：中立+2 =====
   { id: 'neu_bloodfen', name: '血沼迅猛龙', cost: 2, type: 'minion', attack: 3, hp: 2, rarity: 'common', art: '🦖', text: '', race: 'beast' },
   { id: 'neu_senjin', name: '森金持盾卫士', cost: 4, type: 'minion', attack: 3, hp: 5, rarity: 'common', art: '🛡️', text: '嘲讽', taunt: true },
+
+  // ===== 第15轮：状态机制卡（中毒/易伤/虚弱）=====
+  { id: 'hun_poison_arrow', name: '剧毒之箭', cost: 3, type: 'spell', rarity: 'epic', art: '🏹', text: '对敌方英雄施加5层中毒', effect: 'poison_face_5' },
+  { id: 'hun_venom_trap', name: '淬毒陷阱', cost: 2, type: 'spell', rarity: 'rare', art: '🪤', text: '对敌方英雄施加3层中毒，抽1张牌', effect: 'poison_face_3_draw' },
+  { id: 'sha_break_armor', name: '破甲重击', cost: 2, type: 'spell', rarity: 'rare', art: '🔨', text: '对敌方英雄施加2层易伤并造成2点伤害', effect: 'vuln_face_2_dmg2' },
+  { id: 'sha_confusion', name: '迷乱之术', cost: 4, type: 'spell', rarity: 'epic', art: '🌀', text: '对敌方英雄施加3层虚弱，抽1张牌', effect: 'weak_face_3_draw' },
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -519,7 +525,7 @@ const CLASSES = {
     starterDeck: ['wolf','murloc','archer','blood_imp','charge_knight','lightning_bolt','rusty_knife','berserker','ogre','fan_of_knives','hun_trap','hun_dog','hun_steady','hun_marksman','hun_wolf_pack','hun_hawk','hun_master','hun_crossbow','hun_beast_call','tundra_rhino','pack_alpha','beast_king','hun_multi_shot','hun_tiger','windfury_harpy','storm_falcon'],
     cardPool: ['wolf','murloc','archer','charge_knight','windfury_harpy','blood_imp','fan_of_knives','lightning_bolt','berserker','ogre','sylvanas','loot_hoarder','storm_falcon','tundra_rhino','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','beast_king','pack_alpha','inspiring_leader','abyss_lord','titan_earthguard','hun_steady','hun_trap','hun_dog','hun_marksman','hun_beast_call','hun_wolf_pack','hun_hawk','hun_master','hun_crossbow','hun_beast_king_2','hun_multi_shot','hun_tiger','hun_scout_2','hun_eagle_horn','hun_mammoth','evo_beast_tamer','reb_serpent','disc_hunter','echo_dagger',
     'hun_rapid_fire','hun_tracking','hun_cobra','hun_pack_leader','hun_kill_shot','hun_bear','hun_spirit_beast','hun_elephant',
-    'hun_deadly_shot','hun_savannah'],
+    'hun_deadly_shot','hun_savannah','hun_poison_arrow','hun_venom_trap'],
     signature: 'beast_master',
   },
   paladin: {
@@ -576,7 +582,7 @@ const CLASSES = {
     heroPower: { name: '图腾召唤', cost: 2, type: 'shaman', description: '召唤一个1/1冲锋幽灵狼' },
     starterDeck: ['guardsman','stone_golem','archer','healer','card_drawer','frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf','earth_shield','lava_burst','overload_lightning','overload_missiles','overload_wolf','windfury_totem','totem_army','elem_surge','storm_giant','freeze_elem','water_elemental','lightning_storm','evo_frost','chain_fire','magic_missile','scout'],
     cardPool: ['frost_shock','totem_power','rock_hammer','flame_blast','spirit_wolf','lightning_storm','windfury_totem','earth_shield','lava_burst','storm_giant','totem_army','elem_surge','lightning_bolt','freeze_elem','water_elemental','overload_lightning','overload_missiles','overload_wolf','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_frost','chain_fire','reb_phoenix','sa_lightning_2','sa_heal_totem','sa_storm_fury','sa_totem_boost','sa_elem_blast','sa_wild_strike','sa_totem_army_2','sa_chain_lightning','sa_frost_shock_2','sa_fire_elemental','sa_tide_priest','sa_thunder_herald','sa_wind_totem','sa_earth_elemental','sa_magma','sa_storm_watcher',
-    'sha_rockbiter','sha_healing_rain','sha_totem_carver','sha_elem_destruction'],
+    'sha_rockbiter','sha_healing_rain','sha_totem_carver','sha_elem_destruction','sha_break_armor','sha_confusion'],
     signature: 'spell_power_1',
   },
 }
@@ -626,12 +632,12 @@ const ACTIVE_TREASURES = [
 
 const ENEMIES = {
   normal: [
-    { name: '森林哥布林', act: 1, portrait: '👺', hp: 34, deck: ['murloc','wolf','orc_grunt','berserker','war_hammer','lightning_bolt','healer','stone_golem','blood_imp','ogre'], ai: 'aggressive', personality: 'swarm' },
-    { name: '亡灵术士', act: 1, portrait: '💀', hp: 36, deck: ['blood_imp','summoner','cultist','mirror_entity','undead_knight','assassinate','card_drawer','berserker','shield_bearer','wolf'], ai: 'control', personality: 'vampiric' },
-    { name: '兽人战狂', act: 2, portrait: '👹', hp: 38, deck: ['orc_grunt','berserker','war_hammer','ogre','war_golem','wolf','guardsman','flame_sword','shield_bearer','fireball'], ai: 'aggressive', personality: 'frenzy' },
-    { name: '暗影法师', act: 1, portrait: '🧙', hp: 33, deck: ['arcane_missiles','lightning_bolt','arcane_intellect','fireball','consecration','flamestrike','spellblade','freeze_elem','polymorph','card_drawer'], ai: 'spell', personality: 'reflect' },
-    { name: '鱼人领袖', act: 1, portrait: '🐟', hp: 34, deck: ['murloc','murloc','wolf','archer','fan_of_knives','berserker','healer','charge_knight','lightning_bolt','ogre'], ai: 'aggressive', personality: 'commander' },
-    { name: '黑骑士', act: 2, portrait: '🛡️', hp: 36, deck: ['guardsman','stone_golem','shield_bearer','paladin_knight','war_hammer','flame_sword','healer','doom_blade','ogre','cultist'], ai: 'control', personality: 'guardian' },
+    { name: '森林哥布林', act: 1, portrait: '👺', hp: 34, passive: 'armor_on_hit', deck: ['murloc','wolf','orc_grunt','berserker','war_hammer','lightning_bolt','healer','stone_golem','blood_imp','ogre'], ai: 'aggressive', personality: 'swarm' },
+    { name: '亡灵术士', act: 1, portrait: '💀', hp: 36, passive: 'heal_turn', deck: ['blood_imp','summoner','cultist','mirror_entity','undead_knight','assassinate','card_drawer','berserker','shield_bearer','wolf'], ai: 'control', personality: 'vampiric' },
+    { name: '兽人战狂', act: 2, portrait: '👹', hp: 38, passive: 'strength_gain', deck: ['orc_grunt','berserker','war_hammer','ogre','war_golem','wolf','guardsman','flame_sword','shield_bearer','fireball'], ai: 'aggressive', personality: 'frenzy' },
+    { name: '暗影法师', act: 1, portrait: '🧙', hp: 33, passive: 'spell_buff', deck: ['arcane_missiles','lightning_bolt','arcane_intellect','fireball','consecration','flamestrike','spellblade','freeze_elem','polymorph','card_drawer'], ai: 'spell', personality: 'reflect' },
+    { name: '鱼人领袖', act: 1, portrait: '🐟', hp: 34, passive: 'summon_on_start', deck: ['murloc','murloc','wolf','archer','fan_of_knives','berserker','healer','charge_knight','lightning_bolt','ogre'], ai: 'aggressive', personality: 'commander' },
+    { name: '黑骑士', act: 2, portrait: '🛡️', hp: 36, passive: 'armor_on_hit', deck: ['guardsman','stone_golem','shield_bearer','paladin_knight','war_hammer','flame_sword','healer','doom_blade','ogre','cultist'], ai: 'control', personality: 'guardian' },
     { name: '治疗德鲁伊', act: 2, portrait: '🌿', hp: 36, deck: ['healer','holy_light','circle_healing','guardian_of_kings','stone_golem','guardsman','armored_knight','shield_bearer','holy_nova','soul_purify'], ai: 'control', personality: 'guardian' },
     { name: '武器战狂', act: 1, portrait: '⚔️', hp: 34, deck: ['war_hammer','flame_sword','battle_axe','rusty_knife','orc_grunt','berserker','wolf','frostwolf_grunt','guardsman','lightning_bolt'], ai: 'aggressive', personality: 'frenzy' },
     { name: '鱼人潮行者', act: 2, portrait: '🐟', hp: 33, deck: ['murloc','murloc','scout','blood_imp','wolf','archer','charge_knight','tundra_rhino','fan_of_knives','lightning_bolt'], ai: 'aggressive', personality: 'swarm' },

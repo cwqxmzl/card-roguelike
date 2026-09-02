@@ -86,6 +86,8 @@ function startBattle(type) {
   const MANA_CAP = 10 + (hasRelic('max_mana_plus') ? 1 : 0);
   G.player.spellPower = (hasRelic('spell_power') ? 1 : 0) + (hasRelic('spell_power_1') ? 1 : 0) + (hasRelic('spell_power_2') ? 2 : 0) + (hasRelic('spell_power_3') ? 3 : 0);
   G.player.heroPower.used = false;
+  G.player.overload = 0;
+  G.player.divineShield = false;
   // 第9轮：进化次数 = 基础2 + 局外强化 start_evolve 等级 + 进化之心遗物
   G.player.evolvePoints = 2 + (typeof metaLevel === 'function' ? metaLevel('start_evolve') : 0) + (hasRelic('evolve_boost') ? 1 : 0);
 
@@ -119,6 +121,17 @@ function startBattle(type) {
   // Coin start
   if (hasRelic('coin_start')) {
     G.player.hand.push({ ...getCardData('the_coin'), uid: uid() });
+  }
+
+  // 第15轮：敌人专属被动——战斗开始召唤小怪
+  if (G.enemy.passive === 'summon_on_start') {
+    for (let i = 0; i < 2; i++) {
+      if (G.enemy.minions.length < 7) {
+        const m = createMinion({ id: 'passive_summon_' + uid(), name: '鱼人幼崽', art: '🐠', attack: 1, hp: 2, cost: 1, type: 'minion' }, false);
+        G.enemy.minions.push(m);
+      }
+    }
+    addBattleLog('鱼人领袖召唤了2只鱼人幼崽', 'enemy');
   }
   
   G.battle = { turn: 1, isPlayerTurn: true, turnPhase: 'player', log: [], targetingMode: null, selectedMinion: null, isHeroAttacker: false, heroCanAttack: false, ended: false, enemyType: type, safetyTimer: null, attackSafetyTimer: null, spellTargeting: null, battlecryTargeting: null, heroPowerTargeting: null, firstCardPlayed: false, tutorialMsg: (isTut1 || isTut2) ? enemyData.tutorialMsg : null };
@@ -165,6 +178,13 @@ function startPlayerTurn() {
   G.battle.heroCanAttack = !!G.player.weapon;
   G.battle.firstCardPlayed = false;
   resetChain();
+
+  // 第15轮：玩家回合开始结算状态（中毒扣血等）+ 敏捷护甲
+  if (typeof tickStatuses === 'function') tickStatuses(G.player);
+  if (typeof hasStatus === 'function' && hasStatus(G.player, 'agility')) {
+    G.player.armor += G.player.states.agility.stacks;
+    floatText('player-portrait', '+' + G.player.states.agility.stacks + '甲', 'armor');
+  }
 
   // P1-1: start_of_turn effects on player minions
   G.player.minions.forEach(m => {
@@ -401,10 +421,25 @@ function startEnemyTurn() {
   G.battle.isPlayerTurn = false;
   G.battle.turnPhase = 'enemy_play';
   G.battle.turn++;
-  addBattleLog(`—— 敌方回合 ${Math.ceil(G.battle.turn / 2)} 开始 ——`, 'enemy');
+  addBattleLog(`—— 敌方回合 ${Math.floor(G.battle.turn / 2)} 开始 ——`, 'enemy');
   G.enemy.maxMana = Math.min(GAME_CONFIG.battle.maxMana, G.enemy.maxMana + 1);
   G.enemy.mana = G.enemy.maxMana - (G.enemy.overload || 0);
   G.enemy.overload = 0;
+  // 第15轮：敌人专属被动——回合开始效果
+  if (G.enemy.passive === 'heal_turn') {
+    const heal = Math.max(1, Math.floor(G.enemy.maxHp * 0.05));
+    G.enemy.hp = Math.min(G.enemy.maxHp, G.enemy.hp + heal);
+    floatText('enemy-portrait', '+' + heal, 'heal');
+    addBattleLog('亡灵术士汲取生命恢复' + heal + '点', 'enemy');
+  }
+  if (G.enemy.passive === 'strength_gain') {
+    if (typeof applyStatus === 'function') applyStatus(G.enemy, 'strength', 1);
+    addBattleLog('兽人战狂怒火上涌，力量+1', 'enemy');
+  }
+  if (G.enemy.passive === 'spell_buff') {
+    G.enemy.spellPower = (G.enemy.spellPower || 0) + 1;
+    addBattleLog('暗影法师凝聚魔力，法术强度+1', 'enemy');
+  }
 
   // Enemy personality: turn start effects
   applyEnemyPersonalityTurnStart();
@@ -420,8 +455,14 @@ function startEnemyTurn() {
   });
 
   resetChain();
-  G.enemy.intent = '思考中...';
-  document.getElementById('battle-turn-info').textContent = `第 ${Math.ceil(G.battle.turn / 2)} 回合 - 敌方回合`;
+  G.enemy.intent = '敌方回合';
+  // 第15轮：敌方回合开始结算状态 + 敏捷护甲
+  if (typeof tickStatuses === 'function') tickStatuses(G.enemy);
+  if (typeof hasStatus === 'function' && hasStatus(G.enemy, 'agility')) {
+    G.enemy.armor += G.enemy.states.agility.stacks;
+    floatText('enemy-portrait', '+' + G.enemy.states.agility.stacks + '甲', 'armor');
+  }
+  document.getElementById('battle-turn-info').textContent = `第 ${Math.floor(G.battle.turn / 2)} 回合 - 敌方回合`;
   setEndTurnButtonState('enemy');
   renderBattle();
 
@@ -1068,6 +1109,27 @@ function executeSpell(effect, player, enemy, card, target) {
     case 'deal_3_face':
       dealDamage(target || enemy, 3 + sp, player);
       break;
+    case 'poison_face_5':
+      if (typeof applyStatus === 'function') applyStatus(enemy, 'poison', 5);
+      else dealDamage(enemy, 5 + sp, player);
+      addBattleLog(`${caster}施加了5层中毒`, logType);
+      break;
+    case 'poison_face_3_draw':
+      if (typeof applyStatus === 'function') applyStatus(enemy, 'poison', 3);
+      else dealDamage(enemy, 3 + sp, player);
+      drawCard(player, true);
+      addBattleLog(`${caster}施加了3层中毒并抽1张牌`, logType);
+      break;
+    case 'vuln_face_2_dmg2':
+      if (typeof applyStatus === 'function') applyStatus(enemy, 'vulnerable', 2, 3);
+      dealDamage(enemy, 2 + sp, player);
+      addBattleLog(`${caster}施加了2层易伤并造成${2 + sp}点伤害`, logType);
+      break;
+    case 'weak_face_3_draw':
+      if (typeof applyStatus === 'function') applyStatus(enemy, 'weak', 3, 3);
+      drawCard(player, true);
+      addBattleLog(`${caster}施加了3层虚弱并抽1张牌`, logType);
+      break;
     case 'deal_6_face':
       dealDamage(target || enemy, 6 + sp, player);
       break;
@@ -1420,6 +1482,9 @@ function attack(attacker, target, isEnemyAttacking) {
 
   // Deal damage
   let atkDmg = attacker.currentAttack || attacker.attack || 0;
+  // 第15轮：力量状态——本方随从攻击力+层数
+  if (typeof hasStatus === 'function' && !isEnemyAttacking && hasStatus(G.player, 'strength')) atkDmg += G.player.states.strength.stacks;
+  if (typeof hasStatus === 'function' && isEnemyAttacking && hasStatus(G.enemy, 'strength')) atkDmg += G.enemy.states.strength.stacks;
   // Relic: crit_strike (30% double damage)
   if (!isEnemyAttacking && hasRelic('crit_strike') && Math.random() < 0.3) {
     atkDmg *= 2;
@@ -1546,6 +1611,9 @@ function triggerBossEnrage() {
 
 function dealDamage(target, amount, source) {
   if (target.dead || amount <= 0) return;
+  // 第15轮：状态修正——易伤（受伤+50%）/ 虚弱（造成伤害-50%）
+  if (typeof hasStatus === 'function' && hasStatus(target, 'vulnerable')) amount = Math.ceil(amount * 1.5);
+  if (typeof hasStatus === 'function' && source && hasStatus(source, 'weak')) amount = Math.max(1, Math.ceil(amount * 0.5));
   const targetName = target === G.player ? '你的英雄' : target === G.enemy ? '敌方英雄' : (target.name || '随从');
   const sourceName = source ? (source === G.player ? '你' : source === G.enemy ? '敌方' : (source.name || source)) : '疲劳';
   if (target === G.player || target === G.enemy) {
@@ -1589,6 +1657,17 @@ function dealDamage(target, amount, source) {
     // Enemy personality: frenzy / reflect on taking damage
     if (target === G.enemy && !G.enemy.dead) {
       applyEnemyPersonalityOnTakeDamage(remaining, source);
+    }
+    // 第15轮：敌人专属被动——受伤叠甲
+    if (target === G.enemy && !G.enemy.dead && G.enemy.passive === 'armor_on_hit' && remaining > 0) {
+      G.enemy.armor += 2;
+      floatText('enemy-portrait', '+2甲', 'armor');
+      addBattleLog('黑骑士的铁壁：受击获得2点护甲', 'enemy');
+    }
+    // 第15轮：死亡中断——英雄死亡立即结算胜负，终止后续效果链
+    if (target.hp <= 0 && !G.battle.ended) {
+      if (target === G.player) { onBattleLost(); } else { onBattleWon(); }
+      return;
     }
   } else {
     if (target.divineShield) {

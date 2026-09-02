@@ -2051,3 +2051,7 @@ html.fast-forward *::after {
 .card, .minion, .btn, .relic-icon {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* 第15轮：状态系统样式 */
+.status-display { display:flex; gap:4px; flex-wrap:wrap; margin-top:4px; min-height:18px; justify-content:center; }
+.status-icon { font-size:12px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:1px 4px; cursor:default; line-height:1.4; }

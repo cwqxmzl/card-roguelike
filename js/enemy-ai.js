@@ -76,23 +76,48 @@ function getEnemyIntentText() {
   if (!G || !G.enemy) return '';
   const enraged = G.enemy.enraged ? ' ⚡激怒' : '';
   const persona = getPersonalityText();
-  const base = G.enemy.intent ? `敌方意图：${G.enemy.intent}${enraged}` : (enraged ? `${G.enemy.name || '敌方'}已激怒` : '');
+  // 第15轮：玩家回合优先展示"下回合意图预览"
+  const preview = G.battle && G.battle.isPlayerTurn && G.enemy.previewIntent ? getPreviewIntentText() : '';
+  const base = preview || (G.enemy.intent ? `敌方意图：${G.enemy.intent}${enraged}` : (enraged ? `${G.enemy.name || '敌方'}已激怒` : ''));
   return persona ? (base ? base + '  ' + persona : persona) : base;
 }
 
 function computeEnemyIntent() {
   if (!G.enemy) return;
+  // 第15轮：意图预览增强——预测敌人下回合行动类型与预计伤害
   const playableCards = G.enemy.hand.filter(c => (c.cost || 0) <= G.enemy.maxMana + 1);
-  if (playableCards.length === 0) {
-    G.enemy.intent = '准备攻击';
-  } else {
-    const types = playableCards.map(c => c.type);
-    if (types.includes('spell')) G.enemy.intent = '施法意图';
-    else if (types.includes('minion')) G.enemy.intent = '召唤随从';
-    else G.enemy.intent = '装备武器';
-  }
+  const ai = G.enemy.ai || 'balanced';
+  let atkTotal = 0;
+  (G.enemy.minions || []).forEach(m => { if (!m.dead && (m.currentAttack || 0) > 0) atkTotal += m.currentAttack; });
+  if (G.enemy.weapon && G.enemy.weapon.attack) atkTotal += G.enemy.weapon.attack;
+  const hasSpell = playableCards.some(c => c.type === 'spell' && canEnemyUseSpell(c));
+  const hasMinion = playableCards.some(c => c.type === 'minion' && G.enemy.minions.length < 7);
+  const hasWeapon = playableCards.some(c => c.type === 'weapon' && !G.enemy.weapon);
+  let intentType = 'attack';
+  if (hasSpell && ai !== 'aggressive') intentType = 'spell';
+  else if (hasMinion && (ai === 'control' || ai === 'boss' || Math.random() < 0.5)) intentType = 'summon';
+  else if (hasWeapon && atkTotal === 0) intentType = 'weapon';
+  if (G.enemy.armor > 3 && Math.random() < 0.3 && hasSpell) intentType = 'defend';
+  if (intentType === 'attack' && atkTotal === 0 && playableCards.length === 0) intentType = 'idle';
+  G.enemy.previewIntent = { type: intentType, atk: atkTotal };
   const intentEl = document.getElementById('enemy-intent');
   if (intentEl) intentEl.textContent = getEnemyIntentText();
+}
+
+function getPreviewIntentText() {
+  if (!G || !G.enemy) return '';
+  const p = G.enemy.previewIntent;
+  if (!p) return '';
+  const enraged = G.enemy.enraged ? ' ⚡激怒' : '';
+  const base = {
+    attack:  p.atk > 0 ? `⚔️ 攻击 · 预计 ${p.atk} 点伤害` : '⚔️ 攻击',
+    summon:  '🐣 召唤随从',
+    spell:   '🔮 施放法术',
+    weapon:  '🗡️ 装备武器',
+    defend:  '🛡️ 防御姿态',
+    idle:    '😴 蓄力',
+  }[p.type] || '未知';
+  return `${base}${enraged}`;
 }
 
 // ===================== HERO POWER =====================
