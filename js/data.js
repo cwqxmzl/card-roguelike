@@ -756,6 +756,13 @@ const RELICS = [
   { id: 'life_spring', name: '生命泉', icon: '💧', desc: '每回合开始恢复2点生命', effect: 'regen_2' },
   { id: 'power_totem', name: '力量图腾', icon: '🗿', desc: '你的随从攻击力+1', effect: 'minion_attack_1' },
   { id: 'spellburst_amulet', name: '法术迸发护符', icon: '🔮', desc: '你的随从获得法术迸发（施放法术后+1/+1）', effect: 'spellburst_aura' },
+
+  { id: 'relic_dragon_scale', name: '龙鳞护体', icon: '🐲', desc: '每回合开始获得3点护甲', effect: 'dragon_scale' },
+  { id: 'relic_mana_spring', name: '法力之泉', icon: '⛲', desc: '每回合开始额外获得1点能量', effect: 'mana_spring' },
+  { id: 'relic_hex_doll', name: '咒术人偶', icon: '🎎', desc: '每回合开始使敌人获得1层虚弱', effect: 'hex_doll' },
+  { id: 'relic_poison_heart', name: '剧毒之心', icon: '💚', desc: '你施加的中毒层数额外+2', effect: 'poison_heart' },
+  { id: 'relic_brutal_axe', name: '蛮力战斧', icon: '🪓', desc: '你造成的伤害额外+2', effect: 'brutal_axe' },
+  { id: 'relic_giant_heart', name: '泰坦之心', icon: '❤️‍🔥', desc: '最大生命值+20', effect: 'giant_heart' },
 ];
 
 // ===================== META PROGRESSION (局外肉鸽) =====================

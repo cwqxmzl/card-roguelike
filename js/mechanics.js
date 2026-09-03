@@ -307,6 +307,10 @@ const STATUS_INFO = {
 
 function applyStatus(target, type, value, turns) {
   if (!target || !STATUS_INFO[type] || value <= 0) return;
+  // 第21轮：剧毒之心——对敌人施毒时层数+2
+  if (type === 'poison' && target === (typeof G !== 'undefined' ? G.enemy : null) && typeof hasRelic === 'function' && hasRelic('poison_heart')) {
+    value += 2;
+  }
   target.states = target.states || {};
   const s = target.states[type] || { stacks: 0, turns: 0 };
   // 第16轮：层数上限钳位，防止无限叠加崩坏（MAX_STATUS_STACK=20）

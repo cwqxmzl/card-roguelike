@@ -327,6 +327,10 @@ function applyRelic(relic) {
       G.player.maxHp += 10;
       G.player.hp += 10;
       break;
+    case 'giant_heart':
+      G.player.maxHp += 20;
+      G.player.hp += 20;
+      break;
     case 'spell_power':
       // Applied at battle start
       break;

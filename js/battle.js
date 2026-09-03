@@ -1,4 +1,4 @@
-/* card-roguelike — battle module
+﻿/* card-roguelike — battle module
    Split from card_roguelike.html inline <script> for maintainability.
    Classic script loaded via <script src>; shares global scope with siblings. */
 
@@ -156,6 +156,20 @@ function startPlayerTurn() {
     G.player.maxMana = Math.min(GAME_CONFIG.battle.maxMana + (hasRelic('max_mana_plus') ? 1 : 0), G.player.maxMana + 1);
   }
   G.player.mana = G.player.maxMana - G.player.overload;
+  // 第21轮：法力之泉——每回合开始+1能量
+  if (hasRelic('mana_spring')) {
+    G.player.mana = Math.min(GAME_CONFIG.battle.maxMana, G.player.mana + 1);
+    addBattleLog('法力之泉：额外+1能量', 'player');
+  }
+  // 第21轮：龙鳞护体——每回合开始+3护甲
+  if (hasRelic('dragon_scale')) {
+    G.player.armor += 3;
+    if (typeof floatText === 'function') floatText('player-portrait', '+3', 'armor');
+  }
+  // 第21轮：咒术人偶——每回合开始使敌人虚弱
+  if (hasRelic('hex_doll') && typeof applyStatus === 'function' && G.enemy) {
+    applyStatus(G.enemy, 'weak', 1, 2);
+  }
   // Relic: armor_turn
   if (hasRelic('armor_turn')) {
     G.player.armor += 1;
@@ -1621,6 +1635,8 @@ function triggerBossEnrage() {
 
 function dealDamage(target, amount, source) {
   if (target.dead || amount <= 0) return;
+  // 第21轮：蛮力战斧——玩家造成的伤害+2
+  if (source === G.player && hasRelic('brutal_axe')) amount += 2;
   // 第15轮：状态修正——易伤（受伤+50%）/ 虚弱（造成伤害-50%）
   if (typeof hasStatus === 'function' && hasStatus(target, 'vulnerable')) amount = Math.ceil(amount * NumericConfig.VULNERABLE_MULTI);
   if (typeof hasStatus === 'function' && source && hasStatus(source, 'weak')) amount = Math.max(1, Math.ceil(amount * NumericConfig.WEAK_MULTI));
@@ -1810,4 +1826,5 @@ function cleanupDeadMinions() {
     for (let i = 0; i < deadPlayerCount; i++) drawCard(G.player, true);
   }
 }
+
 
