@@ -185,6 +185,20 @@ function startPlayerTurn() {
   if (hasRelic('void_grasp') && typeof applyStatus === 'function' && G.enemy) {
     applyStatus(G.enemy, 'vulnerable', 2, 2);
   }
+  // 第23轮：黑曜甲胄——每回合开始获得8点护甲
+  if (hasRelic('obsidian_armor')) {
+    G.player.armor += 8;
+    if (typeof floatText === 'function') floatText('player-portrait', '+8甲', 'block');
+  }
+  // 第23轮：奥术洪流——每回合开始获得2点额外能量
+  if (hasRelic('arcane_overflow')) {
+    G.player.mana += 2;
+    if (typeof floatText === 'function') floatText('player-portrait', '+2能', 'mana');
+  }
+  // 第23轮：凋零光环——每回合开始使敌人获得2层中毒
+  if (hasRelic('withering_aura') && typeof applyStatus === 'function' && G.enemy) {
+    applyStatus(G.enemy, 'poison', 2, 2);
+  }
   // Relic: armor_turn
   if (hasRelic('armor_turn')) {
     G.player.armor += 1;

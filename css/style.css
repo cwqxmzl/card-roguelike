@@ -794,6 +794,17 @@ html.fast-forward *::after {
 
 .relic-icon:hover .relic-tooltip { display: block; }
 
+/* 第23轮：遗物品质边框 */
+.relic-icon.relic-common { display:inline-flex; align-items:center; justify-content:center; border:1px solid #6b7280; border-radius:4px; padding:0 2px; }
+.relic-icon.relic-rare { display:inline-flex; align-items:center; justify-content:center; border:1px solid #3b82f6; box-shadow:0 0 4px rgba(59,130,246,0.6); border-radius:4px; padding:0 2px; }
+.relic-icon.relic-epic { display:inline-flex; align-items:center; justify-content:center; border:1px solid #a855f7; box-shadow:0 0 6px rgba(168,85,247,0.7); border-radius:4px; padding:0 2px; }
+.relic-icon.relic-boss { display:inline-flex; align-items:center; justify-content:center; border:1px solid #f5a623; box-shadow:0 0 8px rgba(245,166,35,0.85); border-radius:4px; padding:0 2px; }
+.relic-rarity-common { color:#9ca3af; }
+.relic-rarity-rare { color:#60a5fa; }
+.relic-rarity-epic { color:#c084fc; }
+.relic-rarity-boss { color:#fbbf24; }
+
+
 
 
 /* Animations */

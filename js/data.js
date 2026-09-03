@@ -713,6 +713,9 @@ const RELICS = [
   { id: 'boss_shadow_crown', name: '暗影王冠', icon: '👑', desc: '每回合开始对敌人造成3点伤害', effect: 'shadow_crown', rarity: 'boss'},
   { id: 'boss_soul_prism', name: '灵魂棱镜', icon: '💠', desc: '每回合开始恢复5点生命', effect: 'soul_prism', rarity: 'boss'},
   { id: 'boss_void_grasp', name: '虚空之握', icon: '🖤', desc: '每回合开始使敌人获得2层易伤', effect: 'void_grasp', rarity: 'boss'},
+  { id: 'boss_obsidian_armor', name: '黑曜甲胄', icon: '🪨', desc: '每回合开始获得8点护甲', effect: 'obsidian_armor', rarity: 'boss' },
+  { id: 'boss_arcane_overflow', name: '奥术洪流', icon: '🌀', desc: '每回合开始获得2点额外能量', effect: 'arcane_overflow', rarity: 'boss' },
+  { id: 'boss_withering_aura', name: '凋零光环', icon: '☠️', desc: '每回合开始使敌人获得2层中毒', effect: 'withering_aura', rarity: 'boss' },
 ];
 
 // ===================== META PROGRESSION (局外肉鸽) =====================

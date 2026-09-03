@@ -361,13 +361,15 @@ function renderRelics(containerId) {
   if (!container) return;
   const frag = document.createDocumentFragment();
   G.relics.forEach(r => {
+    const _rr = r.rarity || 'common';
     const icon = document.createElement('div');
-    icon.className = 'relic-icon';
+    icon.className = 'relic-icon relic-' + _rr;
     icon.textContent = r.icon;
     icon.style.touchAction = 'manipulation';
     const tooltip = document.createElement('div');
     tooltip.className = 'relic-tooltip';
-    tooltip.innerHTML = `<b>${r.name}</b><br>${r.desc || r.description || ''}`;
+    const _rn = { common: '普通', rare: '稀有', epic: '史诗', boss: 'Boss' }[_rr] || '普通';
+    tooltip.innerHTML = `<b>${r.name}</b><br><span class="relic-rarity relic-rarity-${_rr}">【${_rn}】</span><br>${r.desc || r.description || ''}`;
     icon.appendChild(tooltip);
     icon.onclick = () => {
       document.querySelectorAll('.relic-tooltip').forEach(t => { if (t !== tooltip) t.style.display = ''; });

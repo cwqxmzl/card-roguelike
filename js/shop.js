@@ -22,12 +22,15 @@ function openShop() {
     });
   }
   
-  // Generate shop relics (3)
+  // Generate shop relics (3) 第23轮：品质权重 + 定价
+  const RELIC_PRICE_MULT = { common: 1, rare: 1.5, epic: 2, boss: 2.5 };
   const availableRelics = RELICS.filter(r => !G.relics.find(gr => gr.id === r.id));
   for (let i = 0; i < Math.min(3, availableRelics.length); i++) {
-    const idx = Math.floor(Math.random() * availableRelics.length);
-    const relic = availableRelics.splice(idx, 1)[0];
-    G.shopInventory.relics.push({ ...relic, price: GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange), sold: false });
+    const relic = pickRelicByTier(availableRelics, 'elite');
+    const rIdx = availableRelics.indexOf(relic);
+    if (rIdx >= 0) availableRelics.splice(rIdx, 1);
+    const base = GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange);
+    G.shopInventory.relics.push({ ...relic, price: Math.floor(base * (RELIC_PRICE_MULT[relic.rarity] || 1)), sold: false });
   }
   
   // Heal option
@@ -279,12 +282,15 @@ function rerollShop() {
       sold: false,
     });
   }
+  const RELIC_PRICE_MULT = { common: 1, rare: 1.5, epic: 2, boss: 2.5 };
   const availableRelics = RELICS.filter(r => !G.relics.find(gr => gr.id === r.id));
   G.shopInventory.relics = [];
   for (let i = 0; i < Math.min(3, availableRelics.length); i++) {
-    const idx = Math.floor(Math.random() * availableRelics.length);
-    const relic = availableRelics.splice(idx, 1)[0];
-    G.shopInventory.relics.push({ ...relic, price: GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange), sold: false });
+    const relic = pickRelicByTier(availableRelics, 'elite');
+    const rIdx = availableRelics.indexOf(relic);
+    if (rIdx >= 0) availableRelics.splice(rIdx, 1);
+    const base = GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange);
+    G.shopInventory.relics.push({ ...relic, price: Math.floor(base * (RELIC_PRICE_MULT[relic.rarity] || 1)), sold: false });
   }
   renderShop();
   renderMap();
