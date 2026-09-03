@@ -222,14 +222,16 @@ function showUpgradeScreen() {
 function upgradeCard(card) {
   card.upgraded = true;
   if (card.type === 'minion') {
-    card.attack = (card.attack || 0) + 1;
-    card.hp = (card.hp || 0) + 1;
+    card.attack = (card.attack || 0) + NumericConfig.MINION_UPGRADE_ATK;
+    card.hp = (card.hp || 0) + NumericConfig.MINION_UPGRADE_HP;
   } else if (card.type === 'weapon') {
-    card.attack = (card.attack || 0) + 1;
-    card.durability = (card.durability || 0) + 1;
+    card.attack = (card.attack || 0) + NumericConfig.WEAPON_UPGRADE_ATK;
+    card.durability = (card.durability || 0) + NumericConfig.WEAPON_UPGRADE_DUR;
   } else if (card.type === 'spell') {
-    // Reduce cost or improve effect
-    if (card.cost > 0) card.cost = Math.max(0, card.cost - 1);
+    // 第17轮：攻击/防御牌按配置强化数值，其余减费
+    if (card.damage && card.damage > 0) card.damage = (card.damage || 0) + NumericConfig.UPGRADE_ATK_BONUS;
+    else if (card.block && card.block > 0) card.block = (card.block || 0) + NumericConfig.UPGRADE_BLOCK_BONUS;
+    else if (card.cost > 0) card.cost = Math.max(0, card.cost - 1);
   }
   log(`${card.name}已升级！`);
 }

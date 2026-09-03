@@ -38,6 +38,16 @@ const NumericConfig = {
   PRICE_CARD_NORMAL: 15,
   PRICE_CARD_RARE: 30,
   PRICE_REMOVE_CARD: 60,
+
+  // 升级增量（统一升级规则：events.js upgradeCard）
+  MINION_UPGRADE_ATK: 1,      // 随从升级攻击 +1
+  MINION_UPGRADE_HP: 1,       // 随从升级生命 +1
+  WEAPON_UPGRADE_ATK: 1,      // 武器升级攻击 +1
+  WEAPON_UPGRADE_DUR: 1,      // 武器升级耐久 +1
+
+  // 存档数值快照：本局锁定的数值版本，防止跨版本更新篡改进行中的对局
+  SAVE_VERSION: 17,
+  NUMERIC_VERSION: 17,
 };
 
 // ===================== 统一计算函数 =====================
@@ -59,6 +69,26 @@ function clampStatusStack(stacks) {
 // 伤害兜底：防溢出/负值
 function clampDamage(dmg) {
   return Math.max(0, Math.min(Math.round(dmg), NumericConfig.MAX_DAMAGE));
+}
+
+// 提取当前数值快照（只含数值字段，不含函数）
+function getNumericSnapshot() {
+  const s = {};
+  for (const k in NumericConfig) {
+    if (typeof NumericConfig[k] === 'number') s[k] = NumericConfig[k];
+  }
+  return s;
+}
+
+// 从存档恢复本局数值快照（老对局保持老值；缺快照则保持当前配置）
+function restoreNumericSnapshot(snap) {
+  if (snap && typeof snap === 'object') {
+    for (const k in snap) {
+      if (typeof NumericConfig[k] === 'number' && typeof snap[k] === 'number') {
+        NumericConfig[k] = snap[k];
+      }
+    }
+  }
 }
 
 // 统一攻击伤害计算（与 dealDamage 配合的可选入口）

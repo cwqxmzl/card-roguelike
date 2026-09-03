@@ -306,6 +306,26 @@ function pickRewardCard(filtered, rareBonus, act) {
   return filtered[filtered.length - 1];
 }
 
+// 按稀有度权重返回数组内索引（供发现/三选一复用）
+function pickRewardIndex(arr, rareBonus) {
+  if (arr.length <= 1) return 0;
+  const weights = arr.map(c => {
+    let w = (c.rarity === 'common') ? NumericConfig.WEIGHT_NORMAL
+          : (c.rarity === 'rare') ? NumericConfig.WEIGHT_RARE
+          : NumericConfig.WEIGHT_EPIC;
+    if (c.rarity === 'legendary') w = w * 0.5;
+    if (rareBonus > 0 && c.rarity && c.rarity !== 'common') w = w * (1 + rareBonus * 0.3);
+    return w;
+  });
+  const total = weights.reduce((a, b) => a + b, 0) || 1;
+  let r = Math.random() * total;
+  for (let i = 0; i < arr.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return i;
+  }
+  return arr.length - 1;
+}
+
 function showCardPackReward() {
   const cls = CLASSES[G.selectedClass || 'mage'];
   const classPool = cls ? cls.cardPool.map(id => CARD_MAP[id]).filter(c => c) : CARD_POOL;
@@ -381,8 +401,11 @@ function offerDiscover(pool, title, onPick) {
   if (!container) return;
   const offers = [];
   const temp = [...pool];
+  // 第17轮：发现牌也按稀有度权重抽取（幸运之触+稀有开卡加成）
+  const metaUp = (typeof getMetaProgress === 'function' && getMetaProgress().upgrades) || {};
+  const rareBonus = ((metaUp.start_rare || 0) + (metaUp.rare_luck || 0));
   for (let i = 0; i < 3 && temp.length > 0; i++) {
-    const idx = Math.floor(Math.random() * temp.length);
+    const idx = pickRewardIndex(temp, rareBonus);
     offers.push(temp.splice(idx, 1)[0]);
   }
   const frag = document.createDocumentFragment();

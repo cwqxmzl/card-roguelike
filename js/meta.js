@@ -294,6 +294,9 @@ function saveGame() {
       gold: G.gold,
       relics: G.relics,
       difficulty: G.difficulty,
+      // 第17轮：存档携带本局数值快照，跨版本更新不影响进行中的对局
+      numericSnapshot: getNumericSnapshot(),
+      saveVersion: NumericConfig.SAVE_VERSION,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch(e) { /* error handled */ }
@@ -318,6 +321,8 @@ function clearSave() {
 function continueRun() {
   const state = loadGame();
   if (!state) return;
+  // 第17轮：恢复本局数值快照（老对局保持老值）
+  restoreNumericSnapshot(state.numericSnapshot);
   G = {
     act: state.act,
     mode: state.mode || 'endless',
