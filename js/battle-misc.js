@@ -284,6 +284,28 @@ function getClassCardPool() {
 // Neutral cards that can appear in every class's card packs (new keyword cards stay obtainable)
 const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad','death_stalker','overload_lightning','overload_missiles','overload_wolf','neutral_kobold','neutral_guard','neutral_rogue_knife','neutral_spell_2','neutral_minion_3','neutral_minion_4','neutral_minion_5','neutral_spell_6','neutral_minion_7','neutral_spell_8','neutral_minion_9','neutral_minion_10','neutral_spell_11','neutral_minion_12','neutral_minion_13'];
 
+// 第16轮：按稀有度权重抽取奖励卡（common 权重高，稀有度越高权重越低；rareBonus 提升稀有概率）
+function pickRewardCard(filtered, rareBonus, act) {
+  const weights = filtered.map(c => {
+    let w = c.rarity === 'common' ? NumericConfig.WEIGHT_NORMAL
+          : c.rarity === 'rare' ? NumericConfig.WEIGHT_RARE
+          : NumericConfig.WEIGHT_EPIC;
+    // 稀有度越高，权重越低；epic/legendary 共用 epic 权重并再降一半
+    if (c.rarity === 'epic' || c.rarity === 'legendary') w = NumericConfig.WEIGHT_EPIC;
+    if (c.rarity === 'legendary') w = w * 0.5;
+    // rareBonus（幸运之触+稀有开卡）：每级提升 30% 稀有卡权重（不提升 common）
+    if (rareBonus > 0 && c.rarity !== 'common') w = w * (1 + rareBonus * 0.3);
+    return w;
+  });
+  const total = weights.reduce((a, b) => a + b, 0) || 1;
+  let r = Math.random() * total;
+  for (let i = 0; i < filtered.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return filtered[i];
+  }
+  return filtered[filtered.length - 1];
+}
+
 function showCardPackReward() {
   const cls = CLASSES[G.selectedClass || 'mage'];
   const classPool = cls ? cls.cardPool.map(id => CARD_MAP[id]).filter(c => c) : CARD_POOL;
@@ -295,15 +317,11 @@ function showCardPackReward() {
   });
   const cards = [];
   const bonus = (G.battle && G.battle.bossBonusChoices) || 0;
+  // 第16轮：稀有度权重抽取（幸运之触 rare_luck + 稀有开卡 start_rare 加成）
+  const metaUp = getMetaProgress().upgrades || {};
+  const rareBonus = ((metaUp.start_rare || 0) + (metaUp.rare_luck || 0));
   for (let i = 0; i < 3 + bonus; i++) {
-    let card;
-    const rareLv = (getMetaProgress().upgrades && getMetaProgress().upgrades.start_rare) || 0;
-    if (Math.random() < (0.2 + rareLv * 0.15) && G.act > 0) {
-      const rares = filtered.filter(c => c.rarity === 'epic' || c.rarity === 'legendary');
-      card = rares.length > 0 ? rares[Math.floor(Math.random() * rares.length)] : filtered[Math.floor(Math.random() * filtered.length)];
-    } else {
-      card = filtered[Math.floor(Math.random() * filtered.length)];
-    }
+    const card = pickRewardCard(filtered, rareBonus, G.act);
     cards.push({ ...card, uid: uid() });
   }
   renderRewardCards(cards, '选择一张卡牌加入牌组');

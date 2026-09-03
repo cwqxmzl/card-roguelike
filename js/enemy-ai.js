@@ -99,7 +99,10 @@ function computeEnemyIntent() {
   else if (hasWeapon && atkTotal === 0) intentType = 'weapon';
   if (G.enemy.armor > 3 && Math.random() < 0.3 && hasSpell) intentType = 'defend';
   if (intentType === 'attack' && atkTotal === 0 && playableCards.length === 0) intentType = 'idle';
-  G.enemy.previewIntent = { type: intentType, atk: atkTotal };
+  // 第16轮：敌人攻击数值小幅浮动（±2，避免完全背板）
+  const atkLow = Math.max(0, atkTotal - 2);
+  const atkHigh = atkTotal + 2;
+  G.enemy.previewIntent = { type: intentType, atk: atkTotal, atkLow, atkHigh };
   const intentEl = document.getElementById('enemy-intent');
   if (intentEl) intentEl.textContent = getEnemyIntentText();
 }
@@ -110,7 +113,7 @@ function getPreviewIntentText() {
   if (!p) return '';
   const enraged = G.enemy.enraged ? ' ⚡激怒' : '';
   const base = {
-    attack:  p.atk > 0 ? `⚔️ 攻击 · 预计 ${p.atk} 点伤害` : '⚔️ 攻击',
+    attack:  p.atk > 0 ? `⚔️ 攻击 · 预计 ${p.atkLow === p.atk ? p.atk : p.atkLow + '~' + p.atkHigh} 点伤害` : '⚔️ 攻击',
     summon:  '🐣 召唤随从',
     spell:   '🔮 施放法术',
     weapon:  '🗡️ 装备武器',

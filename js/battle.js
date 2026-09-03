@@ -109,7 +109,7 @@ function startBattle(type) {
   if (hasRelic('start_shield')) { G.player.divineShield = true; }
   
   // Draw starting hand (3 cards + relic bonus)
-  let drawCount = 3 + (hasRelic('extra_draw') ? 1 : 0) + (hasRelic('extra_draw_2') ? 2 : 0) + (hasRelic('extra_draw_3') ? 3 : 0);
+  let drawCount = NumericConfig.START_DRAW + (hasRelic('extra_draw') ? 1 : 0) + (hasRelic('extra_draw_2') ? 2 : 0) + (hasRelic('extra_draw_3') ? 3 : 0);
   for (let i = 0; i < drawCount; i++) {
     drawCard(G.player, false);
   }
@@ -1612,8 +1612,9 @@ function triggerBossEnrage() {
 function dealDamage(target, amount, source) {
   if (target.dead || amount <= 0) return;
   // 第15轮：状态修正——易伤（受伤+50%）/ 虚弱（造成伤害-50%）
-  if (typeof hasStatus === 'function' && hasStatus(target, 'vulnerable')) amount = Math.ceil(amount * 1.5);
-  if (typeof hasStatus === 'function' && source && hasStatus(source, 'weak')) amount = Math.max(1, Math.ceil(amount * 0.5));
+  if (typeof hasStatus === 'function' && hasStatus(target, 'vulnerable')) amount = Math.ceil(amount * NumericConfig.VULNERABLE_MULTI);
+  if (typeof hasStatus === 'function' && source && hasStatus(source, 'weak')) amount = Math.max(1, Math.ceil(amount * NumericConfig.WEAK_MULTI));
+  amount = clampDamage(amount);
   const targetName = target === G.player ? '你的英雄' : target === G.enemy ? '敌方英雄' : (target.name || '随从');
   const sourceName = source ? (source === G.player ? '你' : source === G.enemy ? '敌方' : (source.name || source)) : '疲劳';
   if (target === G.player || target === G.enemy) {

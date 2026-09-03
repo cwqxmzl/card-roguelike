@@ -309,7 +309,8 @@ function applyStatus(target, type, value, turns) {
   if (!target || !STATUS_INFO[type] || value <= 0) return;
   target.states = target.states || {};
   const s = target.states[type] || { stacks: 0, turns: 0 };
-  s.stacks = (s.stacks || 0) + value;
+  // 第16轮：层数上限钳位，防止无限叠加崩坏（MAX_STATUS_STACK=20）
+  s.stacks = clampStatusStack((s.stacks || 0) + value);
   if (turns !== undefined) s.turns = Math.max(s.turns, turns);
   target.states[type] = s;
 }
