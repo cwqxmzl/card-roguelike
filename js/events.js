@@ -209,14 +209,84 @@ function showUpgradeScreen() {
     wrapper.onmouseover = () => { wrapper.style.transform = 'translateY(-10px)'; };
     wrapper.onmouseout = () => { wrapper.style.transform = ''; };
     wrapper.onclick = () => {
-      upgradeCard(card);
+      showUpgradeBranch(card);
+    };
+    frag.appendChild(wrapper);
+  });
+  container.replaceChildren(frag);
+  showOverlay('overlay-upgrade');
+}
+
+// 第19轮：卡牌升级分支——根据卡牌类型生成可选择的升级方向
+function getUpgradeChoices(card) {
+  const choices = [];
+  if (card.type === 'minion') {
+    choices.push({ id: 'atk', label: '攻击 +' + NumericConfig.MINION_UPGRADE_ATK, desc: '攻击力提升', apply(){ card.attack = (card.attack || 0) + NumericConfig.MINION_UPGRADE_ATK; } });
+    choices.push({ id: 'hp', label: '生命 +' + NumericConfig.MINION_UPGRADE_HP, desc: '生命值提升', apply(){ card.hp = (card.hp || 0) + NumericConfig.MINION_UPGRADE_HP; } });
+    if (card.cost > 0) choices.push({ id: 'cost', label: '费用 -1', desc: '更早登场', apply(){ card.cost = Math.max(0, card.cost - 1); } });
+  } else if (card.type === 'weapon') {
+    choices.push({ id: 'atk', label: '攻击 +' + NumericConfig.WEAPON_UPGRADE_ATK, desc: '攻击力提升', apply(){ card.attack = (card.attack || 0) + NumericConfig.WEAPON_UPGRADE_ATK; } });
+    choices.push({ id: 'dur', label: '耐久 +' + NumericConfig.WEAPON_UPGRADE_DUR, desc: '耐久提升', apply(){ card.durability = (card.durability || 0) + NumericConfig.WEAPON_UPGRADE_DUR; } });
+    if (card.cost > 0) choices.push({ id: 'cost', label: '费用 -1', desc: '更早装备', apply(){ card.cost = Math.max(0, card.cost - 1); } });
+  } else {
+    // spell：3 分支（数值强化 / 功能化附带效果 / 降费）
+    const spellChoices = [];
+    if (card.damage && card.damage > 0) {
+      spellChoices.push({ id: 'dmg', label: '伤害 +' + NumericConfig.UPGRADE_ATK_BONUS, desc: '造成更多伤害', apply(){ card.damage = (card.damage || 0) + NumericConfig.UPGRADE_ATK_BONUS; } });
+      spellChoices.push({ id: 'func', label: '附带抽牌', desc: '打出时额外抽1张牌', apply(){ card.extraEffect = 'draw_1'; } });
+    } else if (card.block && card.block > 0) {
+      spellChoices.push({ id: 'blk', label: '护甲 +' + NumericConfig.UPGRADE_BLOCK_BONUS, desc: '获得更多护甲', apply(){ card.block = (card.block || 0) + NumericConfig.UPGRADE_BLOCK_BONUS; } });
+      spellChoices.push({ id: 'func', label: '附带回血', desc: '打出时回复2点生命', apply(){ card.extraEffect = 'heal_2'; } });
+    }
+    if (card.cost > 0) spellChoices.push({ id: 'cost', label: '费用 -1', desc: '更容易打出', apply(){ card.cost = Math.max(0, card.cost - 1); } });
+    if (spellChoices.length === 0) {
+      spellChoices.push({ id: 'func', label: '过牌强化', desc: '打出时额外抽1张牌', apply(){ card.extraEffect = 'draw_1'; } });
+      spellChoices.push({ id: 'dmg', label: '伤害 +' + NumericConfig.UPGRADE_ATK_BONUS, desc: '附加伤害能力', apply(){ card.damage = (card.damage || 0) + NumericConfig.UPGRADE_ATK_BONUS; } });
+      if (card.cost > 0) spellChoices.push({ id: 'cost', label: '费用 -1', desc: '更容易打出', apply(){ card.cost = Math.max(0, card.cost - 1); } });
+    }
+    spellChoices.slice(0, 3).forEach(c => choices.push(c));
+  }
+  return choices;
+}
+
+// 升级分支选择界面（复用 overlay-upgrade 容器）
+function showUpgradeBranch(card) {
+  const container = document.getElementById('upgrade-cards');
+  if (!container) { upgradeCard(card); hideOverlay('overlay-upgrade'); completeNode(); return; }
+  const frag = document.createDocumentFragment();
+  const title = document.createElement('div');
+  title.style.cssText = 'text-align:center;color:var(--gold);font-size:14px;margin-bottom:10px;width:100%;';
+  title.textContent = '选择「' + card.name + '」的升级方向';
+  frag.appendChild(title);
+  getUpgradeChoices(card).forEach(ch => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'reward-type-card';
+    wrapper.style.width = '200px';
+    wrapper.style.cursor = 'pointer';
+    const icon = document.createElement('div');
+    icon.className = 'reward-type-icon';
+    icon.textContent = '⬆';
+    const t = document.createElement('div');
+    t.className = 'reward-type-title';
+    t.textContent = ch.label;
+    const d = document.createElement('div');
+    d.className = 'reward-type-desc';
+    d.textContent = ch.desc;
+    wrapper.appendChild(icon);
+    wrapper.appendChild(t);
+    wrapper.appendChild(d);
+    wrapper.onmouseover = () => { wrapper.style.transform = 'translateY(-6px)'; };
+    wrapper.onmouseout = () => { wrapper.style.transform = ''; };
+    wrapper.onclick = () => {
+      ch.apply();
+      card.upgraded = true;
+      log(card.name + ' 升级完成：' + ch.label);
       hideOverlay('overlay-upgrade');
       completeNode();
     };
     frag.appendChild(wrapper);
   });
   container.replaceChildren(frag);
-  showOverlay('overlay-upgrade');
 }
 
 function upgradeCard(card) {

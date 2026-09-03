@@ -1081,6 +1081,16 @@ function executeSpell(effect, player, enemy, card, target) {
   const isPlayer = player === G.player;
   const caster = isPlayer ? '你' : '敌方';
   const logType = isPlayer ? 'player' : 'enemy';
+  // 第19轮：卡牌升级附带效果（extraEffect）
+  if (card && card.extraEffect) {
+    if (card.extraEffect === 'draw_1') { drawCard(player, true); }
+    else if (card.extraEffect === 'heal_2') {
+      const amt = 2;
+      player.hp = Math.min(player.maxHp, (player.hp || 0) + amt);
+      if (typeof floatText === 'function') floatText('player-portrait', '+' + amt, 'heal');
+      if (typeof addBattleLog === 'function') addBattleLog('附带回血：恢复' + amt + '点生命', 'player');
+    }
+  }
   switch (effect) {
     case 'arcane_missiles':
       let missileCount = 0;
