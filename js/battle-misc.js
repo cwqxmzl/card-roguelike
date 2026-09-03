@@ -289,8 +289,9 @@ const NEUTRAL_POOL = ['vampire_bat','vampire_lord','poison_snake','plague_toad',
 // 第16轮：按稀有度权重抽取奖励卡（common 权重高，稀有度越高权重越低；rareBonus 提升稀有概率）
 function pickRewardCard(filtered, rareBonus, act) {
   const weights = filtered.map(c => {
-    let w = c.rarity === 'common' ? NumericConfig.WEIGHT_NORMAL
-          : c.rarity === 'rare' ? NumericConfig.WEIGHT_RARE
+    let _rar = c.rarity || 'common';
+    let w = _rar === 'common' ? NumericConfig.WEIGHT_NORMAL
+          : _rar === 'rare' ? NumericConfig.WEIGHT_RARE
           : NumericConfig.WEIGHT_EPIC;
     // 稀有度越高，权重越低；epic/legendary 共用 epic 权重并再降一半
     if (c.rarity === 'epic' || c.rarity === 'legendary') w = NumericConfig.WEIGHT_EPIC;
@@ -312,8 +313,9 @@ function pickRewardCard(filtered, rareBonus, act) {
 function pickRewardIndex(arr, rareBonus) {
   if (arr.length <= 1) return 0;
   const weights = arr.map(c => {
-    let w = (c.rarity === 'common') ? NumericConfig.WEIGHT_NORMAL
-          : (c.rarity === 'rare') ? NumericConfig.WEIGHT_RARE
+    let _rar = c.rarity || 'common';
+    let w = (_rar === 'common') ? NumericConfig.WEIGHT_NORMAL
+          : (_rar === 'rare') ? NumericConfig.WEIGHT_RARE
           : NumericConfig.WEIGHT_EPIC;
     if (c.rarity === 'legendary') w = w * 0.5;
     if (rareBonus > 0 && c.rarity && c.rarity !== 'common') w = w * (1 + rareBonus * 0.3);
