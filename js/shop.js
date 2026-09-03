@@ -12,7 +12,8 @@ function openShop() {
     return c.rarity !== 'legendary' || Math.random() < 0.1;
   });
   for (let i = 0; i < 5; i++) {
-    const card = pool[Math.floor(Math.random() * pool.length)];
+    // 第18轮：商店卡牌按稀有度权重生成，倾向稀有（rareBonus=6）
+    const card = pool[pickRewardIndex(pool, 6)];
     G.shopInventory.cards.push({
       ...card,
       uid: uid(),
@@ -270,7 +271,8 @@ function rerollShop() {
   });
   G.shopInventory.cards = [];
   for (let i = 0; i < 5; i++) {
-    const card = pool[Math.floor(Math.random() * pool.length)];
+    // 第18轮：重刷商店同样按稀有度权重（rareBonus=6）
+    const card = pool[pickRewardIndex(pool, 6)];
     G.shopInventory.cards.push({
       ...card, uid: uid(),
       price: GAME_CONFIG.shop.cardPrices[card.rarity] || 80,

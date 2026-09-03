@@ -186,6 +186,8 @@ function onBattleWon() {
   if (type === 'boss') goldReward = 50;
   else if (type === 'elite') goldReward = 25;
   else goldReward = 15;
+  // 第18轮：精英战斗额外 +1 卡牌选择（4选1），体现高风险高回报
+  if (type === 'elite' && G.battle) G.battle.bossBonusChoices = (G.battle.bossBonusChoices || 0) + 1;
 
   if (hasRelic('double_gold')) goldReward *= 2;
   if (hasRelic('gold_each_battle')) goldReward += 3;
@@ -339,7 +341,9 @@ function showCardPackReward() {
   const bonus = (G.battle && G.battle.bossBonusChoices) || 0;
   // 第16轮：稀有度权重抽取（幸运之触 rare_luck + 稀有开卡 start_rare 加成）
   const metaUp = getMetaProgress().upgrades || {};
-  const rareBonus = ((metaUp.start_rare || 0) + (metaUp.rare_luck || 0));
+  let rareBonus = ((metaUp.start_rare || 0) + (metaUp.rare_luck || 0));
+  // 第18轮：精英/Boss 战奖励稀有度进一步提升
+  if (G.battle && (G.battle.enemyType === 'elite' || G.battle.enemyType === 'boss')) rareBonus += 4;
   for (let i = 0; i < 3 + bonus; i++) {
     const card = pickRewardCard(filtered, rareBonus, G.act);
     cards.push({ ...card, uid: uid() });
