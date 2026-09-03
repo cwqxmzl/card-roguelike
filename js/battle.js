@@ -170,6 +170,21 @@ function startPlayerTurn() {
   if (hasRelic('hex_doll') && typeof applyStatus === 'function' && G.enemy) {
     applyStatus(G.enemy, 'weak', 1, 2);
   }
+  // 第22轮：暗影王冠——每回合开始对敌人造成3点伤害
+  if (hasRelic('shadow_crown') && G.enemy && !G.enemy.dead) {
+    const before = G.enemy.hp;
+    dealDamage(G.enemy, 3, G.player);
+    if (typeof floatText === 'function' && G.enemy.hp < before) floatText('enemy-portrait', '-' + (before - G.enemy.hp), 'damage');
+  }
+  // 第22轮：灵魂棱镜——每回合开始恢复5点生命
+  if (hasRelic('soul_prism')) {
+    G.player.hp = Math.min(G.player.maxHp, G.player.hp + 5);
+    if (typeof floatText === 'function') floatText('player-portrait', '+5', 'heal');
+  }
+  // 第22轮：虚空之握——每回合开始使敌人获得2层易伤
+  if (hasRelic('void_grasp') && typeof applyStatus === 'function' && G.enemy) {
+    applyStatus(G.enemy, 'vulnerable', 2, 2);
+  }
   // Relic: armor_turn
   if (hasRelic('armor_turn')) {
     G.player.armor += 1;

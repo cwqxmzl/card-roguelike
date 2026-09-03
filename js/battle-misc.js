@@ -230,7 +230,7 @@ function onBattleWon() {
     // 第12轮：贪婪之心——每场战斗胜利额外获得20金币
     if (hasRelic('extra_gold')) { G.gold += 20; addBattleLog('贪婪之心：额外获得20金币', 'player'); }
     setTimeout(() => {
-      grantRelic(G);
+      grantRelic(G, 'boss');
       showRewardTypeSelection(`击败 ${G.enemy.name}！`);
     }, 800);
   } else {

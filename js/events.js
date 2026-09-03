@@ -307,10 +307,24 @@ function upgradeCard(card) {
 }
 
 // ===================== RELICS =====================
-function grantRelic(g) {
+function pickRelicByTier(available, tier) {
+  const w = {
+    normal: { common: 65, rare: 25, epic: 10, boss: 0 },
+    elite:  { common: 40, rare: 35, epic: 20, boss: 5 },
+    boss:   { common: 0,  rare: 25, epic: 40, boss: 35 }
+  }[tier] || { common: 65, rare: 25, epic: 10, boss: 0 };
+  let pool = available.filter(r => (w[r.rarity] || 0) > 0);
+  if (pool.length === 0) pool = available;
+  let total = 0;
+  const items = pool.map(r => { const wt = w[r.rarity] || w.common; total += wt; return { r, wt }; });
+  let roll = Math.random() * total;
+  for (const it of items) { roll -= it.wt; if (roll <= 0) return it.r; }
+  return items[items.length - 1].r;
+}
+function grantRelic(g, tier) {
   const available = RELICS.filter(r => !g.relics.find(gr => gr.id === r.id));
   if (available.length === 0) return;
-  const relic = available[Math.floor(Math.random() * available.length)];
+  const relic = pickRelicByTier(available, tier);
   g.relics.push({ ...relic });
   applyRelic(relic);
   // P2-1: Achievement tracking for relic acquisition
