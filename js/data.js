@@ -546,6 +546,14 @@ const CARD_POOL = [
   { id: 'priest_epic_divine_wrath', name: '神圣之怒', cost: 4, type: 'spell', art: '⚡', text: '造成6点伤害，你恢复6点生命', effect: 'deal_6_heal_6', rarity: 'epic'},
   { id: 'priest_epic_mass_dispel', name: '群体驱散', cost: 3, type: 'spell', art: '✨', text: '驱散敌方英雄与所有敌方随从身上的增益减益', effect: 'mass_dispel', rarity: 'rare'},
   { id: 'priest_epic_heal_burst', name: '圣愈爆发', cost: 2, type: 'spell', art: '💚', text: '恢复8点生命，抽1张牌', effect: 'heal_8_draw_1', rarity: 'rare'},
+
+  // --- Rogue Combo / Stealth (Iter 30) ---
+  { id: 'ro_epic_quick_poison', name: '淬毒连击', cost: 1, type: 'spell', art: '🗡️', text: '造成3点伤害。连锁（本回合第2张）：额外造成3点伤害', effect: 'deal_3', chain: 2, chainEffect: 'deal_3', rarity: 'rare'},
+  { id: 'ro_epic_shadow_chain', name: '暗影连环', cost: 3, type: 'spell', art: '⛓️', text: '造成4点伤害。连锁（本回合第2张）：额外抽2张牌', effect: 'deal_4', chain: 2, chainEffect: 'draw_2', rarity: 'epic'},
+  { id: 'ro_epic_poison_storm', name: '毒刃风暴', cost: 4, type: 'spell', art: '💨', text: '对所有敌方随从造成3点伤害。连锁（本回合第3张）：额外造成3点伤害', effect: 'deal_3_all', chain: 3, chainEffect: 'deal_3_all', rarity: 'epic'},
+  { id: 'ro_epic_ghost_step', name: '幽灵步法', cost: 2, type: 'spell', art: '👻', text: '获得4点护甲。连锁（本回合第2张）：额外抽1张牌', effect: 'gain_armor_4', chain: 2, chainEffect: 'draw_1', rarity: 'rare'},
+  { id: 'ro_epic_lethal_potion', name: '致命药剂', cost: 2, type: 'spell', art: '🧪', text: '使敌人中毒5层。连锁（本回合第2张）：额外中毒3层', effect: 'poison_face_5', chain: 2, chainEffect: 'poison_3', rarity: 'epic'},
+  { id: 'ro_epic_shadow_assassin', name: '影袭大师', cost: 5, type: 'minion', attack: 5, hp: 5, art: '🗡️', text: '潜行·战吼：抽2张牌', stealth: true, battlecry: 'draw_2', rarity: 'legendary'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -646,7 +654,13 @@ const CLASSES = {
     cardPool: ['backstab','sin_strike','eviscerate','fan_knives','sap','poison_blade','stealth_knife','sprint','combo_strike','shadow_step','bribery','master_poisoner','rogue_legend','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_knight','echo_dagger','chain_fire','ro_shiv','ro_poison_bite','ro_shadow_strike','ro_blade_flurry','ro_ambush','ro_sprint_2','ro_stealth_ally','ro_assassin','ro_poison_master','ro_combo_master','ro_bounty_hunter','ro_shadow_master','ro_poison_knife','ro_dagger_dancer','ro_cutthroat','ro_thief',
     'ro_cold_blood','ro_sinister_strike','ro_evasion','ro_master_of_disguise','ro_assassinate_2','ro_perdition','ro_vanish','ro_legend_2',
     'ro_backstab','ro_sap',
-      'ro_epic_toxic','ro_epic_shadowy','epic_twilight_dragon','epic_void_giant'],
+      'ro_epic_toxic','ro_epic_shadowy','epic_twilight_dragon','epic_void_giant',
+    'ro_epic_quick_poison',
+    'ro_epic_shadow_chain',
+    'ro_epic_poison_storm',
+    'ro_epic_ghost_step',
+    'ro_epic_lethal_potion',
+    'ro_epic_shadow_assassin' ],
     signature: 'double_battlecry',
   },
   druid: {

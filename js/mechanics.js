@@ -270,6 +270,15 @@ function checkChainTrigger(card, player, opponent) {
       opponent.minions.forEach(m => dealDamage(m, 2, player));
       dealDamage(opponent, 2, player);
       break;
+    case 'deal_3_all':
+      opponent.minions.filter(x => !x.dead).forEach(m => dealDamage(m, 3, player));
+      break;
+    case 'draw_2':
+      drawCard(player, true); drawCard(player, true);
+      break;
+    case 'poison_3':
+      if (typeof applyStatus === 'function') applyStatus(opponent, 'poison', 3);
+      break;
     default:
       break;
   }
