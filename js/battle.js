@@ -499,6 +499,8 @@ function startEnemyTurn() {
 
   resetChain();
   G.enemy.intent = '敌方回合';
+  // 第28轮：Boss 转阶段检查（阶段切换 + 每回合阶段技能）
+  if (G.enemy && G.enemy.isBoss && G.enemy.phases) checkBossPhase(G.enemy);
   // 第15轮：敌方回合开始结算状态 + 敏捷护甲
   if (typeof tickStatuses === 'function') tickStatuses(G.enemy);
   if (typeof hasStatus === 'function' && hasStatus(G.enemy, 'agility')) {
@@ -1652,6 +1654,85 @@ function applyLifesteal(source, dmg) {
   if (healed > 0) {
     floatText(healer === G.player ? 'player-portrait' : 'enemy-portrait', '+' + healed, 'heal');
     addBattleLog(`${source.name || '随从'} 吸血，恢复${healed}点生命`, source.isPlayer ? 'player' : 'enemy');
+  }
+}
+
+// ===================== 第28轮：Boss 转阶段机制 =====================
+// Boss 配置 phases: [{ hpRatio: 0.4, onEnter: 'skill', skill: 'skill', every: 3 }, ...]
+// hpRatio 为 HP 比例阈值；首次低于阈值触发 onEnter（转阶段一次性），此后每 every 回合触发 skill（阶段常驻技能）
+function checkBossPhase(b) {
+  if (!b || b.dead || b.enragedPhaseOver) return;
+  b.phaseTurnCount = (b.phaseTurnCount || 0) + 1;
+  const ratio = (b.hp || 0) / (b.maxHp || 1);
+  let active = 0;
+  for (let i = 0; i < b.phases.length; i++) {
+    if (ratio <= b.phases[i].hpRatio) active = i + 1;
+  }
+  // 转阶段（进入更高阶段，一次性触发 onEnter）
+  if (active > (b.activePhase || 0)) {
+    const prev = b.activePhase || 0;
+    b.activePhase = active;
+    for (let p = prev; p < active; p++) {
+      const ph = b.phases[p];
+      addBattleLog(`🔮 ${b.name} 进入第${p + 1}阶段！`, 'enemy');
+      if (ph.onEnter) applyBossPhaseSkill(b, ph.onEnter);
+    }
+  }
+  // 当前阶段常驻技能（每 every 回合触发）
+  const cur = b.activePhase ? b.phases[b.activePhase - 1] : null;
+  if (cur && cur.skill && cur.every) {
+    b.phaseTick = (b.phaseTick || 0) + 1;
+    if (b.phaseTick % cur.every === 0) applyBossPhaseSkill(b, cur.skill);
+  }
+}
+
+function applyBossPhaseSkill(b, skill) {
+  if (!skill || b.dead) return;
+  switch (skill) {
+    case 'summon': {
+      let n = 0;
+      for (let i = 0; i < 2 && b.minions.length < 7; i++) {
+        b.minions.push(createMinion({ id: 'bps_' + uid(), name: b.name + '的爪牙', cost: 0, type: 'minion', attack: 3, hp: 3, art: '👾', text: '' }, false));
+        n++;
+      }
+      if (n) addBattleLog(`${b.name} 召唤了${n}个爪牙！`, 'enemy');
+      break;
+    }
+    case 'buff': {
+      b.minions.forEach(m => { if (!m.dead) { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; } });
+      addBattleLog(`${b.name} 使随从获得+2/+2`, 'enemy');
+      break;
+    }
+    case 'clear_armor': {
+      const lost = G.player.armor || 0;
+      G.player.armor = 0;
+      addBattleLog(`${b.name} 撕裂了你的护甲（${lost}点）！`, 'enemy');
+      break;
+    }
+    case 'aoe': {
+      dealDamage(G.player, 3, b);
+      G.player.minions.forEach(m => dealDamage(m, 3, b));
+      addBattleLog(`${b.name} 发动裂境冲击，你方全体受到3点伤害`, 'enemy');
+      break;
+    }
+    case 'heal': {
+      const heal = Math.min(b.maxHp, b.hp + 10) - b.hp;
+      b.hp += heal;
+      floatText('enemy-portrait', '+' + heal, 'heal');
+      addBattleLog(`${b.name} 汲取虚空能量恢复${heal}点生命`, 'enemy');
+      break;
+    }
+    case 'weaken': {
+      if (typeof applyStatus === 'function') applyStatus(G.player, 'weak', 2);
+      addBattleLog(`${b.name} 对你施加了2层虚弱`, 'enemy');
+      break;
+    }
+    case 'mana_burn': {
+      G.player.overload = (G.player.overload || 0) + 1;
+      addBattleLog(`${b.name} 扰乱魔力，你下回合过载1`, 'enemy');
+      break;
+    }
+    default: break;
   }
 }
 
