@@ -1460,6 +1460,10 @@ function executeSpell(effect, player, enemy, card, target) {
       player.hp = Math.min(player.maxHp, player.hp + 3);
       addBattleLog(`${caster}圣光普照：对敌方随从造成${3 + sp}点伤害，恢复友方3点生命`, logType);
       break;
+    case 'deal_8':
+      dealDamage(enemy, 8 + sp, player);
+      addBattleLog(`${caster}造成${8 + sp}点伤害`, logType);
+      break;
     case 'gain_armor_8_draw_1':
       player.armor += 8;
       drawCard(player, true);

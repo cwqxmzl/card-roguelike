@@ -562,6 +562,14 @@ const CARD_POOL = [
   { id: 'pal_epic_holy_radiance', name: '圣光普照', cost: 5, type: 'spell', art: '☀️', text: '对所有敌方随从造成3点伤害，恢复所有友方角色3点生命', effect: 'holy_nova_3', rarity: 'epic'},
   { id: 'pal_epic_blessed_guard', name: '崇高守卫', cost: 6, type: 'spell', art: '🏰', text: '获得8点护甲并抽1张牌', effect: 'gain_armor_8_draw_1', rarity: 'epic'},
   { id: 'pal_epic_light_avatar', name: '圣光化身', cost: 8, type: 'minion', attack: 7, hp: 7, art: '👼', text: '圣盾·嘲讽·战吼：使所有友方随从+2/+2', divineShield: true, taunt: true, battlecry: 'buff_all_2_2', rarity: 'legendary'},
+
+  // --- Shaman Overload / Totem (Iter 32) ---
+  { id: 'sa_epic_lightning_overload', name: '雷霆过载', cost: 3, type: 'spell', art: '⚡', text: '造成8点伤害，过载2', effect: 'deal_8', overload: 2, rarity: 'rare'},
+  { id: 'sa_epic_mana_tide', name: '法力潮汐', cost: 3, type: 'spell', art: '🌊', text: '抽2张牌', effect: 'draw_2', rarity: 'rare'},
+  { id: 'sa_epic_storm_blast', name: '风暴轰炸', cost: 5, type: 'spell', art: '⛈️', text: '对所有敌人造成4点伤害，过载1', effect: 'deal_4_all', overload: 1, rarity: 'epic'},
+  { id: 'sa_epic_earth_giant', name: '大地巨人', cost: 6, type: 'minion', attack: 8, hp: 8, art: '🗿', text: '嘲讽', taunt: true, rarity: 'epic'},
+  { id: 'sa_epic_totem_warchief', name: '图腾酋长', cost: 7, type: 'minion', attack: 5, hp: 6, art: '🛕', text: '战吼：使所有友方随从+2/+2', battlecry: 'buff_all_2_2', rarity: 'epic'},
+  { id: 'sa_epic_ancestral_giant', name: '先祖化身', cost: 8, type: 'minion', attack: 7, hp: 7, art: '🌌', text: '风怒·嘲讽', windfury: true, taunt: true, rarity: 'legendary'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -700,7 +708,13 @@ const CLASSES = {
     'sha_rockbiter','sha_healing_rain','sha_totem_carver','sha_elem_destruction','sha_break_armor','sha_confusion',
       'epic_twilight_dragon','epic_void_giant',
     'sa_epic_elemental_wrath',
-    'sa_epic_totem_master'],
+    'sa_epic_totem_master',
+    'sa_epic_lightning_overload',
+    'sa_epic_mana_tide',
+    'sa_epic_storm_blast',
+    'sa_epic_earth_giant',
+    'sa_epic_totem_warchief',
+    'sa_epic_ancestral_giant'],
     signature: 'spell_power_1',
   },
 }
