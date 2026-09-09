@@ -260,6 +260,12 @@ function checkChainTrigger(card, player, opponent) {
     case 'gain_armor_2':
       player.armor += 2;
       break;
+    case 'deal_5':
+      dealDamage(opponent, 5, player);
+      break;
+    case 'gain_armor_8':
+      player.armor += 8;
+      break;
     case 'deal_2_all':
       opponent.minions.forEach(m => dealDamage(m, 2, player));
       dealDamage(opponent, 2, player);

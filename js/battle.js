@@ -808,6 +808,11 @@ function playCard(card, index) {
   const effCost = getCardCost(card);
   G.player.mana -= effCost;
   G.battle.firstCardPlayed = true;
+  // 第27轮：费用返还（打出后返还法力）
+  if (card.refund) {
+    G.player.mana = Math.min(G.player.maxMana, G.player.mana + card.refund);
+    addBattleLog(`${card.name} 返还了${card.refund}点法力`, 'player');
+  }
   // Relic: echo_relic (first card each turn returns to hand)
   if (hasRelic('echo_relic') && card.type === 'spell' && !card.echoCopy) {
     const echoCopy = { ...card, uid: uid(), echoCopy: true, echo: true };
@@ -1402,6 +1407,9 @@ function executeSpell(effect, player, enemy, card, target) {
       break;
     case 'deal_5':
       dealDamage(target || enemy, 5 + sp, player);
+      break;
+    case 'deal_armor':
+      dealDamage(enemy, (player.armor || 0), player);
       break;
     case 'holy_fire':
       dealDamage(target || enemy, 6 + sp, player);

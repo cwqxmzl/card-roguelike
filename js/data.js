@@ -522,6 +522,16 @@ const CARD_POOL = [
   { id: 'pri_epic_shadow_form', name: '暗影形态', cost: 2, type: 'spell', art: '🌑', text: '使敌人获得3层虚弱，抽1张牌', effect: 'weak_face_3_draw', rarity: 'rare'},
   { id: 'sa_epic_elemental_wrath', name: '元素之怒', cost: 5, type: 'spell', art: '🌪️', text: '对所有敌方随从造成3点伤害并冻结', effect: 'blizzard', rarity: 'epic'},
   { id: 'sa_epic_totem_master', name: '图腾大师', cost: 4, type: 'minion', attack: 3, hp: 6, art: '🛕', text: '战吼：召唤两个2/2图腾', battlecry: 'summon_two_2_2', rarity: 'epic'},
+
+  // --- Finisher Cards (Iter 27) ---
+  { id: 'war_epic_execution_2', name: '处决·终', cost: 3, type: 'spell', art: '⚔️', text: '造成5点伤害。连锁（本回合第2张）：额外造成5点伤害', effect: 'deal_5', chain: 2, chainEffect: 'deal_5', rarity: 'epic'},
+  { id: 'war_epic_shield_slam', name: '盾牌猛击', cost: 1, type: 'spell', art: '🛡️', text: '造成伤害等于你的护甲值', effect: 'deal_armor', rarity: 'epic'},
+  { id: 'war_epic_warhorn', name: '战争号角', cost: 5, type: 'spell', art: '📯', text: '获得8点护甲。连锁（本回合第3张）：额外获得8点护甲', effect: 'gain_armor_8', chain: 3, chainEffect: 'gain_armor_8', rarity: 'epic'},
+  { id: 'war_epic_juggernaut', name: '战争机器', cost: 8, type: 'minion', attack: 8, hp: 8, art: '🤖', text: '嘲讽·战吼：对所有敌方随从造成3点伤害', taunt: true, battlecry: 'deal_3_all', rarity: 'legendary'},
+  { id: 'dru_epic_overgrowth', name: '自然生长', cost: 1, type: 'spell', art: '🌱', text: '获得2点护甲，费用返还', effect: 'gain_armor_2', refund: 1, rarity: 'rare'},
+  { id: 'dru_epic_wildfire', name: '野火燎原', cost: 3, type: 'spell', art: '🔥', text: '造成3点伤害。连锁（本回合第2张）：额外造成3点伤害', effect: 'deal_3', chain: 2, chainEffect: 'deal_3', rarity: 'epic'},
+  { id: 'dru_epic_ironbark_2', name: '铁木壁垒', cost: 4, type: 'spell', art: '🌳', text: '获得8点护甲，费用返还', effect: 'gain_armor_8', refund: 1, rarity: 'rare'},
+  { id: 'dru_epic_ancient_engine', name: '古树引擎', cost: 6, type: 'minion', attack: 5, hp: 7, art: '🌳', text: '野兽·嘲讽·战吼：抽1张牌', race: 'beast', taunt: true, battlecry: 'draw_1', rarity: 'epic'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -546,7 +556,11 @@ const CLASSES = {
     starterDeck: ['guardsman','stone_golem','orc_grunt','berserker','wolf','war_hammer','rusty_knife','healer','shield_bearer','ogre','armor_smith','war_iron_skin','war_pierce','battle_axe','frostwolf_grunt','war_shield_maiden','war_cleave','war_berserker_2','war_axe_2','war_shield_bash','war_ironbark','war_legion','war_iron_golem','war_colossus','chain_fire','war_rage_charge'],
     cardPool: ['war_hammer','flame_sword','doom_blade','shield_bearer','ogre','war_golem','berserker','orc_grunt','guardsman','stone_golem','undead_knight','cultist','iron_bastion','frostwolf_grunt','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','mithril_barrier','armor_smith','inspiring_leader','abyss_lord','titan_earthguard','war_pierce','war_armor_up','war_shield_maiden','war_cleave','war_iron_skin','war_berserker_2','war_shield_bash','war_ironbark','war_battle_cry','war_axe_2','war_legion','war_iron_golem','war_rage_charge','war_armored_soldier','war_colossus','evo_knight','evo_guardian','echo_shield','chain_guard','chain_fire',
     'war_shield_block','war_battle_rage','war_frothing','war_grommash',
-      'war_epic_bastion','war_epic_execution','epic_twilight_dragon','epic_void_giant'],
+      'war_epic_bastion','war_epic_execution','epic_twilight_dragon','epic_void_giant',
+    'war_epic_execution_2',
+    'war_epic_shield_slam',
+    'war_epic_warhorn',
+    'war_epic_juggernaut'],
     signature: 'armor_start',
   },
   hunter: {
@@ -616,7 +630,11 @@ const CLASSES = {
     starterDeck: ['guardsman','stone_golem','wolf','archer','healer','claw','bite','wild_growth','ironbark','mark_wild','moonfire','treant_call','nourish','ancient_guard','forest_king','starfall','pack_alpha','beast_king','tundra_rhino','evo_beast_tamer','reb_serpent','chain_fire','magic_missile','mana_wraith','torch_bearer','battle_axe'],
     cardPool: ['claw','bite','wild_growth','ironbark','mark_wild','moonfire','nourish','treant_call','pack_alpha','ancient_guard','forest_king','starfall','wolf','tundra_rhino','beast_king','hun_pack_alpha','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','evo_beast_tamer','reb_serpent','chain_fire','dr_moonfire_2','dr_wild_power','dr_nature_force','dr_starfire_2','dr_jungle_ward','dr_bark_skin','dr_swipe','dr_vine','dr_bear_form','dr_guardian_2','dr_apprentice','dr_seer','dr_ancien','dr_elder','dr_wolf_rider','dr_root',
     'dru_growth','dru_savage_roar','dru_swift','dru_force_nature','dru_ancient_guardian','dru_cenarius',
-      'dru_epic_wildswarm','dru_epic_savage','epic_twilight_dragon','epic_void_giant'],
+      'dru_epic_wildswarm','dru_epic_savage','epic_twilight_dragon','epic_void_giant',
+    'dru_epic_overgrowth',
+    'dru_epic_wildfire',
+    'dru_epic_ironbark_2',
+    'dru_epic_ancient_engine'],
     signature: 'beast_master',
   },
   shaman: {
