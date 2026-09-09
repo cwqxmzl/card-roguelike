@@ -554,6 +554,14 @@ const CARD_POOL = [
   { id: 'ro_epic_ghost_step', name: '幽灵步法', cost: 2, type: 'spell', art: '👻', text: '获得4点护甲。连锁（本回合第2张）：额外抽1张牌', effect: 'gain_armor_4', chain: 2, chainEffect: 'draw_1', rarity: 'rare'},
   { id: 'ro_epic_lethal_potion', name: '致命药剂', cost: 2, type: 'spell', art: '🧪', text: '使敌人中毒5层。连锁（本回合第2张）：额外中毒3层', effect: 'poison_face_5', chain: 2, chainEffect: 'poison_3', rarity: 'epic'},
   { id: 'ro_epic_shadow_assassin', name: '影袭大师', cost: 5, type: 'minion', attack: 5, hp: 5, art: '🗡️', text: '潜行·战吼：抽2张牌', stealth: true, battlecry: 'draw_2', rarity: 'legendary'},
+
+  // --- Paladin Holy / Buff Aura (Iter 31) ---
+  { id: 'pal_epic_holy_veil', name: '圣光结界', cost: 3, type: 'spell', art: '🛡️', text: '使所有友方随从获得+1/+1', effect: 'buff_all_1_1', rarity: 'rare'},
+  { id: 'pal_epic_divine_armor', name: '神圣护甲', cost: 2, type: 'spell', art: '✨', text: '获得4点护甲', effect: 'gain_armor_4', rarity: 'rare'},
+  { id: 'pal_epic_light_judgment', name: '圣光审判', cost: 4, type: 'spell', art: '⚖️', text: '造成6点伤害，恢复6点生命', effect: 'deal_6_heal_6', rarity: 'epic'},
+  { id: 'pal_epic_holy_radiance', name: '圣光普照', cost: 5, type: 'spell', art: '☀️', text: '对所有敌方随从造成3点伤害，恢复所有友方角色3点生命', effect: 'holy_nova_3', rarity: 'epic'},
+  { id: 'pal_epic_blessed_guard', name: '崇高守卫', cost: 6, type: 'spell', art: '🏰', text: '获得8点护甲并抽1张牌', effect: 'gain_armor_8_draw_1', rarity: 'epic'},
+  { id: 'pal_epic_light_avatar', name: '圣光化身', cost: 8, type: 'minion', attack: 7, hp: 7, art: '👼', text: '圣盾·嘲讽·战吼：使所有友方随从+2/+2', divineShield: true, taunt: true, battlecry: 'buff_all_2_2', rarity: 'legendary'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -607,7 +615,13 @@ const CLASSES = {
     cardPool: ['paladin_knight','healer','holy_light','consecration','shield_bearer','guardsman','equality','circle_healing','stone_golem','archer','card_drawer','sylvanas','lightbringer','guardian_of_kings','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','inspiring_leader','abyss_lord','titan_earthguard','pal_blessing','pal_squire','pal_divine_shield','pal_knight_2','pal_heal_prayer','pal_consecration_2','pal_sword','pal_aurora','pal_sun_guard','pal_tirion','pal_bless_army','pal_shieldbearer_2','pal_hammer_wrath','pal_champion','pal_guardian_2','evo_priest','reb_phoenix','disc_paladin','echo_shield','evo_guardian',
     'pal_might','pal_zealot','pal_guardian_3','pal_light_2','pal_righteousness','pal_champion_2',
     'pal_consecrate','pal_holy_guardian',
-      'pal_epic_light','pal_epic_crusade','epic_twilight_dragon','epic_void_giant'],
+      'pal_epic_light','pal_epic_crusade','epic_twilight_dragon','epic_void_giant',
+    'pal_epic_holy_veil',
+    'pal_epic_divine_armor',
+    'pal_epic_light_judgment',
+    'pal_epic_holy_radiance',
+    'pal_epic_blessed_guard',
+    'pal_epic_light_avatar'],
     signature: 'divine_protection',
   },
   priest: {

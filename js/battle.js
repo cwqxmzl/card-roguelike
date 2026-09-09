@@ -1454,6 +1454,17 @@ function executeSpell(effect, player, enemy, card, target) {
       drawCard(player, true);
       addBattleLog(`${caster}恢复8点生命并抽一张牌`, logType);
       break;
+    case 'holy_nova_3':
+      enemy.minions.forEach(m => dealDamage(m, 3 + sp, player));
+      player.minions.forEach(m => { m.currentHp = Math.min(m.maxHp, m.currentHp + 3); });
+      player.hp = Math.min(player.maxHp, player.hp + 3);
+      addBattleLog(`${caster}圣光普照：对敌方随从造成${3 + sp}点伤害，恢复友方3点生命`, logType);
+      break;
+    case 'gain_armor_8_draw_1':
+      player.armor += 8;
+      drawCard(player, true);
+      addBattleLog(`${caster}获得8点护甲并抽1张牌`, logType);
+      break;
     case 'draw_3':
       drawCard(player, true); drawCard(player, true); drawCard(player, true);
       addBattleLog(`${caster}抽了三张牌`, logType);
