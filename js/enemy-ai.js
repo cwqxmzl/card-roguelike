@@ -245,6 +245,12 @@ function drawCard(entity, showLog) {
     return;
   }
   const card = entity.drawPile.pop();
+  if (entity === G.player && card.drawnHp) {
+    G.player.hp = Math.max(0, G.player.hp - card.drawnHp);
+    floatText('player-portrait', '-' + card.drawnHp, 'damage');
+    addBattleLog(`诅咒发作：${card.name}使你损失${card.drawnHp}点生命`, 'system');
+    if (G.player.hp <= 0) { onBattleLost(); return; }
+  }
   if (entity.hand.length >= GAME_CONFIG.battle.maxHandSize) {
     entity.discardPile.push(card);
     if (showLog) {

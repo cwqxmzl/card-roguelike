@@ -1167,6 +1167,12 @@ function executeSpell(effect, player, enemy, card, target) {
     }
   }
   switch (effect) {
+    case 'curse_mire': {
+      const cd = getCardData('curse_decrepit');
+      if (cd) player.deck.push({ ...cd, uid: uid() });
+      addBattleLog('泥沼诅咒：牌组被加入1张朽木诅咒', 'system');
+      break;
+    }
     case 'arcane_missiles':
       let missileCount = 0;
       for (let i = 0; i < 3 + sp; i++) {

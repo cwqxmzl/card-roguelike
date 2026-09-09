@@ -533,7 +533,7 @@ function confirmSurrender() {
   if (G.dailyChallenge) { saveDailyResult('defeat', getDailyScore()); }
   checkAchievements();
   const meta = getMetaProgress();
-  document.getElementById('gameover-info').innerHTML = `你投降了，结束了本次冒险。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || shards} 裂境碎晶</span>`;
+  document.getElementById('gameover-info').innerHTML = `你投降了，结束了本次冒险。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || shards} 裂境碎晶</span>${challengeModDetailHtml()}`;
   playSfx('defeat');
   showOverlay('overlay-gameover');
 }
@@ -588,7 +588,7 @@ function onBattleLost() {
 
   setTimeout(() => {
     const meta = getMetaProgress();
-    document.getElementById('gameover-info').innerHTML = `你在第${G.act + 1}幕的战斗中倒下，坚持了${Math.ceil(G.battle.turn / 2)}个回合。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 2} 裂境碎晶</span>`;
+    document.getElementById('gameover-info').innerHTML = `你在第${G.act + 1}幕的战斗中倒下，坚持了${Math.ceil(G.battle.turn / 2)}个回合。<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 2} 裂境碎晶</span>${challengeModDetailHtml()}`;
     playSfx('defeat');
     showOverlay('overlay-gameover');
   }, 800);

@@ -215,7 +215,7 @@ function completeNode() {
         saveAchievements(data);
       });
       checkAchievements();
-      document.getElementById('victory-info').innerHTML = `你征服了暗影裂境！<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 8} 裂境碎晶</span>`;
+      document.getElementById('victory-info').innerHTML = `你征服了暗影裂境！<br><span style="color:var(--gold);">获得 💎 ${meta.lastShards || 8} 裂境碎晶</span>${challengeModDetailHtml()}`;
       playSfx('victory');
       showOverlay('overlay-victory');
     } else {

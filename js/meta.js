@@ -108,10 +108,10 @@ function applyDifficulty() {
     G.gold = Math.max(0, G.gold - 30);
   }
   if (currentChallenge.includes('challenge_cursed')) {
-    for (let i = 0; i < 2; i++) {
-      const cd = getCardData('curse_decrepit');
+    ['curse_decrepit', 'curse_wound'].forEach(cid => {
+      const cd = getCardData(cid);
       if (cd) G.player.deck.push({ ...cd, uid: uid() });
-    }
+    });
   }
   if (currentChallenge.includes('challenge_feeble')) {
     G.player.maxMana = Math.max(1, (G.player.maxMana || 3) - 1);
@@ -381,6 +381,22 @@ function continueRun() {
   G.player.spellPower = hasRelic('spell_power') ? 1 : 0;
   showScreen('map');
   renderMap();
+}
+
+function challengeModDetailHtml() {
+  if (!G || !G.challengeMods || !G.challengeMods.length) return '';
+  let bonus = 0;
+  const parts = [];
+  G.challengeMods.forEach(id => {
+    const mod = CHALLENGE_MODS.find(x => x.id === id);
+    if (mod) { bonus += mod.shardBonus; parts.push(mod.name + ' +' + mod.shardBonus.toFixed(1)); }
+  });
+  let endlessNote = '';
+  if (G.mode === 'endless') {
+    const extra = Math.min(1.0, G.act * 0.1);
+    if (extra > 0) { bonus += extra; parts.push('无尽深层 +' + extra.toFixed(1)); endlessNote = '（每幕+0.1，上限+1.0）'; }
+  }
+  return `<br><span style="color:#8ab4ff;font-size:12px;">词条倍率：${parts.join(' · ')} = +${bonus.toFixed(1)}，总倍率 ×${(1 + bonus).toFixed(2)}${endlessNote}</span>`;
 }
 
 function saveMetaProgress(result) {

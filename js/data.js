@@ -581,6 +581,9 @@ const CARD_POOL = [
 
   // --- Curse card (Iter 35) ---
   { id: 'curse_decrepit', name: '朽木诅咒', cost: 2, type: 'spell', art: '💀', text: '无效果。携带时占据手牌与抽牌空间', effect: null, rarity: 'common'},
+
+  { id: 'curse_wound', name: '伤痛诅咒', cost: 0, type: 'spell', art: '🩸', text: '抽到时受到2点伤害。占据手牌空间', effect: null, drawnHp: 2, rarity: 'common'},
+  { id: 'curse_mire', name: '泥沼诅咒', cost: 2, type: 'spell', art: '🟤', text: '打出时：向牌组加入1张朽木诅咒', effect: 'curse_mire', rarity: 'common'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
