@@ -376,6 +376,8 @@ function saveMetaProgress(result) {
       const d = DIFFICULTY_SETTINGS[G.difficulty];
       if (d) shards = Math.floor(shards * d.shardMult);
     }
+    // 每日挑战碎晶翻倍（第33轮）
+    if (G && G.dailyChallenge) shards = Math.floor(shards * 2);
     meta.shards = (meta.shards || 0) + shards;
     meta.lastShards = shards;
     localStorage.setItem(META_KEY, JSON.stringify(meta));

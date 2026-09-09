@@ -3,8 +3,17 @@
    Classic script loaded via <script src>; shares global scope with siblings. */
 
 // ===================== SHOP =====================
+function shopMetaMult() {
+  try {
+    const up = getMetaProgress().upgrades || {};
+    const lv = up.shop_discount || 0;
+    if (lv <= 0) return 1;
+    return Math.max(0.5, 1 - lv * 0.03);
+  } catch (e) { return 1; }
+}
+
 function openShop() {
-  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: GAME_CONFIG.shop.discoverCost, discoverSold: false, rerollCount: 0, removeCost: GAME_CONFIG.shop.removeCardCost, removeSold: false };
+  G.shopInventory = { cards: [], relics: [], healCost: 0, discoverCost: GAME_CONFIG.shop.discoverCost, discoverSold: false, rerollCount: 0, removeCost: Math.floor(GAME_CONFIG.shop.removeCardCost * shopMetaMult()), removeSold: false };
   
   // Generate shop cards (5)
   const pool = CARD_POOL.filter(c => {
@@ -17,7 +26,7 @@ function openShop() {
     G.shopInventory.cards.push({
       ...card,
       uid: uid(),
-      price: Math.floor((GAME_CONFIG.shop.cardPrices[card.rarity] || 80) * (hasRelic('shop_discount') ? 0.8 : 1)),
+      price: Math.floor((GAME_CONFIG.shop.cardPrices[card.rarity] || 80) * (hasRelic('shop_discount') ? 0.8 : 1) * shopMetaMult()),
       sold: false,
     });
   }
@@ -30,11 +39,11 @@ function openShop() {
     const rIdx = availableRelics.indexOf(relic);
     if (rIdx >= 0) availableRelics.splice(rIdx, 1);
     const base = GAME_CONFIG.shop.relicPriceBase + Math.floor(Math.random() * GAME_CONFIG.shop.relicPriceRange);
-    G.shopInventory.relics.push({ ...relic, price: Math.floor(base * (RELIC_PRICE_MULT[relic.rarity] || 1)), sold: false });
+    G.shopInventory.relics.push({ ...relic, price: Math.floor(base * (RELIC_PRICE_MULT[relic.rarity] || 1) * shopMetaMult()), sold: false });
   }
   
   // Heal option
-  G.shopInventory.healCost = GAME_CONFIG.shop.healCost;
+  G.shopInventory.healCost = Math.floor(GAME_CONFIG.shop.healCost * shopMetaMult());
   
   renderShop();
   showOverlay('overlay-shop');

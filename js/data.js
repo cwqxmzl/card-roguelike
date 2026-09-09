@@ -832,9 +832,9 @@ const RELICS = [
 const META_UPGRADES = [{ id: 'max_hp', name: '生命强化', icon: '❤️', desc: '每级初始最大生命值+4', maxLevel: 25, costs: [3,6,9,12,15,18,21,24,27,30,33,36,39,42,45,48,51,54,57,60,63,66,69,72,75] },
   { id: 'start_gold', name: '初始金币', icon: '💰', desc: '每级初始金币+12', maxLevel: 25, costs: [4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100] },
   { id: 'start_armor', name: '初始护甲', icon: '🛡️', desc: '每级每场战斗开始+2护甲', maxLevel: 25, costs: [5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101] },
-  { id: 'first_draw', name: '先手抽牌', icon: '🃏', desc: '每级第一回合多抽1张牌（受手牌上限约束）', maxLevel: 5, costs: [8,14,20,26,32] },
+  { id: 'first_draw', name: '先手抽牌', icon: '🃏', desc: '每级第一回合多抽1张牌（受手牌上限约束）', maxLevel: 10, costs: [8,14,20,26,32,38,44,50,56,62] },
   { id: 'start_relic', name: '初始遗物', icon: '🎁', desc: '每级冒险开始时获得1件随机遗物的概率+20%', maxLevel: 5, costs: [10,16,22,28,34] },
-  { id: 'first_mana', name: '法力涌动', icon: '🔷', desc: '每级第一回合+1法力', maxLevel: 5, costs: [8,14,20,26,32] },
+  { id: 'first_mana', name: '法力涌动', icon: '🔷', desc: '每级第一回合+1法力', maxLevel: 10, costs: [8,14,20,26,32,38,44,50,56,62] },
   { id: 'hero_power_discount', name: '英雄觉醒', icon: '⚡', desc: '每级英雄技能费用-1（最低1费）', maxLevel: 5, costs: [12,18,24,30,36] },
   { id: 'rare_luck', name: '幸运之触', icon: '🍀', desc: '每级稀有奖励概率+6%', maxLevel: 25, costs: [5,9,13,17,21,25,29,33,37,41,45,49,53,57,61,65,69,73,77,81,85,89,93,97,101] },
   { id: 'card_upgrade', name: '卡牌强化', icon: '⚒️', desc: '每级冒险开始时多升级1张起始牌', maxLevel: 25, costs: [10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130] },
@@ -846,6 +846,7 @@ const META_UPGRADES = [{ id: 'max_hp', name: '生命强化', icon: '❤️', des
   { id: 'card_refund', name: '卡牌回收', icon: '♻️', desc: '每级移除卡牌时返还2金币', maxLevel: 10, costs: [10,16,22,28,34,40,46,52,58,64] },
   { id: 'boss_reward', name: '战利品大师', icon: '👑', desc: '每级首领奖励多1张可选卡牌', maxLevel: 5, costs: [20,30,40,50,60] },
   { id: 'spell_cost_down', name: '法术精通', icon: '📜', desc: '每级法术牌费用-1（最低1费）', maxLevel: 5, costs: [16,26,36,46,56] },
+  { id: 'shop_discount', name: '商店折扣', icon: '🛒', desc: '每级商店价格-3%（最低半价）', maxLevel: 25, costs: [6,11,16,21,26,31,36,41,46,51,56,61,66,71,76,81,86,91,96,101,106,111,116,121,126] },
 ];
 
 const STARTING_BONUSES = [
