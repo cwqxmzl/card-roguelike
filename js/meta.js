@@ -107,6 +107,16 @@ function applyDifficulty() {
   if (currentChallenge.includes('challenge_poverty')) {
     G.gold = Math.max(0, G.gold - 30);
   }
+  if (currentChallenge.includes('challenge_cursed')) {
+    for (let i = 0; i < 2; i++) {
+      const cd = getCardData('curse_decrepit');
+      if (cd) G.player.deck.push({ ...cd, uid: uid() });
+    }
+  }
+  if (currentChallenge.includes('challenge_feeble')) {
+    G.player.maxMana = Math.max(1, (G.player.maxMana || 3) - 1);
+    G.player.mana = Math.min(G.player.mana || 0, G.player.maxMana);
+  }
   G.player.maxHp = Math.floor(G.player.maxHp * d.hpMult);
   G.player.hp = G.player.maxHp;
   G.gold = Math.max(0, G.gold + d.startGold);
@@ -402,7 +412,9 @@ function saveMetaProgress(result) {
         const mod = CHALLENGE_MODS.find(x => x.id === id);
         return sum + (mod ? mod.shardBonus : 0);
       }, 0);
-      shards = Math.floor(shards * (1 + modBonus));
+      let totalBonus = modBonus;
+      if (G.mode === 'endless') totalBonus += Math.min(1.0, G.act * 0.1);
+      shards = Math.floor(shards * (1 + totalBonus));
     }
     // 每日挑战碎晶翻倍（第33轮）
     if (G && G.dailyChallenge) shards = Math.floor(shards * 2);

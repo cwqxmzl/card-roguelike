@@ -469,6 +469,10 @@ function startEnemyTurn() {
   G.enemy.maxMana = Math.min(GAME_CONFIG.battle.maxMana, G.enemy.maxMana + 1);
   G.enemy.mana = G.enemy.maxMana - (G.enemy.overload || 0);
   G.enemy.overload = 0;
+  if ((G.challengeMods || []).includes('challenge_armored')) {
+    G.enemy.armor += 2;
+    addBattleLog('荆棘之墙：敌人获得2点护甲', 'enemy');
+  }
   // 第15轮：敌人专属被动——回合开始效果
   if (G.enemy.passive === 'heal_turn') {
     const heal = Math.max(1, Math.floor(G.enemy.maxHp * 0.05));

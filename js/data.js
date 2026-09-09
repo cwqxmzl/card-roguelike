@@ -578,6 +578,9 @@ const CARD_POOL = [
   { id: 'neu_epic_storm_avatar', name: '风暴化身', cost: 9, type: 'minion', attack: 7, hp: 7, art: '⛈️', text: '风怒·战吼：对所有敌人造成2点伤害', windfury: true, battlecry: 'deal_2_all', rarity: 'legendary'},
   { id: 'neu_epic_judgment_angel', name: '审判天使', cost: 7, type: 'minion', attack: 5, hp: 8, art: '😇', text: '圣盾·战吼：恢复8点生命', divineShield: true, battlecry: 'heal_8', rarity: 'legendary'},
   { id: 'neu_epic_world_tree', name: '世界之树', cost: 10, type: 'minion', attack: 8, hp: 8, art: '🌳', text: '嘲讽·战吼：召唤两个2/2树人', taunt: true, battlecry: 'summon_two_2_2', rarity: 'legendary'},
+
+  // --- Curse card (Iter 35) ---
+  { id: 'curse_decrepit', name: '朽木诅咒', cost: 2, type: 'spell', art: '💀', text: '无效果。携带时占据手牌与抽牌空间', effect: null, rarity: 'common'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -916,7 +919,10 @@ const CHALLENGE_MODS = [
   { id: 'challenge_anemia', name: '贫血诅咒', icon: '🩹', desc: '初始最大生命-20%', shardBonus: 0.4 },
   { id: 'challenge_poverty', name: '财富诅咒', icon: '💸', desc: '初始金币-30', shardBonus: 0.2 },
   { id: 'challenge_weakness', name: '虚弱之印', icon: '🌀', desc: '每回合法力-1', shardBonus: 0.3 },
-];
+  { id: 'challenge_cursed', name: '诅咒缠身', icon: '💀', desc: '开局牌组加入2张诅咒牌', shardBonus: 0.3 },
+  { id: 'challenge_armored', name: '荆棘之墙', icon: '🛡️', desc: '敌人每回合开始时获得2点护甲', shardBonus: 0.3 },
+  { id: 'challenge_feeble', name: '基础薄弱', icon: '📉', desc: '初始法力上限-1', shardBonus: 0.3 },
+  { id: 'challenge_greed', name: '贪婪诅咒', icon: '💰', desc: '商店所有价格+30%', shardBonus: 0.2 },];
 
 const STARTING_BONUSES = [
   { id: 'gold', name: '赏金令', icon: '💰', desc: '开始时获得30金币' },

@@ -4,6 +4,7 @@
 
 // ===================== SHOP =====================
 function shopMetaMult() {
+  if ((G && G.challengeMods && G.challengeMods.includes('challenge_greed'))) return 1.3;
   try {
     const up = getMetaProgress().upgrades || {};
     const lv = up.shop_discount || 0;
