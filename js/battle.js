@@ -1082,6 +1082,12 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
         addBattleLog(`${owner === G.player ? '你' : '敌方'}召唤了一个2/2随从`, owner === G.player ? 'player' : 'enemy');
       }
       break;
+    case 'summon_two_2_2':
+      for (let _i = 0; _i < 2 && owner.minions.length < 7; _i++) {
+        owner.minions.push(createMinion({ id: 'bc_22_' + uid(), name: '召唤物', cost: 0, type: 'minion', attack: 2, hp: 2, art: '✨', text: '' }, owner === G.player));
+      }
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}召唤了两个2/2随从`, owner === G.player ? 'player' : 'enemy');
+      break;
     case 'buff_beasts_2_2':
       owner.minions.filter(m => !m.dead && m.race === 'beast').forEach(m => { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; });
       addBattleLog(`${owner === G.player ? '你的' : '敌方的'}野兽随从获得+2/+2`, owner === G.player ? 'player' : 'enemy');
