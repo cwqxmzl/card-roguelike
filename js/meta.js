@@ -60,6 +60,18 @@ function skipTutorial() {
 
 // ===================== DIFFICULTY SYSTEM =====================
 let currentDifficulty = 'normal';
+let currentChallenge = [];
+
+function toggleChallenge(modId) {
+  const idx = currentChallenge.indexOf(modId);
+  if (idx >= 0) currentChallenge.splice(idx, 1);
+  else currentChallenge.push(modId);
+  document.querySelectorAll('.challenge-btn').forEach(btn => {
+    btn.classList.toggle('active', currentChallenge.includes(btn.dataset.challenge));
+  });
+  playSfx('click');
+}
+
 let currentMode = 'standard';
 
 function selectMode(mode) {
@@ -87,6 +99,14 @@ function applyDifficulty() {
   const d = DIFFICULTY_SETTINGS[currentDifficulty];
   if (!d) return;
   G.difficulty = currentDifficulty;
+  G.challengeMods = currentChallenge.slice();
+  if (currentChallenge.includes('challenge_anemia')) {
+    G.player.maxHp = Math.floor(G.player.maxHp * 0.8);
+    G.player.hp = G.player.maxHp;
+  }
+  if (currentChallenge.includes('challenge_poverty')) {
+    G.gold = Math.max(0, G.gold - 30);
+  }
   G.player.maxHp = Math.floor(G.player.maxHp * d.hpMult);
   G.player.hp = G.player.maxHp;
   G.gold = Math.max(0, G.gold + d.startGold);
@@ -375,6 +395,14 @@ function saveMetaProgress(result) {
     if (G && G.difficulty) {
       const d = DIFFICULTY_SETTINGS[G.difficulty];
       if (d) shards = Math.floor(shards * d.shardMult);
+    }
+    // 挑战词条碎晶倍率（第34轮）
+    if (G && G.challengeMods && G.challengeMods.length) {
+      const modBonus = G.challengeMods.reduce((sum, id) => {
+        const mod = CHALLENGE_MODS.find(x => x.id === id);
+        return sum + (mod ? mod.shardBonus : 0);
+      }, 0);
+      shards = Math.floor(shards * (1 + modBonus));
     }
     // 每日挑战碎晶翻倍（第33轮）
     if (G && G.dailyChallenge) shards = Math.floor(shards * 2);

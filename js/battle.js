@@ -50,13 +50,14 @@ function startBattle(type) {
   if (G.difficulty) {
     const d = DIFFICULTY_SETTINGS[G.difficulty];
     if (d) {
-      G.enemy.maxHp = Math.floor(G.enemy.maxHp * d.enemyHpMult);
+      const mods = (G.challengeMods || []).includes('challenge_wounds') ? 1.15 : 1;
+      G.enemy.maxHp = Math.floor(G.enemy.maxHp * d.enemyHpMult * mods);
       G.enemy.hp = G.enemy.maxHp;
     }
   }
   
   // Build enemy deck
-  const dEnemyAtk = (G.difficulty && DIFFICULTY_SETTINGS[G.difficulty]) ? (DIFFICULTY_SETTINGS[G.difficulty].enemyAtkMult || 1) : 1;
+  const dEnemyAtk = (G.difficulty && DIFFICULTY_SETTINGS[G.difficulty]) ? ((DIFFICULTY_SETTINGS[G.difficulty].enemyAtkMult || 1) * ((G.challengeMods || []).includes('challenge_wounds') ? 1.15 : 1)) : 1;
   enemyData.deck.forEach(id => {
     const data = getCardData(id);
     if (data) {
@@ -155,7 +156,7 @@ function startPlayerTurn() {
   if (G.battle.turn > 1) {
     G.player.maxMana = Math.min(GAME_CONFIG.battle.maxMana + (hasRelic('max_mana_plus') ? 1 : 0), G.player.maxMana + 1);
   }
-  G.player.mana = G.player.maxMana - G.player.overload;
+  G.player.mana = G.player.maxMana - G.player.overload - ((G.challengeMods || []).includes('challenge_weakness') ? 1 : 0);
   // 第21轮：法力之泉——每回合开始+1能量
   if (hasRelic('mana_spring')) {
     G.player.mana = Math.min(GAME_CONFIG.battle.maxMana, G.player.mana + 1);
@@ -1015,6 +1016,15 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
     case 'gain_armor_5':
       owner.armor += 5;
       addBattleLog(`${owner === G.player ? '你' : '敌方'}获得5点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'gain_armor_8':
+      owner.armor += 8;
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}获得8点护甲`, owner === G.player ? 'player' : 'enemy');
+      break;
+    case 'heal_8':
+      owner.hp = Math.min(owner.maxHp, owner.hp + 8);
+      floatText(owner === G.player ? 'player-portrait' : 'enemy-portrait', '+8', 'heal');
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}恢复8点生命`, owner === G.player ? 'player' : 'enemy');
       break;
     case 'buff_all_2_2':
       owner.minions.forEach(m => { if (!m.dead) { m.currentAttack += 2; m.currentHp += 2; m.maxHp += 2; } });
