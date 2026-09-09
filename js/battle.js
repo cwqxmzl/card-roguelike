@@ -1103,6 +1103,11 @@ function applyBattlecryOnce(card, minion, owner, opponent, target) {
       drawCard(owner, true); drawCard(owner, true);
       addBattleLog(`${owner === G.player ? '你' : '敌方'}抽了两张牌`, owner === G.player ? 'player' : 'enemy');
       break;
+    case 'self_hurt_4_draw_2':
+      dealDamage(owner, 4, opponent);
+      drawCard(owner, true); drawCard(owner, true);
+      addBattleLog(`${owner === G.player ? '你' : '敌方'}自伤4点并抽了两张牌`, owner === G.player ? 'player' : 'enemy');
+      break;
   }
 }
 
@@ -1390,6 +1395,64 @@ function executeSpell(effect, player, enemy, card, target) {
     case 'deal_3_all':
       enemy.minions.forEach(m => dealDamage(m, 3 + sp, player));
       addBattleLog(`${caster}对所有敌方随从造成${3 + sp}点伤害`, logType);
+      break;
+    // === 第29轮：术士自伤换资源 / 牧师加强 ===
+    case 'self_hurt_2_draw_2':
+      dealDamage(player, 2, enemy);
+      drawCard(player, true); drawCard(player, true);
+      addBattleLog(`${caster}自伤2点并抽了两张牌`, logType);
+      break;
+    case 'siphon_5': {
+      dealDamage(enemy, 5 + sp, player);
+      const sip_heal = Math.min(player.maxHp, player.hp + 5 + sp) - player.hp;
+      player.hp += sip_heal;
+      floatText('player-portrait', '+' + sip_heal, 'heal');
+      addBattleLog(`${caster}造成${5 + sp}点伤害并恢复${sip_heal}点生命`, logType);
+      break;
+    }
+    case 'fel_flame':
+      enemy.minions.forEach(m => dealDamage(m, 3 + sp, player));
+      dealDamage(enemy, 3 + sp, player);
+      dealDamage(player, 3, enemy);
+      addBattleLog(`${caster}对所有敌人造成${3 + sp}点伤害，你受到3点反噬`, logType);
+      break;
+    case 'discard_1_draw_3':
+      if (player.hand.length > 0) player.hand.splice(Math.floor(Math.random() * player.hand.length), 1);
+      drawCard(player, true); drawCard(player, true); drawCard(player, true);
+      addBattleLog(`${caster}弃1张牌并抽了三张牌`, logType);
+      break;
+    case 'deal_8_discard_1':
+      dealDamage(enemy, 8 + sp, player);
+      if (player.hand.length > 0) player.hand.splice(Math.floor(Math.random() * player.hand.length), 1);
+      addBattleLog(`${caster}造成${8 + sp}点伤害并弃1张牌`, logType);
+      break;
+    case 'self_hurt_5_summon_55':
+      dealDamage(player, 5, enemy);
+      if (player.minions.length < 7) player.minions.push(createMinion({ id: 'fel_55_' + uid(), name: '地狱火魔', cost: 0, type: 'minion', attack: 5, hp: 5, art: '🔥', text: '' }, player === G.player));
+      addBattleLog(`${caster}自伤5点并召唤5/5地狱火魔`, logType);
+      break;
+    case 'self_hurt_6_deal_12':
+      dealDamage(player, 6, enemy);
+      dealDamage(enemy, 12 + sp, player);
+      addBattleLog(`${caster}自伤6点并对敌人造成${12 + sp}点伤害`, logType);
+      break;
+    case 'deal_6_heal_6': {
+      dealDamage(enemy, 6 + sp, player);
+      const dh_heal = Math.min(player.maxHp, player.hp + 6) - player.hp;
+      player.hp += dh_heal;
+      floatText('player-portrait', '+' + dh_heal, 'heal');
+      addBattleLog(`${caster}造成${6 + sp}点伤害并恢复${dh_heal}点生命`, logType);
+      break;
+    }
+    case 'mass_dispel':
+      if (enemy.states) enemy.states = {};
+      enemy.minions.forEach(m => { if (m.states) m.states = {}; });
+      addBattleLog(`${caster}驱散了所有敌方效果`, logType);
+      break;
+    case 'heal_8_draw_1':
+      player.hp = Math.min(player.maxHp, player.hp + 8);
+      drawCard(player, true);
+      addBattleLog(`${caster}恢复8点生命并抽一张牌`, logType);
       break;
     case 'draw_3':
       drawCard(player, true); drawCard(player, true); drawCard(player, true);

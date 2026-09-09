@@ -532,6 +532,20 @@ const CARD_POOL = [
   { id: 'dru_epic_wildfire', name: '野火燎原', cost: 3, type: 'spell', art: '🔥', text: '造成3点伤害。连锁（本回合第2张）：额外造成3点伤害', effect: 'deal_3', chain: 2, chainEffect: 'deal_3', rarity: 'epic'},
   { id: 'dru_epic_ironbark_2', name: '铁木壁垒', cost: 4, type: 'spell', art: '🌳', text: '获得8点护甲，费用返还', effect: 'gain_armor_8', refund: 1, rarity: 'rare'},
   { id: 'dru_epic_ancient_engine', name: '古树引擎', cost: 6, type: 'minion', attack: 5, hp: 7, art: '🌳', text: '野兽·嘲讽·战吼：抽1张牌', race: 'beast', taunt: true, battlecry: 'draw_1', rarity: 'epic'},
+
+  // --- Warlock Sacrifice / Priest Light (Iter 29) ---
+  { id: 'warlock_dark_pact', name: '黑暗契约', cost: 1, type: 'spell', art: '🩸', text: '自伤2点，抽2张牌', effect: 'self_hurt_2_draw_2', rarity: 'rare'},
+  { id: 'warlock_soul_tap', name: '灵魂虹吸', cost: 2, type: 'spell', art: '💀', text: '造成5点伤害，你恢复等量生命', effect: 'siphon_5', rarity: 'rare'},
+  { id: 'warlock_fel_flame', name: '邪能烈焰', cost: 3, type: 'spell', art: '🔥', text: '对所有敌人造成3点伤害，你受到3点反噬', effect: 'fel_flame', rarity: 'epic'},
+  { id: 'warlock_discard_pact', name: '弃誓', cost: 2, type: 'spell', art: '🗑️', text: '弃1张牌，抽3张牌', effect: 'discard_1_draw_3', rarity: 'rare'},
+  { id: 'warlock_soul_burn', name: '灵魂燃烧', cost: 4, type: 'spell', art: '💥', text: '造成8点伤害，弃1张牌', effect: 'deal_8_discard_1', rarity: 'epic'},
+  { id: 'warlock_doom_call', name: '末日召唤', cost: 5, type: 'spell', art: '🌀', text: '自伤5点，召唤一个5/5地狱火魔', effect: 'self_hurt_5_summon_55', rarity: 'epic'},
+  { id: 'warlock_epic_demonheart', name: '恶魔之心', cost: 6, type: 'minion', attack: 6, hp: 6, art: '😈', text: '恶魔·嘲讽·战吼：自伤4点，抽2张牌', race: 'demon', taunt: true, battlecry: 'self_hurt_4_draw_2', rarity: 'epic'},
+  { id: 'warlock_epic_nether', name: '虚空之门', cost: 7, type: 'spell', art: '🌌', text: '自伤6点，造成12点伤害', effect: 'self_hurt_6_deal_12', rarity: 'legendary'},
+  { id: 'priest_epic_lightbomb', name: '圣光炸弹', cost: 5, type: 'spell', art: '💫', text: '对所有敌人造成4点伤害', effect: 'flamestrike', rarity: 'epic'},
+  { id: 'priest_epic_divine_wrath', name: '神圣之怒', cost: 4, type: 'spell', art: '⚡', text: '造成6点伤害，你恢复6点生命', effect: 'deal_6_heal_6', rarity: 'epic'},
+  { id: 'priest_epic_mass_dispel', name: '群体驱散', cost: 3, type: 'spell', art: '✨', text: '驱散敌方英雄与所有敌方随从身上的增益减益', effect: 'mass_dispel', rarity: 'rare'},
+  { id: 'priest_epic_heal_burst', name: '圣愈爆发', cost: 2, type: 'spell', art: '💚', text: '恢复8点生命，抽1张牌', effect: 'heal_8_draw_1', rarity: 'rare'},
 ];
 
 // ===================== CLASS DEFINITIONS =====================
@@ -598,7 +612,11 @@ const CLASSES = {
       'epic_twilight_dragon','epic_void_giant',
     'pri_shadow_word_death',
     'pri_epic_power_infusion',
-    'pri_epic_shadow_form'],
+    'pri_epic_shadow_form',
+    'priest_epic_lightbomb',
+    'priest_epic_divine_wrath',
+    'priest_epic_mass_dispel',
+    'priest_epic_heal_burst' ],
     signature: 'light_well',
   },
   warlock: {
@@ -609,7 +627,15 @@ const CLASSES = {
     cardPool: ['blood_imp','death_stalker','undead_knight','cultist','sylvanas','deathwing','mind_control','faceless','lightning_bolt','fan_of_knives','berserker','ogre','wolf','murloc','scout','torch_bearer','voodoo_doctor','mana_wraith','armored_knight','battle_axe','magic_missile','boulderfist_ogre','spellbreaker','argent_commander','guardian_king','ancient_warrior','archmage','abyss_lord','titan_earthguard','inspiring_leader','war_drain','war_imp','war_demon','war_hellfire','war_drain_life','war_imp_king','war_corruption','war_shadow_bolt','war_doomguard','war_pit_lord','war_lifedrain','war_demonlord','war_fel_dog','war_soul_drain','war_void_walker','reb_undead','reb_ghost','reb_phoenix','evo_summoner','chain_fire',
     'war_soulfire','war_felguard','war_darkbargain','war_shadowflame','war_infernal','war_demonheart',
     'war_shadow_bolt_2','war_voidcaller',
-      'epic_twilight_dragon','epic_void_giant'],
+      'epic_twilight_dragon','epic_void_giant',
+    'warlock_dark_pact',
+    'warlock_soul_tap',
+    'warlock_fel_flame',
+    'warlock_discard_pact',
+    'warlock_soul_burn',
+    'warlock_doom_call',
+    'warlock_epic_demonheart',
+    'warlock_epic_nether' ],
     signature: 'regen',
   },
   rogue: {
